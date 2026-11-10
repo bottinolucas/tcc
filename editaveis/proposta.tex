@@ -1,0 +1,422 @@
+\chapter[Proposta]{Proposta}
+\label{cap:proposta}
+
+Este capítulo apresenta o artefato proposto. A Seção~\ref{sec:requisitos}
+define os requisitos da arquitetura. A Seção~\ref{sec:arquitetura} descreve a
+arquitetura por meio das camadas do \textit{Data Lakehouse} e dos papéis que
+cada componente desempenha, sem se prender a ferramentas específicas. A
+Seção~\ref{sec:caso} apresenta a instanciação no caso de prevenção de
+paralisação de obras do MCMV, incluindo as ferramentas escolhidas para cada
+papel.
+
+% ---------------------------------------------------------------------
+\section{Requisitos da arquitetura}
+\label{sec:requisitos}
+
+Os requisitos derivam de duas fontes: os riscos e princípios levantados no
+Capítulo~\ref{cap:referencial} e as regras de engenharia que a plataforma
+Gov Hub Cidades já adota para todos os seus dados. Essas regras são:
+
+\begin{enumerate}
+	\item \textbf{O cálculo mora na camada de transformação.} O dado chega pelo
+	orquestrador, é transformado entre as camadas do \textit{lakehouse}, e a
+	camada de visualização apenas filtra;
+	\item \textbf{Não se cria camada nova para acomodar complexidade.} Antes de
+	criar um conceito, verifica-se se ele precisa existir;
+	\item \textbf{A camada bronze é a interface de arquivos.} Ela espelha a
+	fonte e não é modificada.
+\end{enumerate}
+
+A Tabela~\ref{tab:requisitos} lista os requisitos resultantes.
+
+\begin{table}[htb]
+	\centering
+	\caption{Requisitos da arquitetura de MLOps.}
+	\label{tab:requisitos}
+	\small
+	\begin{tabularx}{\textwidth}{p{0.8cm}X>{\raggedright\arraybackslash}p{4.2cm}}
+		\toprule
+		\textbf{ID} & \textbf{Requisito} & \textbf{Origem} \\
+		\midrule
+		R1 & Toda feature é calculada uma única vez, por uma transformação
+		declarativa e versionada, e usada tanto no treino quanto no escore. &
+		\citeonline{sculley2015}; \citeonline{polyzotis2018}; regra 1 \\
+		R2 & Toda feature de uma observação no mês $t$ usa apenas dados
+		disponíveis até $t$, e isso é verificado por teste automatizado. & \citeonline{kaufman2012} \\
+		R3 & Todo resultado de treino pode ser refeito a partir da versão do
+		código e da versão do dataset. & \citeonline{kreuzberger2023} (P3, P4); \citeonline{shankar2024} \\
+		R4 & Todo experimento registra parâmetros, métricas, artefatos e a
+		origem dos dados. & \citeonline{zaharia2018}; \citeonline{kreuzberger2023} (P7) \\
+		R5 & Um modelo só substitui o vigente se superar o vigente e a regra de
+		referência, na mesma métrica e no mesmo período. & \citeonline{studer2021}; \citeonline{breck2017} \\
+		R6 & Distribuição das features e desempenho realizado são monitorados
+		continuamente. & \citeonline{gama2014}; \citeonline{kreuzberger2023} (P8) \\
+		R7 & Tabelas de ML passam pelas mesmas camadas, testes e catálogo que
+		qualquer outra tabela da plataforma. & \citeonline{ferreira2025}; regras 1 e 2 \\
+		R8 & Adicionar um segundo modelo não exige alterar a estrutura do
+		primeiro. & \citeonline{amershi2019} \\
+		\bottomrule
+	\end{tabularx}
+	\fonte{Elaborado pelos autores.}
+\end{table}
+
+% ---------------------------------------------------------------------
+\section{Arquitetura proposta}
+\label{sec:arquitetura}
+
+\subsection{Visão geral}
+
+A arquitetura opera sobre um \textit{Data Lakehouse} \cite{armbrust2021}
+organizado nas três camadas da arquitetura medalhão
+(Seção~\ref{sec:plataformas}). A ideia central é estender o
+\textit{lakehouse} existente em vez de construir uma plataforma de ML
+paralela: cada artefato do ciclo de vida de um modelo (painel, rótulo,
+features, escores e métricas de monitoramento) ocupa uma camada definida e
+passa pelos mesmos testes e pelo mesmo catálogo das demais tabelas.
+
+A arquitetura é descrita por \textbf{papéis}, e não por ferramentas. Cada papel
+define uma responsabilidade que pode ser cumprida por diferentes tecnologias.
+Essa separação permite reaproveitar a arquitetura em plataformas com pilhas
+tecnológicas diferentes. As ferramentas que materializam cada papel no caso
+estudado estão na Seção~\ref{sec:ferramentas-caso}.
+
+A Figura~\ref{fig:arquitetura} apresenta a visão geral.
+
+\begin{figure}[htb]
+	\centering
+	\resizebox{\textwidth}{!}{%
+	\begin{tikzpicture}[
+		box/.style={draw, rounded corners, align=center, minimum height=1.3cm,
+			text width=3.2cm, font=\footnotesize},
+		bronze/.style={box, fill=orange!18},
+		prata/.style={box, fill=gray!15},
+		ouro/.style={box, fill=yellow!28},
+		ml/.style={box, fill=blue!8},
+		arr/.style={-{Stealth[length=2mm]}, thick},
+		elbl/.style={font=\scriptsize\itshape, fill=white, inner sep=1pt},
+		zone/.style={draw, dashed, rounded corners, inner sep=0.3cm},
+		lbl/.style={font=\scriptsize\itshape, anchor=south west}
+	]
+		% Entrada
+		\node[box] (ingest) at (0,5.2) {Orquestrador\\ingestão das fontes};
+
+		% Camadas medalhão
+		\node[bronze] (bronze) at (0,2.6)  {\textbf{Bronze}\\dado bruto da fonte};
+		\node[prata]  (prata)  at (0,0)    {\textbf{Prata}\\dado limpo; painel e rótulo};
+		\node[ouro]   (ouro)   at (0,-2.6) {\textbf{Ouro}\\features, escores e monitoramento};
+
+		% Consumo e governança
+		\node[box] (vis) at (0,-5.2) {Camada de\\visualização};
+		\node[box] (cat) at (-4.6,0) {Catálogo de dados};
+
+		% Extensão de MLOps
+		\node[ml] (gate)   at (4.8,2.6)  {Orquestrador\\promoção com \textit{gate}};
+		\node[ml] (reg)    at (9.4,2.6)  {Registro de experimentos e modelos};
+		\node[ml] (escore) at (4.8,0)    {Ambiente de modelagem\\escore mensal};
+		\node[ml] (treino) at (9.4,0)    {Ambiente de modelagem\\treino e avaliação};
+		\node[ml] (export) at (4.8,-2.6) {Orquestrador\\export do dataset};
+		\node[ml] (ds)     at (9.4,-2.6) {Armazenamento de objetos\\datasets versionados};
+
+		% Fluxo de dados
+		\draw[arr] (ingest) -- (bronze);
+		\draw[arr] (bronze) -- node[elbl, left] {transformação} (prata);
+		\draw[arr] (prata) -- node[elbl, left] {transformação} (ouro);
+		\draw[arr] (ouro) -- (vis);
+		\draw[arr, dashed] (cat) -- (prata);
+
+		% Ciclo de ML
+		\draw[arr] (ouro) -- (export);
+		\draw[arr] (export) -- (ds);
+		\draw[arr] (ds) -- (treino);
+		\draw[arr] (treino) -- (reg);
+		\draw[arr] (reg) -- (gate);
+		\draw[arr] (gate) -- (escore);
+		\draw[arr] (ouro.north east) -- node[elbl, sloped, below] {features} (escore.south west);
+		\draw[arr] (escore.north west) -- node[elbl, sloped, above] {escores} (bronze.south east);
+
+		\begin{scope}[on background layer]
+			\node[zone, fit=(bronze)(prata)(ouro)] (z1) {};
+			\node[zone, fit=(export)(ds)(treino)(reg)(gate)(escore), draw=blue!60] (z2) {};
+		\end{scope}
+		\node[lbl, anchor=north east, align=right] at (z1.north west) {\textit{Data Lakehouse}\\(camadas medalhão)};
+		\node[lbl, text=blue!60!black] at (z2.north west) {extensão de MLOps};
+	\end{tikzpicture}%
+	}
+	\caption{Visão geral da arquitetura de MLOps proposta.}
+	\label{fig:arquitetura}
+	\fonte{Elaborado pelos autores.}
+\end{figure}
+
+\subsection{Camadas do \textit{lakehouse} no ciclo de ML}
+
+A Tabela~\ref{tab:camadas} mostra o que cada camada da arquitetura medalhão
+guarda, em geral e no ciclo de ML.
+
+\begin{table}[htb]
+	\centering
+	\caption{Conteúdo de cada camada do \textit{lakehouse}.}
+	\label{tab:camadas}
+	\small
+	\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{1.6cm}XX}
+		\toprule
+		\textbf{Camada} & \textbf{Conteúdo geral} & \textbf{Conteúdo de ML} \\
+		\midrule
+		Bronze & Dado bruto, como recebido da fonte, nunca modificado. Ponto de
+		reprocessamento das demais camadas & Escores gravados pelo ambiente de
+		modelagem, um arquivo por competência \\
+		Prata & Dado limpo, tipado e harmonizado entre fontes & Painel
+		unificado (uma linha por unidade e mês) e rótulo \\
+		Ouro & Tabelas modeladas para consumo & Features calculadas
+		\textit{as of} $t$, escores consolidados e métricas de \textit{drift}
+		e de desempenho realizado \\
+		\bottomrule
+	\end{tabularx}
+	\fonte{Elaborado pelos autores.}
+\end{table}
+
+Dois pontos merecem destaque. Primeiro, os escores voltam ao
+\textit{lakehouse} pela camada bronze, como qualquer outra fonte, e chegam à
+camada ouro pelas mesmas transformações e testes. O ambiente de modelagem
+nunca escreve diretamente na camada ouro. Segundo, os datasets congelados de
+cada treino e os artefatos de modelo ficam em uma área própria do
+armazenamento de objetos, fora das camadas medalhão. Eles são saídas do
+treino, e não etapas de transformação de dados, por isso não justificam uma
+camada nova (regra 2).
+
+\subsection{Papéis e responsabilidades}
+
+A principal decisão da arquitetura é qual papel assume cada responsabilidade
+do ciclo de vida de ML (QE1). A Tabela~\ref{tab:responsabilidades} resume essa
+divisão. A coluna ``Não faz'' é tão importante quanto a de responsabilidades,
+porque é ela que impede a duplicação de lógica entre componentes.
+
+\begin{table}[htb]
+	\centering
+	\caption{Papéis da arquitetura e suas responsabilidades.}
+	\label{tab:responsabilidades}
+	\small
+	\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.2cm}X>{\raggedright\arraybackslash}p{3.0cm}}
+		\toprule
+		\textbf{Papel} & \textbf{Responsabilidade} & \textbf{Não faz} \\
+		\midrule
+		Orquestrador & Agendar e encadear ingestão, export de datasets, treino,
+		promoção e escore; aplicar o \textit{gate} de promoção & Conter cálculo
+		sobre dados \\
+		Camada de transformação & Calcular painel, rótulo, features
+		\textit{as of} $t$, leitura dos escores e métricas de monitoramento;
+		executar testes de dados e de vazamento & Treinar modelos \\
+		Motor analítico & Materializar e consultar as camadas prata e ouro & --- \\
+		Armazenamento de objetos & Guardar a camada bronze, os datasets
+		congelados e os artefatos de modelo & --- \\
+		Ambiente de modelagem & Treinar, avaliar e escorar, lendo apenas
+		tabelas da camada ouro & Recalcular features \\
+		Registro de experimentos e modelos & Registrar parâmetros, métricas,
+		artefatos, versões de modelo e o estágio de cada versão & Decidir a
+		promoção \\
+		Catálogo de dados & Registrar tabelas, responsáveis e linhagem de todas
+		as camadas & --- \\
+		Camada de visualização & Exibir o ranking de risco e os indicadores de
+		monitoramento & Calcular métricas \\
+		\bottomrule
+	\end{tabularx}
+	\fonte{Elaborado pelos autores.}
+\end{table}
+
+Em \textit{lakehouses} que usam formatos de tabela abertos sobre armazenamento
+de objetos, o motor analítico e o armazenamento de objetos podem coincidir
+\cite{armbrust2021}. A arquitetura os separa porque nem toda plataforma
+governamental adota esse formato.
+
+Como a mesma transformação gera o dataset de treino e o de escore, não há duas
+implementações da mesma feature (R1), o que elimina por construção a principal
+causa de desalinhamento entre treino e produção \cite{polyzotis2018}. Uma
+feature nova é sempre uma transformação versionada da camada ouro, testada e
+catalogada como qualquer outra tabela (R7).
+
+\subsection{Ciclo de vida}
+
+Cada modelo percorre as fases do CRISP-DM \cite{wirth2000}, e cada fase tem
+um lugar definido na arquitetura (Tabela~\ref{tab:ciclo}). A análise
+exploratória vem antes de qualquer transformação de ML: nenhuma tabela nova é
+criada antes de a exploração mostrar que ela é necessária, em respeito à
+regra 2 da plataforma.
+
+\begin{table}[htb]
+	\centering
+	\caption{Fases do CRISP-DM e sua localização na arquitetura.}
+	\label{tab:ciclo}
+	\small
+	\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{4.8cm}X}
+		\toprule
+		\textbf{Fase} & \textbf{Onde mora} & \textbf{Saída} \\
+		\midrule
+		1. Entendimento do problema & Documentação do modelo, versionada com
+		o código & Definição do evento, usuário, antecedência, capacidade e
+		referência de comparação \\
+		2. Entendimento dos dados & Análise exploratória, que lê a camada prata
+		e nunca vai para produção & Relatório com decisões de rótulo, janela e
+		features \\
+		3. Preparação & Camada de transformação (prata e ouro) & Painel, rótulo
+		e features \textit{as of} $t$, com teste de vazamento \\
+		4. Modelagem & Ambiente de modelagem e registro de experimentos &
+		Experimentos registrados \\
+		5. Avaliação & Ambiente de modelagem & Métricas contra a regra de
+		referência, em corte temporal \\
+		6. Implantação e operação & Orquestrador, camada de transformação e
+		camada de visualização & Escore mensal, retreino com \textit{gate},
+		monitoramento \\
+		\bottomrule
+	\end{tabularx}
+	\fonte{Elaborado pelos autores.}
+\end{table}
+
+\subsection{Reprodutibilidade}
+
+O treino nunca lê uma base extraída manualmente. Ele lê a camada ouro e
+congela uma cópia versionada no armazenamento de objetos, acompanhada de um
+manifesto com a versão do código (\textit{commit}), a versão das
+transformações e as competências incluídas. A versão do dataset é registrada
+no experimento. Assim, qualquer resultado pode ser refeito a partir da versão
+do código e da versão do dataset (R3, QE2), o que será verificado pelo
+critério AV3.
+
+\subsection{Promoção e operação}
+
+A promoção de um modelo é controlada por um \textit{gate} aplicado pelo
+orquestrador: uma nova versão só passa a gerar o escore oficial se, no período
+de validação temporal, superar tanto a versão vigente quanto a regra de
+referência no \textit{recall@k} (R5). O escore mensal é gravado na camada
+bronze e promovido até a camada ouro pela camada de transformação, o que
+mantém o ranking sob os mesmos testes e o mesmo catálogo das demais tabelas.
+
+O monitoramento também fica na camada de transformação (R6): tabelas da
+camada ouro comparam a distribuição das features de cada competência com a do
+dataset de treino e, à medida que o horizonte de predição se cumpre, calculam
+o desempenho realizado dos escores passados. A camada de visualização exibe
+esses indicadores.
+
+\pendente{Definir os limiares de alerta de \textit{drift} (por exemplo, PSI
+ou teste de Kolmogorov--Smirnov por feature) e a política de retreino
+(periódico ou disparado por alerta).}
+
+% ---------------------------------------------------------------------
+\section{Instanciação: prevenção de paralisação de obras do MCMV}
+\label{sec:caso}
+
+\subsection{Problema}
+
+Para cada obra \textbf{em execução} no mês $t$, estima-se a probabilidade de
+ela estar \textbf{paralisada} em algum mês até $t+h$. A saída é um ranking
+mensal de risco, para que a fiscalização priorize visitas antes de a obra
+parar.
+
+A unidade de análise é a obra (\texttt{id\_empreendimento}, que acompanha o
+empreendimento por todas as fases) observada em um mês de competência. O
+escopo inclui as modalidades com execução de obra a acompanhar: Fundo de
+Arrendamento Residencial (FAR), Fundo de Desenvolvimento Social (FDS), Rural,
+Pró-Moradia e Financiado (FGTS). Modalidades que são contratos ou propostas,
+sem execução de obra, ficam de fora.
+
+\subsection{Dados disponíveis}
+
+O painel histórico do FAR, do FDS e do Rural está em tabelas prata de
+histórico por empreendimento, uma por modalidade, com grão de obra por mês,
+de dezembro de 2019 a julho de 2026. São 5.555 obras no FAR, 1.021 no FDS
+e 11.122 no Rural. A situação da obra é harmonizada em uma coluna canônica com
+os valores \texttt{em\_obras}, \texttt{paralisada}, \texttt{concluida},
+\texttt{cancelada} e \texttt{nao\_iniciada}. O FGTS tem tabelas próprias, com
+percentual previsto e realizado, data da última vistoria e motivos de
+paralisação.
+
+A fonte da situação muda duas vezes ao longo da série: SFTP da Caixa até
+novembro de 2024, sistema da SNH de junho de 2024 a março de 2026, e planilha
+de acompanhamento mensal a partir de abril de 2026. No período de sobreposição,
+as duas primeiras fontes concordam em 96 a 98\% dos casos. Ainda assim, um
+terço das paralisações do FAR ocorre exatamente na troca de fonte, e dentro do
+período SNH quase não surgem paralisações novas. No período SFTP há cerca de
+1.500 transições de \texttt{em\_obras} para \texttt{paralisada}, a maioria no
+Rural.
+
+Essas observações indicam que o rótulo só é confiável no período SFTP, e que
+a troca de fonte é uma mudança de distribuição conhecida
+(Seção~\ref{sec:riscos}) que a preparação dos dados precisa tratar
+explicitamente.
+
+\subsection{Referência de comparação}
+
+A regra vigente (\texttt{ouro\_reloginho\_indicadores\_gargalo\_desempenho})
+sinaliza uma obra quando ela passa 90 dias sem atualização, apresenta
+diferença superior a 10 pontos percentuais entre execução física e financeira
+ou tem menos de 30\% de execução. O modelo só se justifica se, com o mesmo
+número de visitas, antecipar mais paralisações ou antecipá-las mais cedo.
+
+\subsection{Métrica e modelagem}
+
+A métrica principal é o \textit{recall@k}, em que $k$ é a capacidade mensal de
+fiscalização. Como métricas secundárias, usam-se \textit{precision@k} e a área
+sob a curva precisão-revocação, mais informativa que a curva ROC em classes
+desbalanceadas \cite{saito2015}. A divisão entre treino, validação e teste é
+temporal.
+
+Como primeira família de modelos, propõe-se \textit{gradient boosting} com
+LightGBM \cite{ke2017}, com explicações individuais por valores SHAP
+\cite{lundberg2017}, para que a fiscalização saiba por que uma obra foi
+priorizada. Uma formulação alternativa por análise de sobrevivência
+\cite{wang2019survival} será considerada se a EDA mostrar que o tempo até a
+paralisação é mais informativo que o evento binário. O modelo será documentado
+em um \textit{model card} \cite{mitchell2019}.
+
+\subsection{Materialização da arquitetura}
+\label{sec:ferramentas-caso}
+
+A Tabela~\ref{tab:ferramentas-caso} mostra a ferramenta que cumpre cada papel
+da arquitetura no Gov Hub Cidades e onde ela fica no repositório. A maior
+parte das ferramentas já fazia parte da plataforma. As novas são o MLflow e as
+bibliotecas de modelagem.
+
+\begin{table}[htb]
+	\centering
+	\caption{Ferramentas que materializam cada papel no Gov Hub Cidades.}
+	\label{tab:ferramentas-caso}
+	\small
+	\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{4.8cm}}
+		\toprule
+		\textbf{Papel} & \textbf{Ferramenta} & \textbf{Local no repositório} \\
+		\midrule
+		Orquestrador & Apache Airflow \cite{airflow} & \texttt{dags/ml/} \\
+		Camada de transformação & dbt \cite{dbt} & \texttt{dbt/mcid/models/} \texttt{ml\_<modelo>\_dbt/} \\
+		Motor analítico & PostgreSQL & --- \\
+		Armazenamento de objetos & MinIO, compatível com S3 & prefixos \texttt{raw/}, \texttt{staging/} e \texttt{ml/} \\
+		Ambiente de modelagem & Python, com pandas, scikit-learn, LightGBM e SHAP & \texttt{ml/<modelo>/} \\
+		Registro de experimentos e modelos & MLflow \cite{zaharia2018} & artefatos em \texttt{ml/mlflow/} \\
+		Catálogo de dados & OpenMetadata \cite{openmetadata} & --- \\
+		Camada de visualização & Apache Superset & --- \\
+		Análise exploratória & Jupyter & \texttt{ml/<modelo>/notebooks/} \\
+		Versionamento e integração contínua & Git e GitHub Actions & --- \\
+		\bottomrule
+	\end{tabularx}
+	\fonte{Elaborado pelos autores.}
+\end{table}
+
+Na plataforma, a camada bronze corresponde aos prefixos \texttt{raw/} e
+\texttt{staging/} do armazenamento de objetos, e as camadas prata e ouro são
+tabelas materializadas pelo dbt no PostgreSQL.
+
+\subsection{Decisões em aberto}
+
+As seguintes decisões dependem de alinhamento com o MCID e precisam ser
+tomadas antes da fase de preparação dos dados:
+
+\begin{itemize}
+	\item \textbf{Horizonte $h$}: com quantos meses de antecedência a
+	fiscalização consegue agir. Proposta: seis meses, com análise de
+	sensibilidade para três e doze;
+	\item \textbf{Capacidade $k$}: quantas obras a fiscalização visita por mês;
+	\item \textbf{Retomada}: se uma obra que retoma e paralisa de novo conta
+	como um segundo evento;
+	\item \textbf{Usuário do alerta}: área técnica do MCID, agente financeiro
+	ou ambos, o que define o que o escore precisa explicar.
+\end{itemize}
+
+\pendente{Registrar aqui as decisões tomadas sobre $h$, $k$, retomada e
+usuário do alerta, com data e responsável.}

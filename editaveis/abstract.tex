@@ -1,10 +1,39 @@
 \begin{resumo}[Abstract]
  \begin{otherlanguage*}{english}
-   This is the english abstract.
+   Government data platforms already consolidate the execution history of
+   public policies, but they rarely have the infrastructure to put machine
+   learning models into production reliably. This work proposes an MLOps
+   architecture that runs on a Data Lakehouse organized into the layers of the
+   medallion architecture, instead of building a separate machine learning
+   platform. The bronze layer preserves raw data as received from the source;
+   the silver layer holds cleaned and harmonized data, from which the
+   historical panel and the label are derived; and the gold layer holds the
+   features computed as of each observation date, the model scores and the
+   monitoring metrics. The architecture is defined by responsibilities,
+   independent of specific tools: the transformation layer performs all
+   computation on data, the modeling environment only trains, evaluates and
+   scores, the orchestrator coordinates the steps, and the experiment registry
+   stores metrics and model versions. Scores re-enter the lakehouse through the
+   bronze layer and flow through the remaining layers like any other source,
+   under the same tests and the same catalog. Each training run freezes its
+   dataset with a manifest that allows the result to be reproduced from the
+   code and data versions. The research follows Design Science Research, and
+   the architecture is instantiated in the prediction of construction
+   stoppages in the Minha Casa, Minha Vida housing program on the Gov Hub
+   Cidades platform of the Brazilian Ministry of Cities, using the
+   fixed-threshold rule currently applied by inspectors as the baseline. In
+   this first stage, the requirements and the architecture design were defined
+   and an initial data survey was carried out, which showed that source changes
+   along the historical series limit the period in which the stoppage label is
+   reliable. The evaluation, planned for the second stage, covers adherence to
+   MLOps principles from the literature, production readiness,
+   reproducibility, absence of temporal leakage, and model performance against
+   the current rule.
 
    \vspace{\onelineskip}
- 
-   \noindent 
-   \textbf{Key-words}: latex. abntex. text editoration.
+
+   \noindent
+   \textbf{Keywords}: MLOps. government data. data lakehouse. medallion
+   architecture. machine learning.
  \end{otherlanguage*}
 \end{resumo}

@@ -1,17 +1,37 @@
 \begin{resumo}
- O resumo deve ressaltar o objetivo, o método, os resultados e as conclusões 
- do documento. A ordem e a extensão
- destes itens dependem do tipo de resumo (informativo ou indicativo) e do
- tratamento que cada item recebe no documento original. O resumo deve ser
- precedido da referência do documento, com exceção do resumo inserido no
- próprio documento. (\ldots) As palavras-chave devem figurar logo abaixo do
- resumo, antecedidas da expressão Palavras-chave:, separadas entre si por
- ponto e finalizadas também por ponto. O texto pode conter no mínimo 150 e 
- no máximo 500 palavras, é aconselhável que sejam utilizadas 200 palavras. 
- E não se separa o texto do resumo em parágrafos.
+ Plataformas de dados governamentais já consolidam o histórico de execução de
+ políticas públicas, mas raramente contam com infraestrutura para colocar
+ modelos de aprendizado de máquina em produção de forma confiável. Este
+ trabalho propõe uma arquitetura de MLOps que opera sobre um \textit{Data
+ Lakehouse} organizado nas camadas da arquitetura medalhão, em vez de construir
+ uma plataforma de aprendizado de máquina paralela. A camada bronze preserva o
+ dado bruto como recebido da fonte; a camada prata reúne os dados limpos e
+ harmonizados, dos quais derivam o painel histórico e o rótulo; e a camada ouro
+ concentra as features calculadas na data de cada observação, os escores do
+ modelo e as métricas de monitoramento. A arquitetura é definida por
+ responsabilidades, independentes de ferramenta: a camada de transformação
+ concentra todo o cálculo sobre dados, o ambiente de modelagem apenas treina,
+ avalia e escora, o orquestrador coordena as etapas e o registro de
+ experimentos guarda métricas e versões de modelo. Os escores voltam ao
+ \textit{lakehouse} pela camada bronze e percorrem as demais camadas como
+ qualquer outra fonte, sob os mesmos testes e o mesmo catálogo. Cada treino
+ congela seu dataset com um manifesto que permite refazer o resultado a partir
+ da versão do código e dos dados. A pesquisa segue a \textit{Design Science
+ Research}, e a arquitetura é instanciada na previsão de paralisação de obras
+ do Programa Minha Casa, Minha Vida na plataforma Gov Hub Cidades, do
+ Ministério das Cidades, tendo como referência de comparação a regra de
+ limiares fixos usada hoje pela fiscalização. Nesta primeira etapa, foram
+ definidos os requisitos e o projeto da arquitetura e realizado o levantamento
+ inicial dos dados, que revelou que as trocas de fonte ao longo da série
+ histórica restringem o período em que o rótulo de paralisação é confiável. A
+ avaliação, prevista para a segunda etapa, considera a aderência a princípios
+ de MLOps da literatura, a prontidão para produção, a reprodutibilidade, a
+ ausência de vazamento temporal e o desempenho do modelo frente à regra
+ vigente.
 
  \vspace{\onelineskip}
-    
+
  \noindent
- \textbf{Palavras-chave}: latex. abntex. editoração de texto.
+ \textbf{Palavras-chave}: MLOps. dados governamentais. \textit{data lakehouse}.
+ arquitetura medalhão. aprendizado de máquina.
 \end{resumo}

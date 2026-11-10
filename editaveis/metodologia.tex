@@ -1,0 +1,171 @@
+\chapter[Metodologia]{Metodologia}
+\label{cap:metodologia}
+
+Este capítulo descreve como a pesquisa é conduzida. A
+Seção~\ref{sec:classificacao} classifica a pesquisa. A
+Seção~\ref{sec:dsr} apresenta a \textit{Design Science Research} e o
+mapeamento de suas atividades para este trabalho. A
+Seção~\ref{sec:contexto} descreve o contexto em que o artefato é
+desenvolvido. A Seção~\ref{sec:avaliacao} define os critérios e
+procedimentos de avaliação, e a Seção~\ref{sec:ferramentas} lista as
+ferramentas utilizadas.
+
+\section{Classificação da pesquisa}
+\label{sec:classificacao}
+
+Quanto à natureza, a pesquisa é \textbf{aplicada}: busca resolver um problema
+concreto de uma plataforma de dados governamentais em operação. Quanto à
+abordagem, é \textbf{mista}: combina medidas quantitativas (métricas do
+modelo, reprodutibilidade de execuções) com análise qualitativa da aderência
+da arquitetura a princípios da literatura. Quanto aos procedimentos, segue a
+\textbf{Design Science Research}, apoiada em pesquisa bibliográfica e em
+pesquisa documental sobre o sistema existente.
+
+\section{Design Science Research}
+\label{sec:dsr}
+
+A DSR é um paradigma de pesquisa em que o conhecimento é produzido pela
+construção e avaliação de artefatos que resolvem problemas relevantes
+\cite{hevner2004}. Artefatos podem ser construtos, modelos, métodos ou
+instanciações. Neste trabalho, o artefato principal é um \textbf{modelo} (a
+arquitetura de MLOps), acompanhado de uma \textbf{instanciação} (sua
+implementação no caso de prevenção de paralisação de obras).
+
+\citeonline{hevner2007} descreve a DSR em três ciclos. O \textbf{ciclo de
+relevância} conecta o artefato ao ambiente, de onde vêm requisitos e para onde
+voltam os resultados. O \textbf{ciclo de rigor} conecta o artefato à base de
+conhecimento: teorias, métodos e trabalhos anteriores. O \textbf{ciclo de
+design} itera entre a construção e a avaliação do artefato. Aqui, o ambiente
+é o Gov Hub Cidades e o MCID, a base de conhecimento é a literatura do
+Capítulo~\ref{cap:referencial} e o ciclo de design corresponde às iterações
+de desenvolvimento da arquitetura.
+
+Para operacionalizar o processo, adota-se a metodologia de
+\citeonline{peffers2007}, que organiza a DSR em seis atividades. A
+Tabela~\ref{tab:dsr} mostra como cada atividade se realiza neste trabalho e em
+qual etapa (TCC1 ou TCC2) ela ocorre.
+
+\begin{table}[htb]
+	\centering
+	\caption{Atividades da DSR \cite{peffers2007} aplicadas a este trabalho.}
+	\label{tab:dsr}
+	\small
+	\begin{tabularx}{\textwidth}{p{3.4cm}Xc}
+		\toprule
+		\textbf{Atividade} & \textbf{Realização neste trabalho} & \textbf{Etapa} \\
+		\midrule
+		1. Identificar o problema e motivar &
+		Diagnóstico da regra de gargalo vigente, levantamento dos dados
+		disponíveis e da ausência de infraestrutura de ML na plataforma
+		(Capítulos~\ref{cap:introducao} e~\ref{cap:proposta}) & TCC1 \\
+		2. Definir os objetivos da solução &
+		Requisitos da arquitetura derivados da literatura e das regras da
+		plataforma (Seção~\ref{sec:requisitos}) & TCC1 \\
+		3. Projetar e desenvolver &
+		Projeto da arquitetura (ADR) e implementação dos componentes:
+		transformações de painel, rótulo e features; código de treino,
+		avaliação e escore; fluxos de orquestração & TCC1/TCC2 \\
+		4. Demonstrar &
+		Execução do ciclo completo no caso de prevenção de paralisação de obras
+		do MCMV & TCC2 \\
+		5. Avaliar &
+		Critérios AV1--AV5 (Seção~\ref{sec:avaliacao}) & TCC2 \\
+		6. Comunicar &
+		Este documento, a monografia final e os ADRs e a documentação no
+		repositório do projeto & TCC1/TCC2 \\
+		\bottomrule
+	\end{tabularx}
+	\fonte{Elaborado pelos autores.}
+\end{table}
+
+O ponto de entrada da pesquisa é centrado no problema
+\cite{peffers2007}: parte-se de uma necessidade observada no ambiente (antecipar
+paralisações) e de uma lacuna de engenharia (ausência de um ciclo de vida de
+ML integrado à plataforma).
+
+\section{Contexto da pesquisa}
+\label{sec:contexto}
+
+O trabalho é desenvolvido no LabLivre da Universidade de Brasília,
+no âmbito do projeto Gov Hub, que constrói plataformas de dados para órgãos do
+governo federal. O ambiente de demonstração é a plataforma de dados do
+Ministério das Cidades, organizada como um \textit{Data Lakehouse} em camadas
+medalhão, que contém:
+
+\begin{itemize}
+	\item fluxos orquestrados de ingestão de fontes como o SFTP da Caixa, os
+	sistemas da Secretaria Nacional de Habitação (SNH) e as planilhas de
+	acompanhamento mensal de obras;
+	\item uma camada bronze em armazenamento de objetos, que preserva os dados
+	como recebidos;
+	\item camadas prata e ouro produzidas por transformações declarativas
+	versionadas e organizadas por domínio;
+	\item painéis analíticos e um catálogo de dados com linhagem;
+	\item três ambientes de execução: desenvolvimento local, homologação e
+	produção.
+\end{itemize}
+
+As ferramentas que compõem essa plataforma, e as que foram adicionadas para o
+ML, estão na Tabela~\ref{tab:ferramentas-caso}.
+
+\pendente{Descrever a equipe (papéis, número de pessoas) e o vínculo formal
+com o MCID; confirmar com os orientadores o nível de detalhe permitido sobre o
+convênio.}
+
+\section{Critérios e procedimentos de avaliação}
+\label{sec:avaliacao}
+
+A avaliação combina critérios sobre a arquitetura e sobre a instanciação. A
+Tabela~\ref{tab:avaliacao} relaciona cada critério às questões de pesquisa
+definidas no Capítulo~\ref{cap:introducao}.
+
+\begin{table}[htb]
+	\centering
+	\caption{Critérios de avaliação do artefato.}
+	\label{tab:avaliacao}
+	\small
+	\begin{tabularx}{\textwidth}{p{0.9cm}X>{\raggedright\arraybackslash}p{1.8cm}}
+		\toprule
+		\textbf{ID} & \textbf{Critério e procedimento} & \textbf{Questão} \\
+		\midrule
+		AV1 & \textbf{Aderência aos princípios de MLOps.} Análise de cada
+		princípio P1--P9 de \citeonline{kreuzberger2023}, indicando o
+		componente da arquitetura que o atende, ou a justificativa para não
+		atendê-lo. & QP, QE1 \\
+		AV2 & \textbf{Prontidão para produção.} Aplicação da rubrica
+		\textit{ML Test Score} \cite{breck2017} antes e depois da
+		implementação. & QP \\
+		AV3 & \textbf{Reprodutibilidade.} Reexecução do treino a partir de um
+		\textit{commit} e de uma versão de dataset registrados, em ambiente
+		limpo, comparando métricas e predições com a execução original. & QE2 \\
+		AV4 & \textbf{Ausência de vazamento temporal.} Testes automatizados na
+		camada de transformação que verificam que nenhuma feature de uma
+		observação no mês $t$ usa
+		dado posterior a $t$, e que os cortes de treino, validação e teste
+		respeitam a ordem temporal. & QE3 \\
+		AV5 & \textbf{Comparação com a regra vigente.} \textit{Recall@k} e
+		\textit{precision@k} do modelo e da regra de gargalo no período de
+		teste, com $k$ igual à capacidade mensal de fiscalização. & QE3 \\
+		\bottomrule
+	\end{tabularx}
+	\fonte{Elaborado pelos autores.}
+\end{table}
+
+O AV5 avalia a instanciação, não a arquitetura: um modelo que não supere a
+regra vigente não invalida a arquitetura, desde que a comparação tenha sido
+feita de forma correta e reprodutível. Esse resultado negativo seria, ele
+próprio, uma informação útil para o órgão.
+
+\pendente{Decidir com os orientadores se haverá uma avaliação qualitativa
+adicional com a equipe técnica (por exemplo, questionário ou grupo focal sobre
+a facilidade de adicionar um segundo modelo à arquitetura).}
+
+\section{Ferramentas}
+\label{sec:ferramentas}
+
+A arquitetura é definida por papéis, independentes de ferramenta
+(Seção~\ref{sec:arquitetura}). As ferramentas que cumprem cada papel no caso
+estudado são definidas uma única vez, na Tabela~\ref{tab:ferramentas-caso},
+junto com a instanciação. A mesma tabela inclui as ferramentas de apoio à
+pesquisa: Jupyter, para a análise exploratória, e Git com GitHub Actions, para
+versionamento e integração contínua.

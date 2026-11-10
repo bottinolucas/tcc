@@ -1,73 +1,75 @@
-\chapter[Considerações sobre os Elementos Textuais]{Considerações sobre os 
-Elementos Textuais}
+\chapter[Considerações Finais]{Considerações Finais}
+\label{cap:consideracoes}
 
-\section{Introdução}
+Este trabalho propõe uma arquitetura de MLOps para plataformas de dados
+governamentais, instanciada na previsão de paralisação de obras do Programa
+Minha Casa, Minha Vida no Gov Hub Cidades. A proposta parte de uma constatação
+da literatura: a maior parte do esforço e da dívida técnica de um sistema de
+ML está fora do código de treino \cite{sculley2015}, e no setor público esse
+esforço é ainda maior por obstáculos institucionais \cite{ferreira2025}.
 
-A regra mais rígida com respeito a Introdução é que a mesma, que é 
-necessariamente parte integrante do texto, não deverá fazer agradecimentos 
-a pessoas ou instituições nem comentários pessoais do autor atinentes à 
-escolha ou à relevância do tema.
+A principal decisão da arquitetura é estender o \textit{Data Lakehouse}
+existente em vez de construir uma plataforma de ML paralela. Painel e rótulo
+ficam na camada prata; features, escores e monitoramento, na camada ouro; e os
+escores voltam pela camada bronze como qualquer outra fonte, sob os mesmos
+testes e o mesmo catálogo das demais tabelas. Todo cálculo sobre dados fica na
+camada de transformação, o ambiente de modelagem apenas treina, avalia e
+escora, e o orquestrador coordena as etapas. Com isso, o treino e o escore
+usam a mesma implementação de cada feature, e qualquer resultado pode ser
+refeito a partir da versão do código e da versão do dataset. Como a
+arquitetura é definida por papéis, e não por ferramentas, ela pode ser
+reaproveitada em plataformas com outras pilhas tecnológicas.
 
-A Introdução obedece a critérios do Método Cientifico e a exigências 
-didáticas. Na Introdução o leitor deve ser colocado dentro do espírito do 
-trabalho.
+No TCC1 foram concluídas a identificação do problema, a definição dos
+requisitos, o projeto da arquitetura e o levantamento inicial dos dados. O
+levantamento já revelou um achado relevante para o caso: as trocas de fonte de
+dados ao longo da série produzem transições de situação que não correspondem
+necessariamente a paralisações reais, o que restringe o período em que o
+rótulo é confiável.
 
-Cabe mencionar que a Introdução de um trabalho pode, pelo menos em parte, 
-ser escrita com grande vantagem uma vez concluído o trabalho (ou o 
-Desenvolvimento e as Conclusões terem sido redigidos). Não só a pesquisa 
-costuma modificar-se durante a execução, mas também, ao fim do trabalho, o 
-autor tem melhor perspectiva ou visão de conjunto.
+\section{Próximos passos}
 
-Por seu caráter didático, a Introdução deve, ao seu primeiro parágrafo, 
-sugerir o mais claramente possível o que pretende o autor. Em seguida deve 
-procurar situar o problema a ser examinado em relação ao desenvolvimento 
-científico e técnico do momento. Assim sendo, sempre que pertinente, os 
-seguintes pontos devem ser abordados: 
+Para o TCC2, estão previstas as seguintes atividades:
 
-\begin{itemize}
+\begin{enumerate}
+	\item[A1] Concluir a análise exploratória e fechar as decisões sobre
+	horizonte, capacidade, retomada e usuário do alerta;
+	\item[A2] Calcular o desempenho da regra vigente no período SFTP;
+	\item[A3] Implementar na camada de transformação o painel e o rótulo
+	(camada prata) e as features \textit{as of} $t$ (camada ouro), com testes
+	de vazamento;
+	\item[A4] Implementar o export de datasets versionados, o treino e a
+	avaliação, com registro dos experimentos;
+	\item[A5] Implementar a promoção com \textit{gate}, o escore mensal e o
+	monitoramento;
+	\item[A6] Executar a avaliação (AV1--AV5);
+	\item[A7] Redigir a monografia final e preparar a defesa.
+\end{enumerate}
 
-	\item Contextualização ou apresentação do tema em linhas gerais de 
-	forma clara e objetiva;
-	\item Apresentação da justificativa e/ou relevância do tema escolhido;
-	\item Apresentação da questão ou problema de pesquisa;
-	\item Declaração dos objetivos, gerais e específicos do trabalho;
-	\item Apresentação resumida da metodologia, e
-	\item Indicação de como o trabalho estará organizado.
+\section{Cronograma}
 
-\end{itemize}
+A Tabela~\ref{tab:cronograma} apresenta o cronograma previsto para o TCC2.
 
-\section{Desenvolvimento}
+\begin{table}[htb]
+	\centering
+	\caption{Cronograma das atividades do TCC2.}
+	\label{tab:cronograma}
+	\small
+	\begin{tabular}{lcccccc}
+		\toprule
+		\textbf{Atividade} & \textbf{Mês 1} & \textbf{Mês 2} & \textbf{Mês 3} & \textbf{Mês 4} & \textbf{Mês 5} & \textbf{Mês 6} \\
+		\midrule
+		A1 -- EDA e decisões       & X & X &   &   &   &   \\
+		A2 -- Regra vigente        & X &   &   &   &   &   \\
+		A3 -- Painel, rótulo e features &   & X & X &   &   &   \\
+		A4 -- Treino e registro    &   &   & X & X &   &   \\
+		A5 -- Gate, escore e monitoramento &   &   &   & X & X &   \\
+		A6 -- Avaliação            &   &   &   &   & X & X \\
+		A7 -- Escrita e defesa     &   &   &   & X & X & X \\
+		\bottomrule
+	\end{tabular}
+	\fonte{Elaborado pelos autores.}
+\end{table}
 
-O Desenvolvimento (Miolo ou Corpo do Trabalho) é subdividido em seções de 
-acordo com o planejamento do autor. As seções primárias são aquelas que 
-resultam da primeira divisão do texto do documento, geralmente 
-correspondendo a divisão em capítulos. Seções secundárias, terciárias, 
-etc., são aquelas que resultam da divisão do texto de uma seção primária, 
-secundária, terciária, etc., respectivamente.
-
-As seções primárias são numeradas consecutivamente, seguindo a série 
-natural de números inteiros, a partir de 1, pela ordem de sua sucessão no 
-documento.
-
-O Desenvolvimento é a seção mais importante do trabalho, por isso exigi-se 
-organização, objetividade e clareza. É conveniente dividi-lo em pelo menos 
-três partes:
-
-\begin{itemize}
-
-	\item Referencial teórico, que corresponde a uma análise dos trabalhos 
-	relevantes, encontrados na pesquisa bibliográfica sobre o assunto. 
-	\item Metodologia, que é a descrição de todos os passos metodológicos 
-	utilizados no trabalho. Sugere-se que se enfatize especialmente em (1) 
-	População ou Sujeitos da pesquisa, (2) Materiais e equipamentos 
-	utilizados e (3) Procedimentos de coleta de dados.
-	\item Resultados, Discussão dos resultados e Conclusões, que é onde se 
-	apresenta os dados encontrados a análise feita pelo autor à luz do 
-	Referencial teórico e as Conclusões.
-
-\end{itemize}
-
-\section{Uso de editores de texto}
-
-O uso de programas de edição eletrônica de textos é de livre escolha do autor. 
-
+\pendente{Substituir ``Mês 1'' a ``Mês 6'' pelos meses reais do semestre do
+TCC2, conforme o calendário acadêmico da UnB.}

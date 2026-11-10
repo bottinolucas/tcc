@@ -1,0 +1,353 @@
+\chapter[Referencial Teórico]{Referencial Teórico}
+\label{cap:referencial}
+
+Este capítulo apresenta os conceitos que fundamentam a proposta. A
+Seção~\ref{sec:plataformas} trata das plataformas de dados sobre as quais a
+arquitetura se apoia. A Seção~\ref{sec:ml-producao} discute os desafios de
+sistemas de ML em produção e os modelos de processo que organizam seu ciclo
+de vida. A Seção~\ref{sec:mlops} define MLOps, seus princípios e componentes.
+A Seção~\ref{sec:riscos} aborda os riscos específicos da modelagem com dados
+longitudinais. A Seção~\ref{sec:setor-publico} discute o uso de ML no setor
+público e a Seção~\ref{sec:relacionados} apresenta os trabalhos relacionados.
+
+% ---------------------------------------------------------------------
+\section{Plataformas de dados governamentais}
+\label{sec:plataformas}
+
+\subsection{Engenharia de dados e o ciclo de vida do dado}
+
+\citeonline{reis2022} definem a engenharia de dados como o desenvolvimento,
+a implantação e a manutenção de sistemas que recebem dados brutos e produzem
+informação consistente para usos posteriores, como análise e aprendizado de
+máquina. Os autores descrevem o ciclo de vida do dado em geração, ingestão,
+armazenamento, transformação e disponibilização, permeado por correntes
+transversais como segurança, gestão de dados, orquestração e boas práticas de
+engenharia de software.
+
+No contexto governamental, a etapa de ingestão é particularmente difícil. Os
+dados vêm de sistemas construídos em épocas e por equipes diferentes, expostos
+por APIs, arquivos, planilhas e extrações manuais, com vocabulários e
+granularidades próprios. Fontes também mudam ao longo do tempo: no caso
+estudado neste trabalho, a origem dos dados de situação das obras muda duas
+vezes entre 2024 e 2026 (ver Seção~\ref{sec:caso}).
+
+\subsection{Arquitetura em camadas e \textit{lakehouse}}
+
+\citeonline{armbrust2021} propõem o \textit{lakehouse} como arquitetura que
+combina o armazenamento aberto e barato de um \textit{data lake} com
+funcionalidades de gestão típicas de um \textit{data warehouse}, como
+transações, versionamento e controle de esquema. Os autores argumentam que
+essa unificação atende, sobre os mesmos dados, tanto a análise via SQL quanto
+cargas de trabalho de ciência de dados e ML.
+
+Uma organização frequente nessas plataformas é a arquitetura em camadas
+conhecida como medalhão, com três camadas de qualidade crescente:
+
+\begin{itemize}
+	\item \textbf{bronze}: preserva o dado bruto como recebido da fonte, sem
+	modificações;
+	\item \textbf{prata}: contém dados limpos, tipados e harmonizados entre
+	fontes;
+	\item \textbf{ouro}: reúne tabelas modeladas para consumo por análises,
+	painéis e modelos.
+\end{itemize}
+
+A camada bronze é o ponto de reprocessamento: se uma regra de transformação
+mudar, as demais camadas podem ser reconstruídas sem nova extração da fonte. O
+Gov Hub adota essa organização, e a arquitetura proposta neste trabalho
+(Capítulo~\ref{cap:proposta}) atribui a cada artefato do ciclo de vida de ML
+uma dessas camadas.
+
+\subsection{Orquestração e transformação declarativa}
+
+Um orquestrador de fluxos de trabalho representa cada fluxo como um grafo
+acíclico dirigido (DAG) de tarefas, com agendamento, novas tentativas e
+registro de execuções. O Apache Airflow \cite{airflow} é um exemplo. Uma
+ferramenta de transformação declarativa representa cada transformação como uma
+consulta SQL versionada, resolve as dependências entre elas, materializa os
+resultados e executa testes de dados declarados junto às transformações. O dbt
+\cite{dbt} é um exemplo.
+
+Os dois papéis separam duas responsabilidades: o orquestrador decide
+\emph{quando} algo roda e em que ordem, e a camada de transformação define
+\emph{o que} é calculado. Essa separação é relevante para ML, pois features
+(variáveis de entrada de um modelo) são, em última análise, transformações
+sobre dados. Catálogos de dados, como o OpenMetadata \cite{openmetadata},
+completam essa organização registrando tabelas, linhagem e responsáveis.
+
+% ---------------------------------------------------------------------
+\section{Aprendizado de máquina em produção}
+\label{sec:ml-producao}
+
+\subsection{Dívida técnica em sistemas de ML}
+
+\citeonline{sculley2015} mostram que, em sistemas reais, o código de ML é
+uma pequena fração do sistema, cercada por coleta de dados, extração de
+features, verificação de dados, gestão de configuração, infraestrutura de
+serviço e monitoramento. Os autores identificam formas de dívida técnica
+específicas desses sistemas, entre elas:
+
+\begin{itemize}
+	\item \textbf{Emaranhamento}: pelo princípio CACE (\textit{Changing Anything
+	Changes Everything}), alterar uma feature, um hiperparâmetro ou a
+	distribuição de entrada pode mudar o comportamento de todo o modelo;
+	\item \textbf{Dependências de dados}: dependências instáveis ou
+	subutilizadas entre o modelo e seus dados de entrada são mais difíceis de
+	detectar do que dependências de código;
+	\item \textbf{Código de cola e selvas de pipeline}: grande parte do sistema
+	consiste em código que conecta componentes e prepara dados, frequentemente
+	duplicado entre treino e uso em produção;
+	\item \textbf{Ciclos de realimentação}: o próprio uso do modelo pode alterar
+	os dados que ele observará no futuro.
+\end{itemize}
+
+\subsection{Desafios de implantação}
+
+\citeonline{amershi2019}, em estudo de caso na Microsoft, descrevem um fluxo
+de trabalho de ML em nove etapas e observam que gerenciar dados é mais difícil
+do que gerenciar código, que a customização de modelos exige competências
+diferentes das de engenharia de software tradicional e que os componentes de
+ML se entrelaçam de formas que dificultam o isolamento.
+\citeonline{paleyes2022} organizam os desafios relatados em estudos de caso
+de implantação conforme as etapas de gestão de dados, aprendizado do modelo,
+verificação e implantação, além de questões transversais como ética, aspectos
+legais, confiança dos usuários finais e segurança. \citeonline{lwakatare2020}
+chegam a uma classificação semelhante ao revisar sistemas de ML em larga
+escala na indústria.
+
+Em estudo de entrevistas com engenheiros de ML, \citeonline{shankar2024}
+observam que a operação de modelos é iterativa, manual e coletiva, e que o
+sucesso de uma implantação depende de três fatores: velocidade de
+experimentação, validação antes da produção e versionamento de dados, código
+e modelos.
+
+\subsection{Modelos de processo}
+
+O CRISP-DM (\textit{Cross-Industry Standard Process for Data Mining}) organiza
+projetos de mineração de dados em seis fases iterativas: entendimento do
+negócio, entendimento dos dados, preparação dos dados, modelagem, avaliação e
+implantação \cite{wirth2000}. O CRISP-ML(Q) estende esse processo para ML,
+acrescentando uma fase de monitoramento e manutenção e associando a cada fase
+uma metodologia de garantia de qualidade baseada em riscos
+\cite{studer2021}.
+
+Neste trabalho, o CRISP-DM organiza o ciclo de vida de cada modelo, e as
+fases de monitoramento e de garantia de qualidade do CRISP-ML(Q) orientam a
+etapa de operação.
+
+% ---------------------------------------------------------------------
+\section{MLOps}
+\label{sec:mlops}
+
+\subsection{Definição e princípios}
+
+\citeonline{kreuzberger2023}, a partir de revisão de literatura, análise de
+ferramentas e entrevistas com especialistas, definem MLOps como um paradigma
+que inclui boas práticas, conceitos e cultura de desenvolvimento voltados à
+conceituação, implementação, monitoramento, implantação e escalabilidade de
+produtos de ML de ponta a ponta. Os autores identificam nove princípios:
+
+\begin{enumerate}
+	\item[P1] automação de CI/CD;
+	\item[P2] orquestração de fluxos de trabalho;
+	\item[P3] reprodutibilidade;
+	\item[P4] versionamento de dados, modelos e código;
+	\item[P5] colaboração;
+	\item[P6] treino e avaliação contínuos;
+	\item[P7] rastreamento e registro de metadados de ML;
+	\item[P8] monitoramento contínuo;
+	\item[P9] ciclos de realimentação.
+\end{enumerate}
+
+Esses princípios se materializam em componentes técnicos: repositório de
+código, componente de CI/CD, orquestrador de fluxos, repositório de features
+(\textit{feature store}), infraestrutura de treino, registro de modelos,
+repositório de metadados de ML, serviço de inferência e monitoramento
+\cite{kreuzberger2023}. Os princípios P1--P9 servirão de critério de
+avaliação da arquitetura proposta (Capítulo~\ref{cap:metodologia}).
+
+\citeonline{testi2022} propõem uma taxonomia de trabalhos sobre MLOps e uma
+metodologia para conduzir projetos de ML com práticas de MLOps. Em um dos
+primeiros relatos brasileiros, \citeonline{aguiar2020} descreve a adoção de
+MLOps por uma equipe com experiência prévia em DevOps durante 24 meses de
+co-desenvolvimento entre governo e academia, e aponta que, embora implantar
+modelos tenha ficado mais simples, manter e evoluir sistemas de ML segue
+pouco discutido.
+
+\subsection{Níveis de maturidade}
+
+A documentação de arquitetura do Google Cloud descreve três níveis de
+maturidade em MLOps \cite{google2020mlops}: no nível 0, o processo é manual
+e o modelo é entregue como artefato; no nível 1, o pipeline de treino é
+automatizado e permite treino contínuo; no nível 2, o próprio pipeline é
+testado e implantado por CI/CD. \citeonline{john2021} propõem um modelo de
+maturidade derivado de revisão de literatura e estudos de caso, com estágios
+que vão de processos manuais orientados a dados até operação totalmente
+automatizada com monitoramento e retreino.
+
+O nível de maturidade adequado depende do contexto. Um modelo que gera
+um escore mensal sobre dados atualizados mensalmente não exige inferência em
+tempo real, mas exige que o retreino e o escore sejam reprodutíveis e
+auditáveis.
+
+\subsection{Rastreamento de experimentos e registro de modelos}
+
+O MLflow \cite{zaharia2018} é uma plataforma aberta para o ciclo de vida de
+ML com três componentes originais: \textit{Tracking}, que registra
+parâmetros, métricas e artefatos de cada execução; \textit{Projects}, que
+empacota código de forma reprodutível; e \textit{Models}, que define um
+formato padrão para implantação. O componente de registro de modelos permite
+versionar modelos e controlar sua promoção entre estágios.
+
+\citeonline{breck2017} propõem o \textit{ML Test Score}, uma rubrica de 28
+testes e verificações agrupados em features e dados, desenvolvimento do
+modelo, infraestrutura de ML e monitoramento. A rubrica oferece um critério
+objetivo para medir a prontidão de um sistema de ML para produção.
+
+% ---------------------------------------------------------------------
+\section{Riscos na modelagem com dados longitudinais}
+\label{sec:riscos}
+
+\subsection{Vazamento de informação}
+
+\citeonline{kaufman2012} definem vazamento (\textit{leakage}) como a
+introdução, nos dados de treino, de informação sobre o alvo que não estaria
+legitimamente disponível no momento da predição. O vazamento produz modelos
+que parecem excelentes na avaliação e falham em produção. Em dados
+longitudinais, a forma mais comum é usar, para prever o estado no mês $t+h$,
+features calculadas com informação posterior a $t$. A prevenção exige que
+cada feature seja calculada ``na data'' (\textit{as of}) da observação, e que
+a separação entre treino e teste respeite a ordem temporal.
+
+\subsection{Validação temporal}
+
+A validação cruzada com partições aleatórias supõe observações
+independentes, hipótese que dados temporais violam. \citeonline{bergmeir2012}
+comparam esquemas de avaliação para preditores de séries temporais, como a
+validação cruzada em blocos e a avaliação fora da amostra sobre o trecho final
+da série, e discutem em que condições cada um produz estimativas confiáveis.
+Para o caso estudado, em que as features dependem do histórico de cada obra e
+o objetivo é prever eventos futuros, adota-se a forma mais conservadora:
+cortes temporais fixos e documentados, com treino sempre anterior à validação
+e ao teste.
+
+\subsection{Desalinhamento entre treino e produção}
+
+\citeonline{polyzotis2018} descrevem o chamado \textit{training-serving
+skew}, o desalinhamento entre treino e produção: diferenças entre os dados ou
+o código usados para treinar o modelo e os usados para gerar predições. Uma
+causa frequente é a reimplementação de uma mesma feature em dois lugares.
+\citeonline{breck2019} propõem a validação sistemática de dados com esquemas
+declarados e comparação de distribuições entre os conjuntos de treino e de
+produção.
+
+\subsection{Avaliação sob capacidade limitada e classes desbalanceadas}
+
+Quando o modelo orienta uma ação de capacidade limitada, como vistorias, a
+métrica relevante não é a acurácia global, e sim quantos eventos reais estão
+entre os $k$ itens priorizados (\textit{recall@k}) ou qual a proporção de
+acertos entre eles (\textit{precision@k}). Paralisações são eventos raros
+em relação ao total de obras-mês, o que caracteriza um problema de classes
+desbalanceadas. \citeonline{saito2015} mostram que, nesse cenário, a curva
+precisão-revocação é mais informativa do que a curva ROC.
+
+\subsection{Mudança de distribuição e monitoramento}
+
+Modelos em produção enfrentam mudanças na distribuição dos dados de entrada
+e na relação entre entradas e alvo (\textit{concept drift}).
+\citeonline{gama2014} revisam técnicas de detecção e adaptação a essas
+mudanças. \citeonline{rabanser2019} comparam empiricamente métodos de
+detecção de mudança de distribuição e concluem que testes estatísticos de duas
+amostras sobre representações de dimensão reduzida são uma linha de base
+eficaz. No caso estudado, a troca da fonte de dados ao longo da série é uma
+mudança de distribuição conhecida, que precisa ser tratada já na preparação
+dos dados.
+
+\subsection{Modelos para dados tabulares e explicabilidade}
+
+Para dados tabulares, métodos de \textit{gradient boosting} sobre árvores de
+decisão, como o LightGBM \cite{ke2017}, são uma escolha frequente pela boa
+relação entre desempenho e custo computacional. Quando o interesse é o tempo
+até um evento, a análise de sobrevivência oferece alternativas, do modelo de
+riscos proporcionais de \citeonline{cox1972} a métodos de ML revisados por
+\citeonline{wang2019survival}.
+
+Para que um escore de risco seja usado por equipes de fiscalização, ele
+precisa ser explicável. Os valores SHAP \cite{lundberg2017} atribuem a cada
+feature uma contribuição para uma predição individual, com fundamentação na
+teoria dos jogos cooperativos. \citeonline{mitchell2019} propõem os
+\textit{model cards}, documentos curtos que acompanham um modelo e descrevem
+seu uso pretendido, desempenho por subgrupos e limitações.
+
+% ---------------------------------------------------------------------
+\section{Aprendizado de máquina no setor público}
+\label{sec:setor-publico}
+
+\citeonline{wirtz2019} classificam as aplicações de inteligência artificial
+no setor público e os desafios associados em quatro dimensões: implementação
+tecnológica, lei e regulação, ética e sociedade. No Brasil, a Lei Geral de
+Proteção de Dados \cite{brasil2018lgpd} impõe restrições ao tratamento de
+dados pessoais, relevantes quando as bases de obras incluem informações de
+construtoras e responsáveis técnicos.
+
+\citeonline{ferreira2025}, ao analisar o pipeline de ML da plataforma Brasil
+Participativo, concluem que ML responsável no setor público é sobretudo um
+problema de engenharia institucional: acesso restrito a dados, conjuntos de
+dados sem versão e governança frágil de proveniência e monitoramento pesam
+tanto quanto as escolhas técnicas. Os autores defendem tratar pipelines de ML
+como infraestrutura cívica, com práticas de dados transparentes,
+reprodutíveis e auditáveis.
+
+% ---------------------------------------------------------------------
+\section{Trabalhos relacionados}
+\label{sec:relacionados}
+
+\citeonline{madaio2016} desenvolveram o Firebird, sistema que estima o risco
+de incêndio de edificações comerciais em Atlanta para priorizar inspeções do
+corpo de bombeiros. O problema é análogo ao deste trabalho: um escore de risco
+orienta uma equipe de fiscalização de capacidade limitada. O trabalho, porém,
+foca no modelo e na integração com o processo de inspeção, sem tratar da
+arquitetura de operação contínua.
+
+\citeonline{gondia2020} comparam árvores de decisão e classificadores
+bayesianos ingênuos para prever o risco de atraso em projetos de construção a
+partir de dados históricos de projetos. No contexto brasileiro,
+\citeonline{fernandes2024} treinou modelos XGBoost sobre dados abertos do
+SAGRES, do Tribunal de Contas do Estado da Paraíba, para classificar obras
+públicas entre sucesso e fracasso. Ambos tratam a predição como experimento
+isolado, sem pipeline de retreino, monitoramento ou integração com a
+plataforma de dados de origem.
+
+Do lado da engenharia, \citeonline{kreuzberger2023} propõem uma arquitetura
+de referência genérica para MLOps, e \citeonline{aguiar2020} e
+\citeonline{ferreira2025} relatam experiências de ML em projetos
+governamentais brasileiros. Nenhum deles parte de uma plataforma de dados
+governamentais já estruturada como \textit{lakehouse} em camadas medalhão para definir onde
+cada responsabilidade do ciclo de vida de ML deve morar. A
+Tabela~\ref{tab:relacionados} resume a comparação.
+
+\begin{table}[htb]
+	\centering
+	\caption{Comparação entre trabalhos relacionados e este trabalho.}
+	\label{tab:relacionados}
+	\small
+	\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.8cm}*{4}{>{\centering\arraybackslash}X}}
+		\toprule
+		\textbf{Trabalho} & \textbf{Setor público} & \textbf{Predição de risco} & \textbf{Arquitetura MLOps} & \textbf{Plataforma de dados existente} \\
+		\midrule
+		\citeonline{madaio2016}      & Sim & Sim & Não     & Não \\
+		\citeonline{gondia2020}      & Não & Sim & Não     & Não \\
+		\citeonline{fernandes2024}   & Sim & Sim & Não     & Não \\
+		\citeonline{kreuzberger2023} & Não & Não & Sim     & Não \\
+		\citeonline{aguiar2020}      & Sim & Não & Parcial & Não \\
+		\citeonline{ferreira2025}    & Sim & Não & Parcial & Não \\
+		\textbf{Este trabalho}       & Sim & Sim & Sim     & Sim \\
+		\bottomrule
+	\end{tabularx}
+	\fonte{Elaborado pelos autores.}
+\end{table}
+
+\pendente{Ampliar os trabalhos relacionados com uma busca estruturada
+(Scopus, IEEE Xplore, ACM DL e SBC OpenLib) por ``MLOps'' AND (``public
+sector'' OR ``government'') e por trabalhos de predição de paralisação ou
+atraso de obras públicas no Brasil.}

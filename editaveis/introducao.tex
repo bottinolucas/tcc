@@ -1,9 +1,133 @@
-\chapter*[Introdução]{Introdução}
-\addcontentsline{toc}{chapter}{Introdução}
+\chapter[Introdução]{Introdução}
+\label{cap:introducao}
 
-Este documento apresenta considerações gerais e preliminares relacionadas 
-à redação de relatórios de Projeto de Graduação da Faculdade UnB Gama 
-(FGA). São abordados os diferentes aspectos sobre a estrutura do trabalho, 
-uso de programas de auxilio a edição, tiragem de cópias, encadernação, etc.
+\section{Contextualização}
 
-Este template é uma adaptação do ABNTeX2\footnote{\url{https://github.com/abntex/abntex2/}}.
+A administração pública federal brasileira produz, em seus sistemas
+estruturantes, um volume crescente de dados sobre a execução de políticas
+públicas. A Política de Dados Abertos do Poder Executivo federal
+\cite{brasil2016dadosabertos} e a Lei do Governo Digital
+\cite{brasil2021governodigital} estabeleceram a disponibilização e o uso
+desses dados como diretriz de gestão. Disponibilizar o dado, porém, não
+garante que ele apoie decisões: \citeonline{janssen2012} mostram que os
+benefícios dos dados abertos dependem de capacidades institucionais para
+integrá-los, interpretá-los e mantê-los ao longo do tempo.
+
+Plataformas de dados governamentais como o Gov Hub, desenvolvido pelo
+Laboratório de Competência em Software Livre (LabLivre) da Universidade de
+Brasília em parceria com órgãos federais, respondem a parte desse desafio. Elas ingerem dados de
+sistemas heterogêneos, os organizam em camadas de qualidade crescente e os
+publicam em painéis analíticos. No caso do Ministério das Cidades (MCID), a
+plataforma consolida o histórico mensal de execução das obras do Programa
+Minha Casa, Minha Vida (MCMV) \cite{brasil2023mcmv}, com situação, percentuais
+de execução física e financeira, valores e datas de cada empreendimento.
+
+Com esse histórico disponível, a pergunta deixa de ser descritiva (``quais
+obras estão paralisadas?'') e passa a ser preditiva (``quais obras ativas vão
+paralisar nos próximos meses?''). Responder a ela exige modelos de
+aprendizado de máquina (\textit{Machine Learning}, ML). Colocar esses modelos
+em produção de forma confiável é um problema de engenharia distinto, conhecido
+como MLOps (\textit{Machine Learning Operations})
+\cite{kreuzberger2023}.
+
+\section{Problema e justificativa}
+
+A paralisação de obras públicas é um problema de grande escala no Brasil.
+Auditoria operacional do Tribunal de Contas da União identificou 14.403 obras
+paralisadas em um universo de 38.412 obras financiadas com recursos federais
+\cite{tcu2019}. Quando a fiscalização só identifica a paralisação depois que
+ela ocorre, o custo de retomada já incorreu.
+
+No Gov Hub Cidades, a identificação de obras em risco é feita hoje por uma
+regra fixa: uma obra é sinalizada quando passa 90 dias sem atualização,
+apresenta diferença superior a 10 pontos percentuais entre execução física e
+financeira ou tem menos de 30\% de execução. Essa regra nunca foi comparada
+com as paralisações que de fato ocorreram. Um modelo preditivo treinado no
+histórico poderia, em princípio, antecipar mais paralisações com o mesmo
+número de vistorias.
+
+O obstáculo não é apenas estatístico. A literatura mostra que o código de
+treinamento de um modelo é uma fração pequena de um sistema de ML em
+produção, e que a maior parte do esforço e da dívida técnica está na
+infraestrutura em torno dele: dependências de dados, pipelines, configuração e
+monitoramento \cite{sculley2015}. Estudos de casos reais apontam desafios em
+todas as etapas da implantação \cite{paleyes2022}, e no setor público eles se
+somam a obstáculos institucionais, como acesso restrito a dados, conjuntos de
+dados sem versionamento e governança frágil de proveniência
+\cite{ferreira2025}. Em plataformas governamentais que já adotam práticas
+maduras de engenharia de dados, como um \textit{Data Lakehouse} organizado
+nas camadas bronze, prata e ouro da arquitetura medalhão, orquestração de
+fluxos, transformação declarativa e catálogo de dados, falta definir como o
+ciclo de vida de modelos se encaixa nessas práticas sem duplicar lógica nem
+criar camadas paralelas.
+
+\section{Questão de pesquisa}
+
+Diante desse cenário, este trabalho é orientado pela seguinte questão de
+pesquisa:
+
+\begin{quote}
+\textbf{QP:} Como estruturar uma arquitetura de MLOps que se integre a uma
+plataforma de dados governamentais existente, garantindo reprodutibilidade,
+rastreabilidade e avaliação honesta de modelos preditivos?
+\end{quote}
+
+Dela derivam três questões específicas:
+
+\begin{itemize}
+	\item \textbf{QE1:} Quais responsabilidades do ciclo de vida de ML devem
+	ficar na camada de transformação de dados, quais no ambiente de modelagem e
+	quais no orquestrador, e em qual camada do \textit{lakehouse} fica cada
+	artefato de ML?
+	\item \textbf{QE2:} Como garantir que qualquer resultado de um modelo possa
+	ser reproduzido a partir do código e dos dados que o geraram?
+	\item \textbf{QE3:} A arquitetura proposta permite avaliar um modelo contra
+	a regra vigente de forma comparável, sem vazamento de informação temporal?
+\end{itemize}
+
+\section{Objetivos}
+
+\subsection{Objetivo geral}
+
+Propor, implementar e avaliar uma arquitetura de MLOps para plataformas de
+dados governamentais, instanciada no caso de previsão de paralisação de obras
+do Programa Minha Casa, Minha Vida na plataforma Gov Hub Cidades.
+
+\subsection{Objetivos específicos}
+
+\begin{enumerate}
+	\item Levantar, na literatura, os princípios, componentes e riscos de
+	sistemas de ML em produção, com atenção ao contexto do setor público;
+	\item Definir os requisitos da arquitetura a partir das restrições da
+	plataforma de dados existente e do caso de uso;
+	\item Projetar a arquitetura sobre as camadas do \textit{lakehouse},
+	especificando os papéis que a compõem e as responsabilidades de cada um,
+	independentemente de ferramenta;
+	\item Instanciar a arquitetura no caso de prevenção de paralisação de
+	obras, cobrindo preparação de dados, treino, avaliação, escore mensal e
+	monitoramento;
+	\item Avaliar a arquitetura quanto à reprodutibilidade, à rastreabilidade e
+	à capacidade de comparar o modelo com a regra vigente.
+\end{enumerate}
+
+\section{Metodologia em síntese}
+
+O trabalho segue a \textit{Design Science Research} (DSR)
+\cite{hevner2004,peffers2007}, abordagem voltada à construção e avaliação de
+artefatos que resolvem problemas reais. O artefato principal é a arquitetura
+de MLOps. O caso de previsão de paralisação de obras serve como demonstração
+e avaliação em contexto real. O Capítulo~\ref{cap:metodologia} detalha as
+etapas.
+
+\section{Organização do trabalho}
+
+O restante deste documento está organizado da seguinte forma. O
+Capítulo~\ref{cap:referencial} apresenta o referencial teórico sobre
+plataformas de dados, sistemas de ML em produção, MLOps e o uso de ML no
+setor público, além dos trabalhos relacionados. O
+Capítulo~\ref{cap:metodologia} descreve a metodologia de pesquisa. O
+Capítulo~\ref{cap:proposta} apresenta a arquitetura proposta e sua
+instanciação no caso das obras do MCMV. O Capítulo~\ref{cap:resultados}
+relata os resultados preliminares obtidos até esta etapa. Por fim, o
+Capítulo~\ref{cap:consideracoes} traz as considerações finais e o cronograma
+para a continuidade do trabalho.

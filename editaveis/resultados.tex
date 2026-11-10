@@ -1,0 +1,97 @@
+\chapter[Resultados Preliminares]{Resultados Preliminares}
+\label{cap:resultados}
+
+Este capítulo relata o que foi produzido até o fim do TCC1, organizado pelas
+atividades da DSR (Tabela~\ref{tab:dsr}).
+
+\section{Identificação do problema}
+
+O diagnóstico da plataforma Gov Hub Cidades mostrou que:
+
+\begin{itemize}
+	\item o repositório não continha nenhum componente de ML: não havia
+	código de treino, registro de experimentos, datasets versionados nem
+	monitoramento de modelos;
+	\item a identificação de obras em risco dependia de uma regra de limiares
+	fixos que nunca havia sido confrontada com as paralisações observadas;
+	\item os dados necessários para um modelo preditivo já existiam nas
+	camadas prata, com histórico mensal de dezembro de 2019 a julho de 2026.
+\end{itemize}
+
+\section{Definição dos objetivos da solução}
+
+Os requisitos R1--R8 (Tabela~\ref{tab:requisitos}) foram definidos a partir
+da literatura e das regras de engenharia da plataforma. A decisão de estender
+a plataforma existente, em vez de construir uma plataforma de ML separada, foi
+registrada no ADR 0001 do repositório do projeto, com status ``proposto'', em
+27 de outubro de 2026.
+
+\pendente{Atualizar o status do ADR 0001 (proposto/aceito) e citar o ADR
+0002, sobre o MLflow, quando for escrito.}
+
+\section{Projeto e desenvolvimento}
+
+Até esta etapa foram produzidos:
+
+\begin{enumerate}
+	\item a estrutura de pastas do ML no repositório (\texttt{ml/} e
+	\texttt{ml/prevencao\_paralisacao/}), com a documentação do ciclo de vida;
+	\item a especificação do problema (fase 1 do CRISP-DM), com pergunta,
+	unidade de análise, escopo, referência de comparação e decisões em aberto
+	(Seção~\ref{sec:caso});
+	\item o levantamento inicial dos dados, cujos achados principais (cobertura,
+	trocas de fonte, volume de transições) estão na Seção~\ref{sec:caso}.
+\end{enumerate}
+
+\section{Análise exploratória dos dados}
+
+A análise exploratória (fase 2 do CRISP-DM) lê as tabelas prata como o
+pipeline as monta hoje, sem criar novas tabelas. Ela segue seis perguntas, na
+ordem:
+
+\begin{enumerate}
+	\item Qual a cobertura e o grão por modalidade e por fonte, e onde há
+	lacunas na série mensal?
+	\item Quais transições de situação são artefatos da troca de fonte em 2024,
+	e como tratá-las?
+	\item Como mapear os códigos de situação da planilha mensal e do FGTS para a
+	situação canônica?
+	\item Qual a taxa de paralisação por modalidade, UF, agente financeiro e
+	construtora?
+	\item Qual o tempo até a paralisação e até a retomada (análise de
+	sobrevivência)?
+	\item Quais sinais antecedem a paralisação: ritmo da execução física,
+	diferença físico-financeira, tempo sem liberação de recursos, tempo sem
+	vistoria?
+\end{enumerate}
+
+\pendente{Inserir os resultados da EDA à medida que os notebooks forem
+concluídos. Sugestão de figuras: (a) número de obras por mês e por fonte, com
+as trocas de fonte marcadas; (b) taxa mensal de transição
+\texttt{em\_obras}$\rightarrow$\texttt{paralisada} por fonte; (c) curva de
+Kaplan--Meier do tempo até a paralisação por modalidade; (d) distribuição da
+diferença físico-financeira em obras que paralisaram e que não paralisaram.}
+
+\pendente{Calcular o desempenho da regra de gargalo vigente
+(\textit{recall@k} e \textit{precision@k}) no período SFTP. Este é o primeiro
+número que o modelo terá de superar e já pode ser obtido sem nenhum modelo.}
+
+\section{Ameaças à validade}
+
+\begin{itemize}
+	\item \textbf{Validade de construto}: o rótulo ``paralisada'' depende da
+	fonte, e as trocas de fonte produzem transições que podem não corresponder a
+	paralisações reais. A mitigação é restringir o rótulo ao período SFTP e
+	tratar a troca de fonte na preparação dos dados;
+	\item \textbf{Validade interna}: features calculadas com informação futura
+	inflariam artificialmente o desempenho. A mitigação é o teste automatizado
+	de vazamento (AV4) e a divisão temporal;
+	\item \textbf{Validade externa}: a arquitetura é demonstrada em uma única
+	plataforma e em um único caso. A generalização para outros órgãos do Gov Hub
+	será discutida a partir do requisito R8 (adição de um segundo modelo sem
+	alterar o primeiro), mas não será demonstrada empiricamente;
+	\item \textbf{Viés do pesquisador}: os autores participam do desenvolvimento da
+	plataforma, o que é inerente à DSR. A mitigação é registrar as decisões em
+	ADRs e basear a avaliação em critérios externos (P1--P9 e o \textit{ML Test
+	Score}).
+\end{itemize}
