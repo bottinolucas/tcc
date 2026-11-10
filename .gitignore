@@ -1,5 +1,7 @@
 # PDF gerado pela compilação (figuras em figuras/ continuam versionadas)
 /*.pdf
+# Conversão automática de EPS feita pelo pdflatex
+*-eps-converted-to.pdf
 
 # Arquivos auxiliares do LaTeX
 *.aux
