@@ -1,0 +1,21 @@
+# PDF gerado pela compilação (figuras em figuras/ continuam versionadas)
+/*.pdf
+
+# Arquivos auxiliares do LaTeX
+*.aux
+*.bbl
+*.blg
+*.brf
+*.dvi
+*.fdb_latexmk
+*.fls
+*.idx
+*.ilg
+*.ind
+*.lof
+*.log
+*.lot
+*.out
+*.ps
+*.synctex.gz
+*.toc
