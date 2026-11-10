@@ -17,8 +17,10 @@ no dbt, Python treina, Airflow orquestra, MLflow registra". Isso tem dois proble
 
 1. A arquitetura opera sobre um **Data Lakehouse** organizado nas camadas **bronze, prata e ouro**
    da arquitetura medalhão:
-   - **bronze:** dado bruto como recebido; é também onde os escores do modelo voltam a entrar,
-     como qualquer outra fonte;
+   - **zona de pouso** (antes das camadas, não é uma camada medalhão): arquivos no formato da
+     fonte; no Gov Hub, os prefixos `raw/` e `staging/`. Os escores do modelo também entram por
+     aqui, como qualquer outra fonte;
+   - **bronze:** cópia da zona de pouso, ainda bruta e sem regra de negócio;
    - **prata:** dado limpo e harmonizado; painel unificado e rótulo;
    - **ouro:** features *as of t*, escores consolidados e métricas de monitoramento.
 
@@ -32,8 +34,8 @@ no dbt, Python treina, Airflow orquestra, MLflow registra". Isso tem dois proble
    |---|---|---|
    | Orquestrador | Agenda e encadeia as etapas; aplica o gate de promoção | Cálculo sobre dados |
    | Camada de transformação | Painel, rótulo, features, leitura dos escores, monitoramento, testes | Treinar modelos |
-   | Motor analítico | Materializa e consulta prata e ouro | — |
-   | Armazenamento de objetos | Bronze, datasets congelados, artefatos | — |
+   | Motor analítico | Materializa e consulta bronze, prata e ouro | — |
+   | Armazenamento de objetos | Zona de pouso, datasets congelados, artefatos | — |
    | Ambiente de modelagem | Treina, avalia e escora lendo a camada ouro | Recalcular features |
    | Registro de experimentos e modelos | Métricas, versões e estágio dos modelos | Decidir a promoção |
    | Catálogo de dados | Tabelas, responsáveis e linhagem | — |

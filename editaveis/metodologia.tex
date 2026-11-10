@@ -90,20 +90,99 @@ O trabalho é desenvolvido no LabLivre da Universidade de Brasília,
 no âmbito do projeto Gov Hub, que constrói plataformas de dados para órgãos do
 governo federal. O ambiente de demonstração é a plataforma de dados do
 Ministério das Cidades, organizada como um \textit{Data Lakehouse} em camadas
-medalhão, que contém:
+medalhão (Figura~\ref{fig:govhub}), que contém:
 
 \begin{itemize}
-	\item fluxos orquestrados de ingestão de fontes como o SFTP da Caixa, os
-	sistemas da Secretaria Nacional de Habitação (SNH) e as planilhas de
-	acompanhamento mensal de obras;
-	\item uma camada bronze em armazenamento de objetos, que preserva os dados
-	como recebidos;
-	\item camadas prata e ouro produzidas por transformações declarativas
-	versionadas e organizadas por domínio;
-	\item painéis analíticos e um catálogo de dados com linhagem;
+	\item fluxos orquestrados de ingestão de fontes como o SFTP da Caixa, as
+	planilhas do Novo MCMV, o histórico da Secretaria Nacional de Habitação
+	(SNH) e APIs públicas, como as do IBGE e do Banco Central;
+	\item uma zona de pouso em armazenamento de objetos, dividida em
+	\texttt{raw/}, com os arquivos no formato original da fonte, e
+	\texttt{staging/}, com os mesmos dados convertidos para Parquet;
+	\item o mascaramento de dados pessoais ainda em \texttt{raw/}: CPF e NIS
+	são pseudonimizados por HMAC, e nome e data de nascimento são suprimidos,
+	em atenção à LGPD \cite{brasil2018lgpd};
+	\item camadas bronze, prata e ouro materializadas no \textit{data warehouse}
+	por transformações declarativas versionadas, organizadas por domínio, que
+	leem o Parquet da \texttt{staging/};
+	\item painéis analíticos, que consomem apenas a camada ouro, e um catálogo
+	de dados com linhagem;
 	\item três ambientes de execução: desenvolvimento local, homologação e
 	produção.
 \end{itemize}
+
+\begin{figure}[htb]
+	\centering
+	\resizebox{\textwidth}{!}{%
+	\begin{tikzpicture}[
+		box/.style={draw, rounded corners, align=center, minimum height=1.2cm,
+			text width=3.6cm, font=\footnotesize},
+		fonte/.style={box},
+		arquivo/.style={box, fill=gray!8},
+		bronze/.style={box, fill=orange!18},
+		prata/.style={box, fill=gray!15},
+		ouro/.style={box, fill=yellow!28},
+		orq/.style={box, fill=blue!8},
+		gov/.style={box, fill=red!6},
+		arr/.style={-{Stealth[length=2mm]}, thick},
+		elbl/.style={font=\scriptsize\itshape, fill=white, inner sep=1pt},
+		zone/.style={draw, dashed, rounded corners, inner sep=0.3cm},
+		lbl/.style={font=\scriptsize\itshape}
+	]
+		% Fontes
+		\node[fonte] (sftp) at (0,6.6)   {SFTP da Caixa\\(FAR, FDS, Rural)};
+		\node[fonte] (shp)  at (5.6,6.6) {Planilhas do Novo MCMV\\e histórico da SNH};
+		\node[fonte] (apis) at (11.2,6.6) {APIs públicas\\(IBGE, BACEN, CAGED\ldots)};
+
+		% Orquestração
+		\node[orq] (airflow) at (5.6,4.2) {Orquestrador\\(Apache Airflow)};
+
+		% Zona de pouso
+		\node[arquivo] (raw)     at (0,1.6)  {\textbf{raw/}\\formato original;\\dados pessoais\\mascarados};
+		\node[arquivo] (staging) at (0,-1.0) {\textbf{staging/}\\Parquet, com\\colunas de linhagem};
+
+		% Camadas medalhão
+		\node[bronze] (bronze) at (5.6,1.6)  {\textbf{Bronze}\\cópia da staging,\\ainda bruta};
+		\node[prata]  (prata)  at (5.6,-1.0) {\textbf{Prata}\\tipada e\\unificada por frente};
+		\node[ouro]   (ouro)   at (5.6,-3.6) {\textbf{Ouro}\\indicadores\\para consumo};
+
+		% Governança e consumo
+		\node[gov] (om)       at (11.2,0.3)  {Catálogo de dados\\(OpenMetadata)};
+		\node[box] (superset) at (11.2,-3.6) {Visualização\\(Apache Superset)};
+
+		% Fontes -> orquestrador
+		\draw[thick] (sftp.south) |- (5.6,5.35);
+		\draw[thick] (apis.south) |- (5.6,5.35);
+		\draw[thick] (shp.south) -- (5.6,5.35);
+		\draw[arr] (5.6,5.35) -- node[elbl, right] {extração} (airflow.north);
+
+		% Fluxo de dados
+		\draw[arr] (airflow.west) -| node[elbl, above, pos=0.25] {grava} (raw.north);
+		\draw[arr] (raw) -- node[elbl, right] {converte} (staging);
+		\draw[arr] (staging.east) -- ++(1.1,0) |- node[elbl, sloped, above, pos=0.3] {lê o Parquet} (bronze.west);
+		\draw[arr] (bronze) -- (prata);
+		\draw[arr] (prata) -- (ouro);
+		\draw[arr] (ouro) -- node[elbl, above] {leitura} (superset);
+
+		\begin{scope}[on background layer]
+			\node[zone, fit=(sftp)(shp)(apis)] (zf) {};
+			\node[zone, fit=(raw)(staging)] (zl) {};
+			\node[zone, fit=(bronze)(prata)(ouro)] (zw) {};
+		\end{scope}
+
+		% Execução e governança
+		\draw[arr] (airflow.south) -- node[elbl, right] {executa as transformações} (zw.north);
+		\draw[arr, dashed] (om.west) -- node[elbl, above] {cataloga} (om.west -| zw.east);
+
+		\node[lbl, anchor=south west] at (zf.north west) {fontes};
+		\node[lbl, anchor=north west, align=left] at (zl.south west) {zona de pouso\\(armazenamento de objetos)};
+		\node[lbl, anchor=north west, align=left] at (zw.south west) {\textit{data warehouse}\\(camadas medalhão)};
+	\end{tikzpicture}%
+	}
+	\caption{Arquitetura da plataforma Gov Hub Cidades.}
+	\label{fig:govhub}
+	\fonte{Elaborado pelos autores, a partir do repositório da plataforma.}
+\end{figure}
 
 As ferramentas que compõem essa plataforma, e as que foram adicionadas para o
 ML, estão na Tabela~\ref{tab:ferramentas-caso}.

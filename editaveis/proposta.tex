@@ -23,8 +23,9 @@ Gov Hub Cidades já adota para todos os seus dados. Essas regras são:
 	camada de visualização apenas filtra;
 	\item \textbf{Não se cria camada nova para acomodar complexidade.} Antes de
 	criar um conceito, verifica-se se ele precisa existir;
-	\item \textbf{A camada bronze é a interface de arquivos.} Ela espelha a
-	fonte e não é modificada.
+	\item \textbf{O \textit{lake} é a interface de arquivos.} Todo dado entra
+	por uma zona de pouso de arquivos, que espelha a fonte, e só dali é lido
+	pela camada bronze.
 \end{enumerate}
 
 A Tabela~\ref{tab:requisitos} lista os requisitos resultantes.
@@ -161,9 +162,10 @@ guarda, em geral e no ciclo de ML.
 		\toprule
 		\textbf{Camada} & \textbf{Conteúdo geral} & \textbf{Conteúdo de ML} \\
 		\midrule
-		Bronze & Dado bruto, como recebido da fonte, nunca modificado. Ponto de
-		reprocessamento das demais camadas & Escores gravados pelo ambiente de
-		modelagem, um arquivo por competência \\
+		Bronze & Cópia da zona de pouso, ainda bruta e sem regra de negócio.
+		Ponto de reprocessamento das demais camadas & Escores, lidos dos
+		arquivos que o ambiente de modelagem grava na zona de pouso, um por
+		competência \\
 		Prata & Dado limpo, tipado e harmonizado entre fontes & Painel
 		unificado (uma linha por unidade e mês) e rótulo \\
 		Ouro & Tabelas modeladas para consumo & Features calculadas
@@ -174,9 +176,15 @@ guarda, em geral e no ciclo de ML.
 	\fonte{Elaborado pelos autores.}
 \end{table}
 
+Antes da camada bronze há uma zona de pouso de arquivos, que guarda o dado no
+formato da fonte e serve de interface entre a ingestão e o
+\textit{lakehouse} (regra 3). Ela não é uma camada medalhão: nenhuma
+transformação de negócio acontece ali.
+
 Dois pontos merecem destaque. Primeiro, os escores voltam ao
-\textit{lakehouse} pela camada bronze, como qualquer outra fonte, e chegam à
-camada ouro pelas mesmas transformações e testes. O ambiente de modelagem
+\textit{lakehouse} como qualquer outra fonte: são gravados como arquivos na
+zona de pouso, lidos pela camada bronze e chegam à camada ouro pelas mesmas
+transformações e testes. O ambiente de modelagem
 nunca escreve diretamente na camada ouro. Segundo, os datasets congelados de
 cada treino e os artefatos de modelo ficam em uma área própria do
 armazenamento de objetos, fora das camadas medalhão. Eles são saídas do
@@ -205,8 +213,9 @@ porque é ela que impede a duplicação de lógica entre componentes.
 		Camada de transformação & Calcular painel, rótulo, features
 		\textit{as of} $t$, leitura dos escores e métricas de monitoramento;
 		executar testes de dados e de vazamento & Treinar modelos \\
-		Motor analítico & Materializar e consultar as camadas prata e ouro & --- \\
-		Armazenamento de objetos & Guardar a camada bronze, os datasets
+		Motor analítico & Materializar e consultar as camadas bronze, prata e
+		ouro & --- \\
+		Armazenamento de objetos & Guardar a zona de pouso, os datasets
 		congelados e os artefatos de modelo & --- \\
 		Ambiente de modelagem & Treinar, avaliar e escorar, lendo apenas
 		tabelas da camada ouro & Recalcular features \\
@@ -385,8 +394,8 @@ bibliotecas de modelagem.
 		\midrule
 		Orquestrador & Apache Airflow \cite{airflow} & \texttt{dags/ml/} \\
 		Camada de transformação & dbt \cite{dbt} & \texttt{dbt/mcid/models/} \texttt{ml\_<modelo>\_dbt/} \\
-		Motor analítico & PostgreSQL & --- \\
-		Armazenamento de objetos & MinIO, compatível com S3 & prefixos \texttt{raw/}, \texttt{staging/} e \texttt{ml/} \\
+		Motor analítico & PostgreSQL com a extensão pg\_duckdb & --- \\
+		Armazenamento de objetos & RustFS, compatível com S3 & prefixos \texttt{raw/}, \texttt{staging/} e \texttt{ml/} \\
 		Ambiente de modelagem & Python, com pandas, scikit-learn, LightGBM e SHAP & \texttt{ml/<modelo>/} \\
 		Registro de experimentos e modelos & MLflow \cite{zaharia2018} & artefatos em \texttt{ml/mlflow/} \\
 		Catálogo de dados & OpenMetadata \cite{openmetadata} & --- \\
@@ -398,9 +407,12 @@ bibliotecas de modelagem.
 	\fonte{Elaborado pelos autores.}
 \end{table}
 
-Na plataforma, a camada bronze corresponde aos prefixos \texttt{raw/} e
-\texttt{staging/} do armazenamento de objetos, e as camadas prata e ouro são
-tabelas materializadas pelo dbt no PostgreSQL.
+Na plataforma (Figura~\ref{fig:govhub}), a zona de pouso são os prefixos
+\texttt{raw/} e \texttt{staging/} do armazenamento de objetos, e as
+camadas bronze, prata e ouro são tabelas materializadas pelo dbt no
+PostgreSQL, que lê o Parquet da \texttt{staging/} pela extensão pg\_duckdb.
+Os escores do modelo seguem o mesmo caminho, a partir de um prefixo próprio
+do armazenamento de objetos (\texttt{ml/escores/}).
 
 \subsection{Decisões em aberto}
 
