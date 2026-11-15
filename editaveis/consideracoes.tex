@@ -1,79 +1,33 @@
 \chapter[Considerações Finais]{Considerações Finais}
 \label{cap:consideracoes}
 
-Este trabalho propõe uma arquitetura de MLOps para plataformas de dados
-governamentais, instanciada na previsão de paralisação de obras do Programa
-Minha Casa, Minha Vida no Gov Hub Cidades. A proposta parte de uma constatação
-da literatura: a maior parte do esforço e da dívida técnica de um sistema de
-ML está fora do código de treino \cite{sculley2015}, e no setor público esse
-esforço é ainda maior por obstáculos institucionais \cite{ferreira2025}.
+Este trabalho propõe uma arquitetura de MLOps para plataformas de dados governamentais, instanciada na previsão de paralisação de obras do Programa Minha Casa, Minha Vida no Gov Hub Cidades. A proposta parte de uma constatação da literatura: a maior parte do esforço e da dívida técnica de um sistema de ML está fora do código de treino \cite{sculley2015}, e no setor público esse esforço é ainda maior por obstáculos institucionais \cite{ferreira2025}.
 
-A principal decisão da arquitetura é estender o \textit{Data Lakehouse}
-existente em vez de construir uma plataforma de ML paralela. Painel e rótulo
-ficam na camada prata; features, escores e monitoramento, na camada ouro; e os
-escores voltam pela camada bronze como qualquer outra fonte, sob os mesmos
-testes e o mesmo catálogo das demais tabelas. Todo cálculo sobre dados fica na
-camada de transformação, o ambiente de modelagem apenas treina, avalia e
-escora, e o orquestrador coordena as etapas. Com isso, o treino e o escore
-usam a mesma implementação de cada feature, e qualquer resultado pode ser
-refeito a partir da versão do código e da versão do dataset. Como a
-arquitetura é definida por papéis, e não por ferramentas, ela pode ser
-reaproveitada em plataformas com outras pilhas tecnológicas, e os mesmos
-papéis descrevem também aplicações com modelos de linguagem, como o assistente
-de dados graphrag-tais do próprio Gov Hub (Seção~\ref{sec:extensao-llm}).
+A principal decisão da arquitetura é estender o \textit{Data Lakehouse} existente em vez de construir uma plataforma de ML paralela. Painel e rótulo ficam na camada prata; features, escores e monitoramento, na camada ouro; e os escores voltam pela camada bronze como qualquer outra fonte, sob os mesmos testes e o mesmo catálogo das demais tabelas. Todo cálculo sobre dados fica na camada de transformação, o ambiente de modelagem apenas treina, avalia e escora, e o orquestrador coordena as etapas. Com isso, o treino e o escore usam a mesma implementação de cada feature, e qualquer resultado pode ser refeito a partir da versão do código e da versão do dataset. Como a arquitetura é definida por papéis, e não por ferramentas, ela pode ser reaproveitada em plataformas com outras pilhas tecnológicas, e os mesmos papéis descrevem também aplicações com modelos de linguagem, como o assistente de dados graphrag-tais do próprio Gov Hub (Seção~\ref{sec:extensao-llm}).
 
-Na instanciação, os papéis são cumpridos por uma pilha aberta e proporcional
-a um escore mensal em lote: versionamento dos datasets congelados com o DVC,
-rastreamento de experimentos e promoção por apelidos (\textit{champion} e
-\textit{challenger}) no MLflow, validação de dados em três pontos, ciclo
-disparado pela chegada de dados novos no orquestrador e monitoramento em dois
-tempos, que compensa o atraso do rótulo com o acompanhamento da distribuição
-das features.
+Na instanciação, os papéis são cumpridos por uma pilha aberta e proporcional a um escore mensal em lote: versionamento dos datasets congelados com o DVC, rastreamento de experimentos e promoção por apelidos (\textit{champion} e \textit{challenger}) no MLflow, validação de dados em três pontos, ciclo disparado pela chegada de dados novos no orquestrador e monitoramento em dois tempos, que compensa o atraso do rótulo com o acompanhamento da distribuição das features.
 
-No TCC1 foram concluídas a identificação do problema, a definição dos
-requisitos, o projeto da arquitetura e o levantamento inicial dos dados. O
-levantamento já revelou um achado relevante para o caso: as trocas de fonte de
-dados ao longo da série produzem transições de situação que não correspondem
-necessariamente a paralisações reais, o que restringe o período em que o
-rótulo é confiável. A recuperação da série histórica anterior a 2019, ainda em
-validação, indica que esse período pode ser ampliado.
+No TCC1 foram concluídas a identificação do problema, a definição dos requisitos, o projeto da arquitetura e o levantamento inicial dos dados. O levantamento já revelou um achado relevante para o caso: as trocas de fonte de dados ao longo da série produzem transições de situação que não correspondem necessariamente a paralisações reais, o que restringe o período em que o rótulo é confiável. A recuperação da série histórica anterior a 2019, ainda em validação, indica que esse período pode ser ampliado.
 
 \section{Próximos passos}
 
 Para o TCC2, estão previstas as seguintes atividades:
 
 \begin{enumerate}
-	\item[A1] Concluir a análise exploratória, incluindo a série histórica, e
-	fechar as decisões sobre horizonte, capacidade, retomada e usuário do
-	alerta;
-	\item[A2] Calcular o desempenho da regra vigente no período SFTP, no
-	agregado e por subgrupo;
-	\item[A3] Implementar na camada de transformação o painel e o rótulo
-	(camada prata) e as features \textit{as of} $t$ (camada ouro), com testes
-	de vazamento;
-	\item[A4] Implementar o export de datasets versionados com o DVC, a
-	validação na leitura, o treino e a avaliação, com registro dos experimentos
-	no MLflow e treino de fumaça na integração contínua;
-	\item[A5] Implementar a promoção com \textit{gate}, o escore mensal e o
-	monitoramento em dois tempos, inclusive por subgrupo;
+	\item[A1] Concluir a análise exploratória, incluindo a série histórica, e fechar as decisões sobre horizonte, capacidade, retomada e usuário do alerta;
+	\item[A2] Calcular o desempenho da regra vigente no período SFTP, no agregado e por subgrupo;
+	\item[A3] Implementar na camada de transformação o painel e o rótulo (camada prata) e as features \textit{as of} $t$ (camada ouro), com testes de vazamento;
+	\item[A4] Implementar o export de datasets versionados com o DVC, a validação na leitura, o treino e a avaliação, com registro dos experimentos no MLflow e treino de fumaça na integração contínua;
+	\item[A5] Implementar a promoção com \textit{gate}, o escore mensal e o monitoramento em dois tempos, inclusive por subgrupo;
 	\item[A6] Executar a avaliação (AV1--AV7);
 	\item[A7] Redigir a monografia final e preparar a defesa.
 \end{enumerate}
 
-Fica como trabalho futuro, fora do escopo do TCC2, levar ao graphrag-tais a
-mesma pilha usada no caso preditivo: o conjunto \textit{gold} e as cópias do
-índice versionados com o DVC, e as avaliações, os \textit{prompts} e os
-\textit{traces} registrados no MLflow. Isso transformaria a análise de
-aderência do AV7 em uma segunda instanciação da arquitetura.
+Fica como trabalho futuro, fora do escopo do TCC2, levar ao graphrag-tais a mesma pilha usada no caso preditivo: o conjunto \textit{gold} e as cópias do índice versionados com o DVC, e as avaliações, os \textit{prompts} e os \textit{traces} registrados no MLflow. Isso transformaria a análise de aderência do AV7 em uma segunda instanciação da arquitetura.
 
 \section{Cronograma}
 
-O trabalho segue \textit{sprints} de duas semanas (Seção~\ref{sec:gestao}).
-Até a entrega do TCC1, em dezembro de 2026, restam duas: a primeira calcula o
-desempenho da regra vigente e responde às três primeiras perguntas da EDA, e a
-segunda incorpora esses resultados ao texto e passa pela revisão dos
-orientadores. A Tabela~\ref{tab:cronograma} apresenta as \textit{sprints}
-previstas para o TCC2, cerca de seis meses.
+O trabalho segue \textit{sprints} de duas semanas (Seção~\ref{sec:gestao}). Até a entrega do TCC1, em dezembro de 2026, restam duas: a primeira calcula o desempenho da regra vigente e responde às três primeiras perguntas da EDA, e a segunda incorpora esses resultados ao texto e passa pela revisão dos orientadores. A Tabela~\ref{tab:cronograma} apresenta as \textit{sprints} previstas para o TCC2, cerca de seis meses.
 
 \begin{table}[!htb]
 	\centering
@@ -101,5 +55,4 @@ previstas para o TCC2, cerca de seis meses.
 	\fonte{Elaborado pelos autores.}
 \end{table}
 
-\pendente{Atribuir datas às \textit{sprints} S1 a S12 conforme o calendário
-acadêmico da UnB para o semestre do TCC2.}
+\pendente{Atribuir datas às \textit{sprints} S1 a S12 conforme o calendário acadêmico da UnB para o semestre do TCC2.}

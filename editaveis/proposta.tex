@@ -1,32 +1,18 @@
 \chapter[Proposta]{Proposta}
 \label{cap:proposta}
 
-Este capítulo apresenta o artefato proposto. A Seção~\ref{sec:requisitos}
-define os requisitos da arquitetura. A Seção~\ref{sec:arquitetura} descreve a
-arquitetura por meio das camadas do \textit{Data Lakehouse} e dos papéis que
-cada componente desempenha, sem se prender a ferramentas específicas. A
-Seção~\ref{sec:extensao-llm} discute a extensão dos papéis a aplicações com
-modelos de linguagem. A Seção~\ref{sec:caso} apresenta a instanciação no caso
-de prevenção de paralisação de obras do MCMV, incluindo as ferramentas
-escolhidas para cada papel.
+Este capítulo apresenta o artefato proposto. A Seção~\ref{sec:requisitos} define os requisitos da arquitetura. A Seção~\ref{sec:arquitetura} descreve a arquitetura por meio das camadas do \textit{Data Lakehouse} e dos papéis que cada componente desempenha, sem se prender a ferramentas específicas. A Seção~\ref{sec:extensao-llm} discute a extensão dos papéis a aplicações com modelos de linguagem. A Seção~\ref{sec:caso} apresenta a instanciação no caso de prevenção de paralisação de obras do MCMV, incluindo as ferramentas escolhidas para cada papel.
 
 % ---------------------------------------------------------------------
 \section{Requisitos da arquitetura}
 \label{sec:requisitos}
 
-Os requisitos derivam de duas fontes: os riscos e princípios levantados no
-Capítulo~\ref{cap:referencial} e as regras de engenharia que a plataforma
-Gov Hub Cidades já adota para todos os seus dados. Essas regras são:
+Os requisitos derivam de duas fontes: os riscos e princípios levantados no Capítulo~\ref{cap:referencial} e as regras de engenharia que a plataforma Gov Hub Cidades já adota para todos os seus dados. Essas regras são:
 
 \begin{enumerate}
-	\item \textbf{O cálculo mora na camada de transformação.} O dado chega pelo
-	orquestrador, é transformado entre as camadas do \textit{lakehouse}, e a
-	camada de visualização apenas filtra;
-	\item \textbf{Não se cria camada nova para acomodar complexidade.} Antes de
-	criar um conceito, verifica-se se ele precisa existir;
-	\item \textbf{O \textit{lake} é a interface de arquivos.} Todo dado entra
-	por uma zona de pouso de arquivos, que espelha a fonte, e só dali é lido
-	pela camada bronze.
+	\item \textbf{O cálculo mora na camada de transformação.} O dado chega pelo orquestrador, é transformado entre as camadas do \textit{lakehouse}, e a camada de visualização apenas filtra;
+	\item \textbf{Não se cria camada nova para acomodar complexidade.} Antes de criar um conceito, verifica-se se ele precisa existir;
+	\item \textbf{O \textit{lake} é a interface de arquivos.} Todo dado entra por uma zona de pouso de arquivos, que espelha a fonte, e só dali é lido pela camada bronze.
 \end{enumerate}
 
 A Tabela~\ref{tab:requisitos} lista os requisitos resultantes.
@@ -71,19 +57,9 @@ A Tabela~\ref{tab:requisitos} lista os requisitos resultantes.
 
 \subsection{Visão geral}
 
-A arquitetura opera sobre um \textit{Data Lakehouse} \cite{armbrust2021}
-organizado nas três camadas da arquitetura medalhão
-(Seção~\ref{sec:plataformas}). A ideia central é estender o
-\textit{lakehouse} existente em vez de construir uma plataforma de ML
-paralela: cada artefato do ciclo de vida de um modelo (painel, rótulo,
-features, escores e métricas de monitoramento) ocupa uma camada definida e
-passa pelos mesmos testes e pelo mesmo catálogo das demais tabelas.
+A arquitetura opera sobre um \textit{Data Lakehouse} \cite{armbrust2021} organizado nas três camadas da arquitetura medalhão (Seção~\ref{sec:plataformas}). A ideia central é estender o \textit{lakehouse} existente em vez de construir uma plataforma de ML paralela: cada artefato do ciclo de vida de um modelo (painel, rótulo, features, escores e métricas de monitoramento) ocupa uma camada definida e passa pelos mesmos testes e pelo mesmo catálogo das demais tabelas.
 
-A arquitetura é descrita por \textbf{papéis}, e não por ferramentas. Cada papel
-define uma responsabilidade que pode ser cumprida por diferentes tecnologias.
-Essa separação permite reaproveitar a arquitetura em plataformas com pilhas
-tecnológicas diferentes. As ferramentas que materializam cada papel no caso
-estudado estão na Seção~\ref{sec:ferramentas-caso}.
+A arquitetura é descrita por \textbf{papéis}, e não por ferramentas. Cada papel define uma responsabilidade que pode ser cumprida por diferentes tecnologias. Essa separação permite reaproveitar a arquitetura em plataformas com pilhas tecnológicas diferentes. As ferramentas que materializam cada papel no caso estudado estão na Seção~\ref{sec:ferramentas-caso}.
 
 A Figura~\ref{fig:arquitetura} apresenta a visão geral.
 
@@ -157,8 +133,7 @@ A Figura~\ref{fig:arquitetura} apresenta a visão geral.
 
 \subsection{Camadas do \textit{lakehouse} no ciclo de ML}
 
-A Tabela~\ref{tab:camadas} mostra o que cada camada da arquitetura medalhão
-guarda, em geral e no ciclo de ML.
+A Tabela~\ref{tab:camadas} mostra o que cada camada da arquitetura medalhão guarda, em geral e no ciclo de ML.
 
 \begin{table}[htb]
 	\centering
@@ -183,27 +158,13 @@ guarda, em geral e no ciclo de ML.
 	\fonte{Elaborado pelos autores.}
 \end{table}
 
-Antes da camada bronze há uma zona de pouso de arquivos, que guarda o dado no
-formato da fonte e serve de interface entre a ingestão e o
-\textit{lakehouse} (regra 3). Ela não é uma camada medalhão: nenhuma
-transformação de negócio acontece ali.
+Antes da camada bronze há uma zona de pouso de arquivos, que guarda o dado no formato da fonte e serve de interface entre a ingestão e o \textit{lakehouse} (regra 3). Ela não é uma camada medalhão: nenhuma transformação de negócio acontece ali.
 
-Dois pontos merecem destaque. Primeiro, os escores voltam ao
-\textit{lakehouse} como qualquer outra fonte: são gravados como arquivos na
-zona de pouso, lidos pela camada bronze e chegam à camada ouro pelas mesmas
-transformações e testes. O ambiente de modelagem
-nunca escreve diretamente na camada ouro. Segundo, os datasets congelados de
-cada treino e os artefatos de modelo ficam em uma área própria do
-armazenamento de objetos, fora das camadas medalhão. Eles são saídas do
-treino, e não etapas de transformação de dados, por isso não justificam uma
-camada nova (regra 2).
+Dois pontos merecem destaque. Primeiro, os escores voltam ao \textit{lakehouse} como qualquer outra fonte: são gravados como arquivos na zona de pouso, lidos pela camada bronze e chegam à camada ouro pelas mesmas transformações e testes. O ambiente de modelagem nunca escreve diretamente na camada ouro. Segundo, os datasets congelados de cada treino e os artefatos de modelo ficam em uma área própria do armazenamento de objetos, fora das camadas medalhão. Eles são saídas do treino, e não etapas de transformação de dados, por isso não justificam uma camada nova (regra 2).
 
 \subsection{Papéis e responsabilidades}
 
-A principal decisão da arquitetura é qual papel assume cada responsabilidade
-do ciclo de vida de ML (QE1). A Tabela~\ref{tab:responsabilidades} resume essa
-divisão. A coluna ``Não faz'' é tão importante quanto a de responsabilidades,
-porque é ela que impede a duplicação de lógica entre componentes.
+A principal decisão da arquitetura é qual papel assume cada responsabilidade do ciclo de vida de ML (QE1). A Tabela~\ref{tab:responsabilidades} resume essa divisão. A coluna ``Não faz'' é tão importante quanto a de responsabilidades, porque é ela que impede a duplicação de lógica entre componentes.
 
 \begin{table}[htb]
 	\centering
@@ -239,44 +200,17 @@ porque é ela que impede a duplicação de lógica entre componentes.
 	\fonte{Elaborado pelos autores.}
 \end{table}
 
-Em \textit{lakehouses} que usam formatos de tabela abertos sobre armazenamento
-de objetos, o motor analítico e o armazenamento de objetos podem coincidir
-\cite{armbrust2021}. A arquitetura os separa porque nem toda plataforma
-governamental adota esse formato.
+Em \textit{lakehouses} que usam formatos de tabela abertos sobre armazenamento de objetos, o motor analítico e o armazenamento de objetos podem coincidir \cite{armbrust2021}. A arquitetura os separa porque nem toda plataforma governamental adota esse formato.
 
-Como a mesma transformação gera o dataset de treino e o de escore, não há duas
-implementações da mesma feature (R1), o que elimina por construção a principal
-causa de desalinhamento entre treino e produção \cite{polyzotis2018}. Uma
-feature nova é sempre uma transformação versionada da camada ouro, testada e
-catalogada como qualquer outra tabela (R7).
+Como a mesma transformação gera o dataset de treino e o de escore, não há duas implementações da mesma feature (R1), o que elimina por construção a principal causa de desalinhamento entre treino e produção \cite{polyzotis2018}. Uma feature nova é sempre uma transformação versionada da camada ouro, testada e catalogada como qualquer outra tabela (R7).
 
-Por isso, a arquitetura não inclui um repositório de features dedicado
-(\textit{feature store}), embora \citeonline{kreuzberger2023} o listem entre os
-componentes de MLOps. Um repositório desses resolve dois problemas: servir
-features com baixa latência para inferência em tempo real e garantir que o
-treino use o valor de cada feature como ele era na data da observação. O
-primeiro não existe num escore mensal em lote. O segundo é resolvido pelas
-próprias tabelas da camada ouro, calculadas \textit{as of} $t$ e testadas
-contra vazamento (R2). Acrescentar um componente para repetir essa função
-criaria uma segunda implementação das mesmas features, justamente o que o R1
-proíbe.
+Por isso, a arquitetura não inclui um repositório de features dedicado (\textit{feature store}), embora \citeonline{kreuzberger2023} o listem entre os componentes de MLOps. Um repositório desses resolve dois problemas: servir features com baixa latência para inferência em tempo real e garantir que o treino use o valor de cada feature como ele era na data da observação. O primeiro não existe num escore mensal em lote. O segundo é resolvido pelas próprias tabelas da camada ouro, calculadas \textit{as of} $t$ e testadas contra vazamento (R2). Acrescentar um componente para repetir essa função criaria uma segunda implementação das mesmas features, justamente o que o R1 proíbe.
 
-A validação de dados acontece em três pontos. Os testes da camada de
-transformação verificam esquema, unicidade, domínios e ausência de vazamento
-a cada execução \cite{schelter2018}. Os contratos de dados de cada fonte
-declaram o esquema e as garantias que a ingestão precisa cumprir antes de o
-dado chegar à camada bronze. E o ambiente de modelagem valida o esquema do
-dataset congelado ao lê-lo, antes de treinar ou escorar, para que uma
-mudança não percebida na camada ouro não chegue silenciosamente ao modelo
-\cite{breck2019}.
+A validação de dados acontece em três pontos. Os testes da camada de transformação verificam esquema, unicidade, domínios e ausência de vazamento a cada execução \cite{schelter2018}. Os contratos de dados de cada fonte declaram o esquema e as garantias que a ingestão precisa cumprir antes de o dado chegar à camada bronze. E o ambiente de modelagem valida o esquema do dataset congelado ao lê-lo, antes de treinar ou escorar, para que uma mudança não percebida na camada ouro não chegue silenciosamente ao modelo \cite{breck2019}.
 
 \subsection{Ciclo de vida}
 
-Cada modelo percorre as fases do CRISP-DM \cite{wirth2000}, e cada fase tem
-um lugar definido na arquitetura (Tabela~\ref{tab:ciclo}). A análise
-exploratória vem antes de qualquer transformação de ML: nenhuma tabela nova é
-criada antes de a exploração mostrar que ela é necessária, em respeito à
-regra 2 da plataforma.
+Cada modelo percorre as fases do CRISP-DM \cite{wirth2000}, e cada fase tem um lugar definido na arquitetura (Tabela~\ref{tab:ciclo}). A análise exploratória vem antes de qualquer transformação de ML: nenhuma tabela nova é criada antes de a exploração mostrar que ela é necessária, em respeito à regra 2 da plataforma.
 
 \begin{table}[htb]
 	\centering
@@ -307,91 +241,32 @@ regra 2 da plataforma.
 	\fonte{Elaborado pelos autores.}
 \end{table}
 
-Ao redor desse ciclo há um processo de integração contínua. Cada mudança
-proposta ao repositório executa a verificação de estilo do código, as
-transformações e seus testes, incluindo os de vazamento, e um treino de
-fumaça sobre uma amostra pequena dos dados. As métricas desse treino são
-publicadas na própria revisão da mudança, para que o efeito de uma alteração
-em uma feature apareça antes da integração, e não depois do retreino
-\cite{breck2017}.
+Ao redor desse ciclo há um processo de integração contínua. Cada mudança proposta ao repositório executa a verificação de estilo do código, as transformações e seus testes, incluindo os de vazamento, e um treino de fumaça sobre uma amostra pequena dos dados. As métricas desse treino são publicadas na própria revisão da mudança, para que o efeito de uma alteração em uma feature apareça antes da integração, e não depois do retreino \cite{breck2017}.
 
 \subsection{Reprodutibilidade}
 
-O treino nunca lê uma base extraída manualmente. Ele lê a camada ouro e
-congela uma cópia versionada no armazenamento de objetos, acompanhada de um
-manifesto com a versão do código (\textit{commit}), a versão das
-transformações e as competências incluídas. O versionamento dessa cópia é
-feito com o DVC (\textit{Data Version Control}) \cite{dvc}: o conteúdo do
-dataset fica no armazenamento de objetos, e o Git guarda apenas um arquivo de
-metadados com o \textit{hash} desse conteúdo, de modo que cada \textit{commit}
-aponta para uma versão exata dos dados.
+O treino nunca lê uma base extraída manualmente. Ele lê a camada ouro e congela uma cópia versionada no armazenamento de objetos, acompanhada de um manifesto com a versão do código (\textit{commit}), a versão das transformações e as competências incluídas. O versionamento dessa cópia é feito com o DVC (\textit{Data Version Control}) \cite{dvc}: o conteúdo do dataset fica no armazenamento de objetos, e o Git guarda apenas um arquivo de metadados com o \textit{hash} desse conteúdo, de modo que cada \textit{commit} aponta para uma versão exata dos dados.
 
-O registro de experimentos fecha o vínculo no sentido contrário. Cada execução
-de treino registra o \textit{commit} do código, o \textit{hash} do dataset,
-a versão das transformações, a especificação travada das dependências do
-ambiente de modelagem e as sementes aleatórias, como recomendam
-\citeonline{pineau2021}. A partir de qualquer versão de modelo registrada,
-portanto, chega-se ao código, ao dado e ao ambiente que a produziram. Assim,
-qualquer resultado pode ser refeito a partir da versão do código e da versão
-do dataset (R3, R4, QE2), o que será verificado pelo critério AV3. O
-\textit{model card} \cite{mitchell2019} e a \textit{datasheet} do dataset
-\cite{gebru2021} são gravados como artefatos da mesma execução.
+O registro de experimentos fecha o vínculo no sentido contrário. Cada execução de treino registra o \textit{commit} do código, o \textit{hash} do dataset, a versão das transformações, a especificação travada das dependências do ambiente de modelagem e as sementes aleatórias, como recomendam \citeonline{pineau2021}. A partir de qualquer versão de modelo registrada, portanto, chega-se ao código, ao dado e ao ambiente que a produziram. Assim, qualquer resultado pode ser refeito a partir da versão do código e da versão do dataset (R3, R4, QE2), o que será verificado pelo critério AV3. O \textit{model card} \cite{mitchell2019} e a \textit{datasheet} do dataset \cite{gebru2021} são gravados como artefatos da mesma execução.
 
 \subsection{Promoção e operação}
 
-O ciclo é disparado por dados, e não apenas por calendário: quando as
-transformações materializam a camada ouro de uma nova competência, o
-orquestrador encadeia o export do dataset, o escore e, quando previsto, o
-retreino. Isso corresponde ao nível 1 de maturidade descrito na
-Seção~\ref{sec:mlops}.
+O ciclo é disparado por dados, e não apenas por calendário: quando as transformações materializam a camada ouro de uma nova competência, o orquestrador encadeia o export do dataset, o escore e, quando previsto, o retreino. Isso corresponde ao nível 1 de maturidade descrito na Seção~\ref{sec:mlops}.
 
-A promoção de um modelo é controlada por um \textit{gate} aplicado pelo
-orquestrador. Cada nova versão entra no registro como candidata
-(\textit{challenger}) e só passa a gerar o escore oficial se, no período
-de validação temporal, superar tanto a versão vigente (\textit{champion})
-quanto a regra de referência no \textit{recall@k} (R5). Promover é mover o
-apelido \textit{champion} para a nova versão, e voltar atrás é movê-lo de
-volta, sem retreinar nada. O escore mensal é gravado na camada
-bronze e promovido até a camada ouro pela camada de transformação, o que
-mantém o ranking sob os mesmos testes e o mesmo catálogo das demais tabelas.
+A promoção de um modelo é controlada por um \textit{gate} aplicado pelo orquestrador. Cada nova versão entra no registro como candidata (\textit{challenger}) e só passa a gerar o escore oficial se, no período de validação temporal, superar tanto a versão vigente (\textit{champion}) quanto a regra de referência no \textit{recall@k} (R5). Promover é mover o apelido \textit{champion} para a nova versão, e voltar atrás é movê-lo de volta, sem retreinar nada. O escore mensal é gravado na camada bronze e promovido até a camada ouro pela camada de transformação, o que mantém o ranking sob os mesmos testes e o mesmo catálogo das demais tabelas.
 
-O monitoramento também fica na camada de transformação (R6), em dois
-tempos, por causa do atraso do rótulo (Seção~\ref{sec:riscos}). Logo após
-cada escore, tabelas da camada ouro comparam a distribuição das features da
-competência com a do dataset de treino, por feature, com o índice de
-estabilidade populacional (PSI). Esse é o sinal antecipado. Só $h$ meses
-depois, quando o horizonte de predição se cumpre, as mesmas tabelas calculam
-o desempenho realizado dos escores passados. Esse desempenho é calculado
-também por subgrupo (unidade da federação, região e modalidade), para que uma
-queda concentrada não fique escondida na média (R9). A camada de
-visualização exibe esses indicadores.
+O monitoramento também fica na camada de transformação (R6), em dois tempos, por causa do atraso do rótulo (Seção~\ref{sec:riscos}). Logo após cada escore, tabelas da camada ouro comparam a distribuição das features da competência com a do dataset de treino, por feature, com o índice de estabilidade populacional (PSI). Esse é o sinal antecipado. Só $h$ meses depois, quando o horizonte de predição se cumpre, as mesmas tabelas calculam o desempenho realizado dos escores passados. Esse desempenho é calculado também por subgrupo (unidade da federação, região e modalidade), para que uma queda concentrada não fique escondida na média (R9). A camada de visualização exibe esses indicadores.
 
-A política de retreino combina os dois tempos: o retreino é periódico e é
-antecipado quando o PSI de alguma feature relevante ultrapassa o limiar de
-alerta. Em qualquer caso, a nova versão passa pelo mesmo \textit{gate}.
+A política de retreino combina os dois tempos: o retreino é periódico e é antecipado quando o PSI de alguma feature relevante ultrapassa o limiar de alerta. Em qualquer caso, a nova versão passa pelo mesmo \textit{gate}.
 
-\pendente{Calibrar os limiares de PSI na EDA (a referência usual é 0,1 para
-atenção e 0,25 para alerta) e definir a periodicidade do retreino com o
-MCID.}
+\pendente{Calibrar os limiares de PSI na EDA (a referência usual é 0,1 para atenção e 0,25 para alerta) e definir a periodicidade do retreino com o MCID.}
 
 \subsection{Extensão para aplicações com modelos de linguagem}
 \label{sec:extensao-llm}
 
-A arquitetura foi projetada para um modelo preditivo em lote, mas seus papéis
-não dependem do tipo de modelo. Para verificar até onde eles se aplicam a uma
-aplicação com LLM, toma-se como referência o graphrag-tais
-\cite{graphragtais}, assistente do próprio Gov Hub que responde a perguntas
-sobre os dados da plataforma e gera consultas SQL para indicadores. Ele
-combina busca vetorial e um grafo de conhecimento (GraphRAG,
-Seção~\ref{sec:llm}) construídos a partir dos metadados do catálogo de dados,
-e já adota parte das práticas discutidas no Referencial: \textit{prompts}
-versionados fora do código, um conjunto de avaliação \textit{gold}, uma
-\textit{baseline} aceita que qualquer mudança na recuperação precisa superar,
-regras de proteção (\textit{guardrails}) aplicadas antes de o modelo ser
-chamado e mascaramento de dados sensíveis na saída.
+A arquitetura foi projetada para um modelo preditivo em lote, mas seus papéis não dependem do tipo de modelo. Para verificar até onde eles se aplicam a uma aplicação com LLM, toma-se como referência o graphrag-tais \cite{graphragtais}, assistente do próprio Gov Hub que responde a perguntas sobre os dados da plataforma e gera consultas SQL para indicadores. Ele combina busca vetorial e um grafo de conhecimento (GraphRAG, Seção~\ref{sec:llm}) construídos a partir dos metadados do catálogo de dados, e já adota parte das práticas discutidas no Referencial: \textit{prompts} versionados fora do código, um conjunto de avaliação \textit{gold}, uma \textit{baseline} aceita que qualquer mudança na recuperação precisa superar, regras de proteção (\textit{guardrails}) aplicadas antes de o modelo ser chamado e mascaramento de dados sensíveis na saída.
 
-A Tabela~\ref{tab:extensao-llm} mostra como cada papel se manifesta no caso
-preditivo e em uma aplicação desse tipo.
+A Tabela~\ref{tab:extensao-llm} mostra como cada papel se manifesta no caso preditivo e em uma aplicação desse tipo.
 
 \begin{table}[htb]
 	\centering
@@ -416,20 +291,9 @@ preditivo e em uma aplicação desse tipo.
 	\fonte{Elaborado pelos autores, a partir do repositório do graphrag-tais.}
 \end{table}
 
-Duas observações saem da tabela. A primeira é que a regra que sustenta o R1
-tem um equivalente direto: assim como nenhuma feature é calculada fora da
-camada de transformação, nenhum documento do índice deve existir fora do
-catálogo de dados. Uma descrição de tabela escrita só para o assistente seria
-uma segunda fonte de verdade, sujeita a divergir da primeira. A segunda é que
-uma aplicação interativa precisa de um papel que o caso preditivo não tem: um
-serviço de inferência sempre disponível, com as proteções de segurança e de
-dados pessoais discutidas na Seção~\ref{sec:llm}. Esse papel fica restrito a
-aplicações interativas e não altera a tabela de papéis do núcleo da
-arquitetura (Tabela~\ref{tab:responsabilidades}).
+Duas observações saem da tabela. A primeira é que a regra que sustenta o R1 tem um equivalente direto: assim como nenhuma feature é calculada fora da camada de transformação, nenhum documento do índice deve existir fora do catálogo de dados. Uma descrição de tabela escrita só para o assistente seria uma segunda fonte de verdade, sujeita a divergir da primeira. A segunda é que uma aplicação interativa precisa de um papel que o caso preditivo não tem: um serviço de inferência sempre disponível, com as proteções de segurança e de dados pessoais discutidas na Seção~\ref{sec:llm}. Esse papel fica restrito a aplicações interativas e não altera a tabela de papéis do núcleo da arquitetura (Tabela~\ref{tab:responsabilidades}).
 
-Essa extensão não é implementada neste trabalho. Ela é avaliada de forma
-qualitativa pelo critério AV7 (Seção~\ref{sec:avaliacao}), como evidência de
-que os papéis se generalizam para além do caso estudado.
+Essa extensão não é implementada neste trabalho. Ela é avaliada de forma qualitativa pelo critério AV7 (Seção~\ref{sec:avaliacao}), como evidência de que os papéis se generalizam para além do caso estudado.
 
 % ---------------------------------------------------------------------
 \section{Instanciação: prevenção de paralisação de obras do MCMV}
@@ -437,80 +301,34 @@ que os papéis se generalizam para além do caso estudado.
 
 \subsection{Problema}
 
-Para cada obra \textbf{em execução} no mês $t$, estima-se a probabilidade de
-ela estar \textbf{paralisada} em algum mês até $t+h$. A saída é um ranking
-mensal de risco, para que a fiscalização priorize visitas antes de a obra
-parar.
+Para cada obra \textbf{em execução} no mês $t$, estima-se a probabilidade de ela estar \textbf{paralisada} em algum mês até $t+h$. A saída é um ranking mensal de risco, para que a fiscalização priorize visitas antes de a obra parar.
 
-A unidade de análise é a obra (\texttt{id\_empreendimento}, que acompanha o
-empreendimento por todas as fases) observada em um mês de competência. O
-escopo inclui as modalidades com execução de obra a acompanhar: Fundo de
-Arrendamento Residencial (FAR), Fundo de Desenvolvimento Social (FDS), Rural,
-Pró-Moradia e Financiado (FGTS). Modalidades que são contratos ou propostas,
-sem execução de obra, ficam de fora.
+A unidade de análise é a obra (\texttt{id\_empreendimento}, que acompanha o empreendimento por todas as fases) observada em um mês de competência. O escopo inclui as modalidades com execução de obra a acompanhar: Fundo de Arrendamento Residencial (FAR), Fundo de Desenvolvimento Social (FDS), Rural, Pró-Moradia e Financiado (FGTS). Modalidades que são contratos ou propostas, sem execução de obra, ficam de fora.
 
 \subsection{Dados disponíveis}
 
-O painel histórico do FAR, do FDS e do Rural está em tabelas prata de
-histórico por empreendimento, uma por modalidade, com grão de obra por mês,
-de dezembro de 2019 a julho de 2026. São 5.555 obras no FAR, 1.021 no FDS
-e 11.122 no Rural. A situação da obra é harmonizada em uma coluna canônica com
-os valores \texttt{em\_obras}, \texttt{paralisada}, \texttt{concluida},
-\texttt{cancelada} e \texttt{nao\_iniciada}. O FGTS tem tabelas próprias, com
-percentual previsto e realizado, data da última vistoria e motivos de
-paralisação.
+O painel histórico do FAR, do FDS e do Rural está em tabelas prata de histórico por empreendimento, uma por modalidade, com grão de obra por mês, de dezembro de 2019 a julho de 2026. São 5.555 obras no FAR, 1.021 no FDS e 11.122 no Rural. A situação da obra é harmonizada em uma coluna canônica com os valores \texttt{em\_obras}, \texttt{paralisada}, \texttt{concluida}, \texttt{cancelada} e \texttt{nao\_iniciada}. O FGTS tem tabelas próprias, com percentual previsto e realizado, data da última vistoria e motivos de paralisação.
 
-A fonte da situação muda duas vezes ao longo da série: SFTP da Caixa até
-novembro de 2024, sistema da SNH de junho de 2024 a março de 2026, e planilha
-de acompanhamento mensal a partir de abril de 2026. No período de sobreposição,
-as duas primeiras fontes concordam em 96 a 98\% dos casos. Ainda assim, um
-terço das paralisações do FAR ocorre exatamente na troca de fonte, e dentro do
-período SNH quase não surgem paralisações novas. No período SFTP há cerca de
-1.500 transições de \texttt{em\_obras} para \texttt{paralisada}, a maioria no
-Rural.
+A fonte da situação muda duas vezes ao longo da série: SFTP da Caixa até novembro de 2024, sistema da SNH de junho de 2024 a março de 2026, e planilha de acompanhamento mensal a partir de abril de 2026. No período de sobreposição, as duas primeiras fontes concordam em 96 a 98\% dos casos. Ainda assim, um terço das paralisações do FAR ocorre exatamente na troca de fonte, e dentro do período SNH quase não surgem paralisações novas. No período SFTP há cerca de 1.500 transições de \texttt{em\_obras} para \texttt{paralisada}, a maioria no Rural.
 
-Essas observações indicam que o rótulo só é confiável no período SFTP, e que
-a troca de fonte é uma mudança de distribuição conhecida
-(Seção~\ref{sec:riscos}) que a preparação dos dados precisa tratar
-explicitamente.
+Essas observações indicam que o rótulo só é confiável no período SFTP, e que a troca de fonte é uma mudança de distribuição conhecida (Seção~\ref{sec:riscos}) que a preparação dos dados precisa tratar explicitamente.
 
-Em paralelo, está sendo recuperada a série anterior ao painel atual, a partir
-do \textit{dump} de um banco de dados legado com relatórios mensais da Caixa e
-do Banco do Brasil desde 2009. Ela contém situação e percentual de execução
-de obra por empreendimento e pode ampliar o período em que há rótulo
-(Seção~\ref{sec:historico}).
+Em paralelo, está sendo recuperada a série anterior ao painel atual, a partir do \textit{dump} de um banco de dados legado com relatórios mensais da Caixa e do Banco do Brasil desde 2009. Ela contém situação e percentual de execução de obra por empreendimento e pode ampliar o período em que há rótulo (Seção~\ref{sec:historico}).
 
 \subsection{Referência de comparação}
 
-A regra vigente (\texttt{ouro\_reloginho\_indicadores\_gargalo\_desempenho})
-sinaliza uma obra quando ela passa 90 dias sem atualização, apresenta
-diferença superior a 10 pontos percentuais entre execução física e financeira
-ou tem menos de 30\% de execução. O modelo só se justifica se, com o mesmo
-número de visitas, antecipar mais paralisações ou antecipá-las mais cedo.
+A regra vigente (\texttt{ouro\_reloginho\_indicadores\_gargalo\_desempenho}) sinaliza uma obra quando ela passa 90 dias sem atualização, apresenta diferença superior a 10 pontos percentuais entre execução física e financeira ou tem menos de 30\% de execução. O modelo só se justifica se, com o mesmo número de visitas, antecipar mais paralisações ou antecipá-las mais cedo.
 
 \subsection{Métrica e modelagem}
 
-A métrica principal é o \textit{recall@k}, em que $k$ é a capacidade mensal de
-fiscalização. Como métricas secundárias, usam-se \textit{precision@k} e a área
-sob a curva precisão-revocação, mais informativa que a curva ROC em classes
-desbalanceadas \cite{saito2015}. A divisão entre treino, validação e teste é
-temporal.
+A métrica principal é o \textit{recall@k}, em que $k$ é a capacidade mensal de fiscalização. Como métricas secundárias, usam-se \textit{precision@k} e a área sob a curva precisão-revocação, mais informativa que a curva ROC em classes desbalanceadas \cite{saito2015}. A divisão entre treino, validação e teste é temporal.
 
-Como primeira família de modelos, propõe-se \textit{gradient boosting} com
-LightGBM \cite{ke2017}, com explicações individuais por valores SHAP
-\cite{lundberg2017}, para que a fiscalização saiba por que uma obra foi
-priorizada. Uma formulação alternativa por análise de sobrevivência
-\cite{wang2019survival} será considerada se a EDA mostrar que o tempo até a
-paralisação é mais informativo que o evento binário. O modelo será documentado
-em um \textit{model card} \cite{mitchell2019}.
+Como primeira família de modelos, propõe-se \textit{gradient boosting} com LightGBM \cite{ke2017}, com explicações individuais por valores SHAP \cite{lundberg2017}, para que a fiscalização saiba por que uma obra foi priorizada. Uma formulação alternativa por análise de sobrevivência \cite{wang2019survival} será considerada se a EDA mostrar que o tempo até a paralisação é mais informativo que o evento binário. O modelo será documentado em um \textit{model card} \cite{mitchell2019}.
 
 \subsection{Materialização da arquitetura}
 \label{sec:ferramentas-caso}
 
-A Tabela~\ref{tab:ferramentas-caso} mostra a ferramenta que cumpre cada papel
-da arquitetura no Gov Hub Cidades e onde ela fica no repositório. A maior
-parte das ferramentas já fazia parte da plataforma. As novas são o MLflow, o
-DVC, o Pandera e as bibliotecas de modelagem.
+A Tabela~\ref{tab:ferramentas-caso} mostra a ferramenta que cumpre cada papel da arquitetura no Gov Hub Cidades e onde ela fica no repositório. A maior parte das ferramentas já fazia parte da plataforma. As novas são o MLflow, o DVC, o Pandera e as bibliotecas de modelagem.
 
 \begin{table}[htb]
 	\centering
@@ -538,28 +356,17 @@ DVC, o Pandera e as bibliotecas de modelagem.
 	\fonte{Elaborado pelos autores.}
 \end{table}
 
-Na plataforma (Figura~\ref{fig:govhub}), a zona de pouso são os prefixos
-\texttt{raw/} e \texttt{staging/} do armazenamento de objetos, e as
-camadas bronze, prata e ouro são tabelas materializadas pelo dbt no
-PostgreSQL, que lê o Parquet da \texttt{staging/} pela extensão pg\_duckdb.
-Os escores do modelo seguem o mesmo caminho, a partir de um prefixo próprio
-do armazenamento de objetos (\texttt{ml/escores/}).
+Na plataforma (Figura~\ref{fig:govhub}), a zona de pouso são os prefixos \texttt{raw/} e \texttt{staging/} do armazenamento de objetos, e as camadas bronze, prata e ouro são tabelas materializadas pelo dbt no PostgreSQL, que lê o Parquet da \texttt{staging/} pela extensão pg\_duckdb. Os escores do modelo seguem o mesmo caminho, a partir de um prefixo próprio do armazenamento de objetos (\texttt{ml/escores/}).
 
 \subsection{Decisões em aberto}
 
-As seguintes decisões dependem de alinhamento com o MCID e precisam ser
-tomadas antes da fase de preparação dos dados:
+As seguintes decisões dependem de alinhamento com o MCID e precisam ser tomadas antes da fase de preparação dos dados:
 
 \begin{itemize}
-	\item \textbf{Horizonte $h$}: com quantos meses de antecedência a
-	fiscalização consegue agir. Proposta: seis meses, com análise de
-	sensibilidade para três e doze;
+	\item \textbf{Horizonte $h$}: com quantos meses de antecedência a fiscalização consegue agir. Proposta: seis meses, com análise de sensibilidade para três e doze;
 	\item \textbf{Capacidade $k$}: quantas obras a fiscalização visita por mês;
-	\item \textbf{Retomada}: se uma obra que retoma e paralisa de novo conta
-	como um segundo evento;
-	\item \textbf{Usuário do alerta}: área técnica do MCID, agente financeiro
-	ou ambos, o que define o que o escore precisa explicar.
+	\item \textbf{Retomada}: se uma obra que retoma e paralisa de novo conta como um segundo evento;
+	\item \textbf{Usuário do alerta}: área técnica do MCID, agente financeiro ou ambos, o que define o que o escore precisa explicar.
 \end{itemize}
 
-\pendente{Registrar aqui as decisões tomadas sobre $h$, $k$, retomada e
-usuário do alerta, com data e responsável.}
+\pendente{Registrar aqui as decisões tomadas sobre $h$, $k$, retomada e usuário do alerta, com data e responsável.}

@@ -1,125 +1,68 @@
 \chapter[Resultados Preliminares]{Resultados Preliminares}
 \label{cap:resultados}
 
-Este capítulo relata o que foi produzido até o fim do TCC1, organizado pelas
-atividades da DSR (Tabela~\ref{tab:dsr}).
+Este capítulo relata o que foi produzido até o fim do TCC1, organizado pelas atividades da DSR (Tabela~\ref{tab:dsr}).
 
 \section{Identificação do problema}
 
 O diagnóstico da plataforma Gov Hub Cidades mostrou que:
 
 \begin{itemize}
-	\item o repositório não continha nenhum componente de ML: não havia
-	código de treino, registro de experimentos, datasets versionados nem
-	monitoramento de modelos;
-	\item a identificação de obras em risco dependia de uma regra de limiares
-	fixos que nunca havia sido confrontada com as paralisações observadas;
-	\item os dados necessários para um modelo preditivo já existiam nas
-	camadas prata, com histórico mensal de dezembro de 2019 a julho de 2026.
+	\item o repositório não continha nenhum componente de ML: não havia código de treino, registro de experimentos, datasets versionados nem monitoramento de modelos;
+	\item a identificação de obras em risco dependia de uma regra de limiares fixos que nunca havia sido confrontada com as paralisações observadas;
+	\item os dados necessários para um modelo preditivo já existiam nas camadas prata, com histórico mensal de dezembro de 2019 a julho de 2026.
 \end{itemize}
 
 \section{Definição dos objetivos da solução}
 
-Os requisitos R1--R9 (Tabela~\ref{tab:requisitos}) foram definidos a partir
-da literatura e das regras de engenharia da plataforma. A decisão de estender
-a plataforma existente, em vez de construir uma plataforma de ML separada, foi
-registrada no ADR 0001 do repositório do projeto, com status ``proposto'', em
-27 de outubro de 2026.
+Os requisitos R1--R9 (Tabela~\ref{tab:requisitos}) foram definidos a partir da literatura e das regras de engenharia da plataforma. A decisão de estender a plataforma existente, em vez de construir uma plataforma de ML separada, foi registrada no ADR 0001 do repositório do projeto, com status ``proposto'', em 27 de outubro de 2026.
 
-\pendente{Atualizar o status do ADR 0001 (proposto/aceito) e citar o ADR
-0002, sobre o MLflow, quando for escrito.}
+\pendente{Atualizar o status do ADR 0001 (proposto/aceito) e citar o ADR 0002, sobre o MLflow, quando for escrito.}
 
 \section{Projeto e desenvolvimento}
 
 Até esta etapa foram produzidos:
 
 \begin{enumerate}
-	\item a estrutura de pastas do ML no repositório (\texttt{ml/} e
-	\texttt{ml/prevencao\_paralisacao/}), com a documentação do ciclo de vida;
-	\item a especificação do problema (fase 1 do CRISP-DM), com pergunta,
-	unidade de análise, escopo, referência de comparação e decisões em aberto
-	(Seção~\ref{sec:caso});
-	\item o levantamento inicial dos dados, cujos achados principais (cobertura,
-	trocas de fonte, volume de transições) estão na Seção~\ref{sec:caso};
-	\item o fluxo de recuperação da série histórica anterior ao painel atual,
-	descrito na Seção~\ref{sec:historico}.
+	\item a estrutura de pastas do ML no repositório (\texttt{ml/} e \texttt{ml/prevencao\_paralisacao/}), com a documentação do ciclo de vida;
+	\item a especificação do problema (fase 1 do CRISP-DM), com pergunta, unidade de análise, escopo, referência de comparação e decisões em aberto (Seção~\ref{sec:caso});
+	\item o levantamento inicial dos dados, cujos achados principais (cobertura, trocas de fonte, volume de transições) estão na Seção~\ref{sec:caso};
+	\item o fluxo de recuperação da série histórica anterior ao painel atual, descrito na Seção~\ref{sec:historico}.
 \end{enumerate}
 
 \section{Análise exploratória dos dados}
 
-A análise exploratória (fase 2 do CRISP-DM) lê as tabelas prata como o
-pipeline as monta hoje, sem criar novas tabelas. Ela segue sete perguntas, na
-ordem:
+A análise exploratória (fase 2 do CRISP-DM) lê as tabelas prata como o pipeline as monta hoje, sem criar novas tabelas. Ela segue sete perguntas, na ordem:
 
 \begin{enumerate}
-	\item Qual a cobertura e o grão por modalidade e por fonte, e onde há
-	lacunas na série mensal?
-	\item Quais transições de situação são artefatos da troca de fonte em 2024,
-	e como tratá-las?
-	\item Como mapear os códigos de situação da planilha mensal e do FGTS para a
-	situação canônica?
-	\item Qual a taxa de paralisação por modalidade, UF, agente financeiro e
-	construtora?
-	\item Qual o tempo até a paralisação e até a retomada (análise de
-	sobrevivência)?
-	\item Quais sinais antecedem a paralisação: ritmo da execução física,
-	diferença físico-financeira, tempo sem liberação de recursos, tempo sem
-	vistoria?
-	\item A série histórica anterior a 2019 (Seção~\ref{sec:historico}) tem
-	situação e percentual de obra comparáveis aos do painel atual, e liga-se
-	ao identificador atual da obra a ponto de ampliar o período rotulado?
+	\item Qual a cobertura e o grão por modalidade e por fonte, e onde há lacunas na série mensal?
+	\item Quais transições de situação são artefatos da troca de fonte em 2024, e como tratá-las?
+	\item Como mapear os códigos de situação da planilha mensal e do FGTS para a situação canônica?
+	\item Qual a taxa de paralisação por modalidade, UF, agente financeiro e construtora?
+	\item Qual o tempo até a paralisação e até a retomada (análise de sobrevivência)?
+	\item Quais sinais antecedem a paralisação: ritmo da execução física, diferença físico-financeira, tempo sem liberação de recursos, tempo sem vistoria?
+	\item A série histórica anterior a 2019 (Seção~\ref{sec:historico}) tem situação e percentual de obra comparáveis aos do painel atual, e liga-se ao identificador atual da obra a ponto de ampliar o período rotulado?
 \end{enumerate}
 
-\pendente{Inserir os resultados da EDA à medida que os notebooks forem
-concluídos. Sugestão de figuras: (a) número de obras por mês e por fonte, com
-as trocas de fonte marcadas; (b) taxa mensal de transição
-\texttt{em\_obras}$\rightarrow$\texttt{paralisada} por fonte; (c) curva de
-Kaplan--Meier do tempo até a paralisação por modalidade; (d) distribuição da
-diferença físico-financeira em obras que paralisaram e que não paralisaram.}
+\pendente{Inserir os resultados da EDA à medida que os notebooks forem concluídos. Sugestão de figuras: (a) número de obras por mês e por fonte, com as trocas de fonte marcadas; (b) taxa mensal de transição \texttt{em\_obras}$\rightarrow$\texttt{paralisada} por fonte; (c) curva de Kaplan--Meier do tempo até a paralisação por modalidade; (d) distribuição da diferença físico-financeira em obras que paralisaram e que não paralisaram.}
 
-\pendente{Calcular o desempenho da regra de gargalo vigente
-(\textit{recall@k} e \textit{precision@k}) no período SFTP. Este é o primeiro
-número que o modelo terá de superar e já pode ser obtido sem nenhum modelo.}
+\pendente{Calcular o desempenho da regra de gargalo vigente (\textit{recall@k} e \textit{precision@k}) no período SFTP. Este é o primeiro número que o modelo terá de superar e já pode ser obtido sem nenhum modelo.}
 
 \subsection{Recuperação da série histórica}
 \label{sec:historico}
 
-Em paralelo às perguntas sobre o painel atual, está em andamento a
-recuperação da série anterior a ele. A fonte é o \textit{dump} congelado de um
-banco de dados legado, exportado como 754 arquivos CSV com relatórios mensais
-da Caixa, do Banco do Brasil e da SNH. Os arquivos cobrem 115 competências
-entre outubro de 2009 e março de 2026, com uma lacuna principal de maio de
-2019 a maio de 2024. A maior parte dessa lacuna é coberta pela fonte atual do
-SFTP (dezembro de 2019 a novembro de 2024), mas os meses de maio a novembro de
-2019 não estão em nenhuma das duas.
+Em paralelo às perguntas sobre o painel atual, está em andamento a recuperação da série anterior a ele. A fonte é o \textit{dump} congelado de um banco de dados legado, exportado como 754 arquivos CSV com relatórios mensais da Caixa, do Banco do Brasil e da SNH. Os arquivos cobrem 115 competências entre outubro de 2009 e março de 2026, com uma lacuna principal de maio de 2019 a maio de 2024. A maior parte dessa lacuna é coberta pela fonte atual do SFTP (dezembro de 2019 a novembro de 2024), mas os meses de maio a novembro de 2019 não estão em nenhuma das duas.
 
-Um \textit{dump} legado traz problemas que uma fonte viva não tem: a mesma
-tabela exportada duas vezes, cabeçalhos fora do lugar, linhas de título e de
-total no meio dos dados, colunas que mudam de nome ao longo dos anos e cópias
-do mesmo arquivo com nomes diferentes. Por isso, o tratamento foi organizado em
-etapas, todas dentro da zona de pouso e antes da camada bronze:
+Um \textit{dump} legado traz problemas que uma fonte viva não tem: a mesma tabela exportada duas vezes, cabeçalhos fora do lugar, linhas de título e de total no meio dos dados, colunas que mudam de nome ao longo dos anos e cópias do mesmo arquivo com nomes diferentes. Por isso, o tratamento foi organizado em etapas, todas dentro da zona de pouso e antes da camada bronze:
 
 \begin{enumerate}
 	\item \textbf{raw}: os arquivos como foram exportados, imutáveis;
-	\item \textbf{staging}: cada CSV convertido para Parquet, sem alterar o
-	conteúdo, exceto pelos dados pessoais, que são mascarados nesta etapa. A
-	conversão é idempotente: um arquivo só é reconvertido se mudar na raw;
-	\item \textbf{analytics}: apenas os arquivos com conteúdo próprio. Saem os
-	vazios, as cópias exatas e um modelo de planilha de 2009 que a exportação
-	gravou no lugar de 273 tabelas;
-	\item \textbf{cleansed}: tratamento estrutural de cada arquivo. Desfaz a
-	duplicação da exportação, corrige o cabeçalho, separa as linhas que não são
-	dado, confere que nenhuma linha foi perdida e atribui a cada arquivo a
-	competência e a data de corte.
+	\item \textbf{staging}: cada CSV convertido para Parquet, sem alterar o conteúdo, exceto pelos dados pessoais, que são mascarados nesta etapa. A conversão é idempotente: um arquivo só é reconvertido se mudar na raw;
+	\item \textbf{analytics}: apenas os arquivos com conteúdo próprio. Saem os vazios, as cópias exatas e um modelo de planilha de 2009 que a exportação gravou no lugar de 273 tabelas;
+	\item \textbf{cleansed}: tratamento estrutural de cada arquivo. Desfaz a duplicação da exportação, corrige o cabeçalho, separa as linhas que não são dado, confere que nenhuma linha foi perdida e atribui a cada arquivo a competência e a data de corte.
 \end{enumerate}
 
-As etapas \textbf{analytics} e \textbf{cleansed} tratam o arquivo, e não
-o negócio: nenhuma regra sobre obras ou situações é aplicada nelas. Por isso,
-não são camadas medalhão novas, e a regra de não criar camadas para acomodar
-complexidade (Seção~\ref{sec:requisitos}) é preservada. A camada bronze lerá o
-resultado do \textbf{cleansed}, com uma tabela por família de relatório, e as
-camadas seguintes seguem a arquitetura do Capítulo~\ref{cap:proposta}. A
-Tabela~\ref{tab:historico} resume o estado em 15 de novembro de 2026.
+As etapas \textbf{analytics} e \textbf{cleansed} tratam o arquivo, e não o negócio: nenhuma regra sobre obras ou situações é aplicada nelas. Por isso, não são camadas medalhão novas, e a regra de não criar camadas para acomodar complexidade (Seção~\ref{sec:requisitos}) é preservada. A camada bronze lerá o resultado do \textbf{cleansed}, com uma tabela por família de relatório, e as camadas seguintes seguem a arquitetura do Capítulo~\ref{cap:proposta}. A Tabela~\ref{tab:historico} resume o estado em 15 de novembro de 2026.
 
 \begin{table}[htb]
 	\centering
@@ -149,80 +92,29 @@ Tabela~\ref{tab:historico} resume o estado em 15 de novembro de 2026.
 	\fonte{Elaborado pelos autores, a partir dos registros do pipeline.}
 \end{table}
 
-Cada etapa segue uma prática estabelecida na literatura. A raw imutável, o
-registro de cada descarte e a coluna de origem em cada linha garantem a
-proveniência: para qualquer valor do \textbf{cleansed}, é possível dizer de que
-arquivo e de que linha ele veio \cite{buneman2001}. A conferência de que
-nenhuma linha se perdeu e o registro do motivo de cada descarte tornam
-auditável a completude, uma das dimensões de qualidade de dados de
-\citeonline{wang1996}.
+Cada etapa segue uma prática estabelecida na literatura. A raw imutável, o registro de cada descarte e a coluna de origem em cada linha garantem a proveniência: para qualquer valor do \textbf{cleansed}, é possível dizer de que arquivo e de que linha ele veio \cite{buneman2001}. A conferência de que nenhuma linha se perdeu e o registro do motivo de cada descarte tornam auditável a completude, uma das dimensões de qualidade de dados de \citeonline{wang1996}.
 
-O problema mais trabalhoso é o dos nomes de coluna. O mesmo dado muda de nome
-entre layouts: o código do empreendimento na Caixa aparece como
-\texttt{codapf}, \texttt{cod\_apf}, \texttt{icodigo\_apf}, \texttt{nu\_apf} e
-\texttt{apf} em 12 famílias. Isso é uma forma de correspondência de esquemas
-(\textit{schema matching}) ao longo do tempo. A proposta de nome canônico
-combina os dois tipos de evidência da taxonomia de
-\citeonline{rahm2001}: a semelhança entre os nomes, no nível do esquema, e a
-presença dos mesmos valores dos dois lados de uma troca de layout, no nível das
-instâncias. Cada correspondência proposta passa por revisão humana antes de ser
-usada, porque uma troca de nome mal resolvida pode juntar dados diferentes sem
-que nenhum teste perceba. A mudança de esquema ao longo do tempo é um problema
-conhecido em bancos de dados \cite{curino2008}. Aqui, porém, ela precisa ser
-reconstruída a partir dos dados, pois não há registro das migrações.
+O problema mais trabalhoso é o dos nomes de coluna. O mesmo dado muda de nome entre layouts: o código do empreendimento na Caixa aparece como \texttt{codapf}, \texttt{cod\_apf}, \texttt{icodigo\_apf}, \texttt{nu\_apf} e \texttt{apf} em 12 famílias. Isso é uma forma de correspondência de esquemas (\textit{schema matching}) ao longo do tempo. A proposta de nome canônico combina os dois tipos de evidência da taxonomia de \citeonline{rahm2001}: a semelhança entre os nomes, no nível do esquema, e a presença dos mesmos valores dos dois lados de uma troca de layout, no nível das instâncias. Cada correspondência proposta passa por revisão humana antes de ser usada, porque uma troca de nome mal resolvida pode juntar dados diferentes sem que nenhum teste perceba. A mudança de esquema ao longo do tempo é um problema conhecido em bancos de dados \cite{curino2008}. Aqui, porém, ela precisa ser reconstruída a partir dos dados, pois não há registro das migrações.
 
-Para o caso estudado, o achado mais relevante até aqui é que a série histórica
-tem rótulo. O relatório executivo da Caixa traz a situação da obra de julho de
-2015 a agosto de 2018, com 6.942 linhas marcadas como paralisada, além do
-percentual de obra executada desde 2012. O código APF desse relatório aparece
-em 98\% dos casos na fonte atual da SNH, o que permite ligar o histórico à obra
-de hoje. No Banco do Brasil, a situação da obra aparece de março de 2018 a
-abril de 2019, mas a ponte entre o código antigo e o atual cobre apenas cerca
-de 200 empreendimentos do FAR.
+Para o caso estudado, o achado mais relevante até aqui é que a série histórica tem rótulo. O relatório executivo da Caixa traz a situação da obra de julho de 2015 a agosto de 2018, com 6.942 linhas marcadas como paralisada, além do percentual de obra executada desde 2012. O código APF desse relatório aparece em 98\% dos casos na fonte atual da SNH, o que permite ligar o histórico à obra de hoje. No Banco do Brasil, a situação da obra aparece de março de 2018 a abril de 2019, mas a ponte entre o código antigo e o atual cobre apenas cerca de 200 empreendimentos do FAR.
 
-Se esses dados se confirmarem, o período com rótulo confiável deixa de se
-restringir ao SFTP, o que dá mais eventos para treino e permite uma validação
-temporal com mais cortes. Antes disso, três cuidados são necessários:
+Se esses dados se confirmarem, o período com rótulo confiável deixa de se restringir ao SFTP, o que dá mais eventos para treino e permite uma validação temporal com mais cortes. Antes disso, três cuidados são necessários:
 
 \begin{itemize}
-	\item o grão não é único: 403 códigos APF têm mais de uma linha na mesma
-	competência do relatório executivo;
-	\item a escala do percentual muda entre relatórios e, em um deles, dentro da
-	mesma coluna (de 0 a 1 e de 0 a 100);
-	\item trocas de layout produzem quedas artificiais: na entrada do Banco do
-	Brasil de junho de 2013, o percentual de obra foi zerado pela mudança de
-	formato, e não por regressão da obra.
+	\item o grão não é único: 403 códigos APF têm mais de uma linha na mesma competência do relatório executivo;
+	\item a escala do percentual muda entre relatórios e, em um deles, dentro da mesma coluna (de 0 a 1 e de 0 a 100);
+	\item trocas de layout produzem quedas artificiais: na entrada do Banco do Brasil de junho de 2013, o percentual de obra foi zerado pela mudança de formato, e não por regressão da obra.
 \end{itemize}
 
-Os três são exemplos dos problemas de dados que \citeonline{sambasivan2021}
-descrevem como cascatas: invisíveis na origem e caros quando chegam ao
-modelo. Por isso, a decisão de usar a série histórica no rótulo fica para a
-EDA, depois da revisão do de-para de colunas.
+Os três são exemplos dos problemas de dados que \citeonline{sambasivan2021} descrevem como cascatas: invisíveis na origem e caros quando chegam ao modelo. Por isso, a decisão de usar a série histórica no rótulo fica para a EDA, depois da revisão do de-para de colunas.
 
-\pendente{Validar com a revisão humana o de-para de colunas e a semântica de
-\texttt{situacao\_de\_obra} no relatório executivo da Caixa, e decidir o
-prefixo definitivo do \textbf{cleansed} fora da área de testes.}
+\pendente{Validar com a revisão humana o de-para de colunas e a semântica de \texttt{situacao\_de\_obra} no relatório executivo da Caixa, e decidir o prefixo definitivo do \textbf{cleansed} fora da área de testes.}
 
 \section{Ameaças à validade}
 
 \begin{itemize}
-	\item \textbf{Validade de construto}: o rótulo ``paralisada'' depende da
-	fonte, e as trocas de fonte produzem transições que podem não corresponder a
-	paralisações reais. A mitigação é restringir o rótulo ao período SFTP e
-	tratar a troca de fonte na preparação dos dados. A série histórica
-	acrescenta outro risco do mesmo tipo: colunas que mudam de nome e de escala
-	entre layouts, que serão tratadas pelo de-para revisado
-	(Seção~\ref{sec:historico});
-	\item \textbf{Validade interna}: features calculadas com informação futura
-	inflariam artificialmente o desempenho. A mitigação é o teste automatizado
-	de vazamento (AV4) e a divisão temporal;
-	\item \textbf{Validade externa}: a arquitetura é demonstrada em uma única
-	plataforma e em um único caso. A generalização para outros órgãos do Gov Hub
-	será discutida a partir do requisito R8 (adição de um segundo modelo sem
-	alterar o primeiro) e da análise de aderência dos papéis a uma aplicação
-	com modelo de linguagem (AV7), mas não será demonstrada empiricamente;
-	\item \textbf{Viés do pesquisador}: os autores participam do desenvolvimento da
-	plataforma, o que é inerente à DSR. A mitigação é registrar as decisões em
-	ADRs e basear a avaliação em critérios externos (P1--P9 e o \textit{ML Test
-	Score}).
+	\item \textbf{Validade de construto}: o rótulo ``paralisada'' depende da fonte, e as trocas de fonte produzem transições que podem não corresponder a paralisações reais. A mitigação é restringir o rótulo ao período SFTP e tratar a troca de fonte na preparação dos dados. A série histórica acrescenta outro risco do mesmo tipo: colunas que mudam de nome e de escala entre layouts, que serão tratadas pelo de-para revisado (Seção~\ref{sec:historico});
+	\item \textbf{Validade interna}: features calculadas com informação futura inflariam artificialmente o desempenho. A mitigação é o teste automatizado de vazamento (AV4) e a divisão temporal;
+	\item \textbf{Validade externa}: a arquitetura é demonstrada em uma única plataforma e em um único caso. A generalização para outros órgãos do Gov Hub será discutida a partir do requisito R8 (adição de um segundo modelo sem alterar o primeiro) e da análise de aderência dos papéis a uma aplicação com modelo de linguagem (AV7), mas não será demonstrada empiricamente;
+	\item \textbf{Viés do pesquisador}: os autores participam do desenvolvimento da plataforma, o que é inerente à DSR. A mitigação é registrar as decisões em ADRs e basear a avaliação em critérios externos (P1--P9 e o \textit{ML Test Score}).
 \end{itemize}

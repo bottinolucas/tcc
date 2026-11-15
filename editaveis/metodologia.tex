@@ -1,50 +1,21 @@
 \chapter[Metodologia]{Metodologia}
 \label{cap:metodologia}
 
-Este capítulo descreve como a pesquisa é conduzida. A
-Seção~\ref{sec:classificacao} classifica a pesquisa. A
-Seção~\ref{sec:dsr} apresenta a \textit{Design Science Research} e o
-mapeamento de suas atividades para este trabalho. A
-Seção~\ref{sec:contexto} descreve o contexto em que o artefato é
-desenvolvido, e a Seção~\ref{sec:gestao}, como o trabalho é planejado e
-acompanhado. A Seção~\ref{sec:avaliacao} define os critérios e
-procedimentos de avaliação, e a Seção~\ref{sec:ferramentas} lista as
-ferramentas utilizadas.
+Este capítulo descreve como a pesquisa é conduzida. A Seção~\ref{sec:classificacao} classifica a pesquisa. A Seção~\ref{sec:dsr} apresenta a \textit{Design Science Research} e o mapeamento de suas atividades para este trabalho. A Seção~\ref{sec:contexto} descreve o contexto em que o artefato é desenvolvido, e a Seção~\ref{sec:gestao}, como o trabalho é planejado e acompanhado. A Seção~\ref{sec:avaliacao} define os critérios e procedimentos de avaliação, e a Seção~\ref{sec:ferramentas} lista as ferramentas utilizadas.
 
 \section{Classificação da pesquisa}
 \label{sec:classificacao}
 
-Quanto à natureza, a pesquisa é \textbf{aplicada}: busca resolver um problema
-concreto de uma plataforma de dados governamentais em operação. Quanto à
-abordagem, é \textbf{mista}: combina medidas quantitativas (métricas do
-modelo, reprodutibilidade de execuções) com análise qualitativa da aderência
-da arquitetura a princípios da literatura. Quanto aos procedimentos, segue a
-\textbf{Design Science Research}, apoiada em pesquisa bibliográfica e em
-pesquisa documental sobre o sistema existente.
+Quanto à natureza, a pesquisa é \textbf{aplicada}: busca resolver um problema concreto de uma plataforma de dados governamentais em operação. Quanto à abordagem, é \textbf{mista}: combina medidas quantitativas (métricas do modelo, reprodutibilidade de execuções) com análise qualitativa da aderência da arquitetura a princípios da literatura. Quanto aos procedimentos, segue a \textbf{Design Science Research}, apoiada em pesquisa bibliográfica e em pesquisa documental sobre o sistema existente.
 
 \section{Design Science Research}
 \label{sec:dsr}
 
-A DSR é um paradigma de pesquisa em que o conhecimento é produzido pela
-construção e avaliação de artefatos que resolvem problemas relevantes
-\cite{hevner2004}. Artefatos podem ser construtos, modelos, métodos ou
-instanciações. Neste trabalho, o artefato principal é um \textbf{modelo} (a
-arquitetura de MLOps), acompanhado de uma \textbf{instanciação} (sua
-implementação no caso de prevenção de paralisação de obras).
+A DSR é um paradigma de pesquisa em que o conhecimento é produzido pela construção e avaliação de artefatos que resolvem problemas relevantes \cite{hevner2004}. Artefatos podem ser construtos, modelos, métodos ou instanciações. Neste trabalho, o artefato principal é um \textbf{modelo} (a arquitetura de MLOps), acompanhado de uma \textbf{instanciação} (sua implementação no caso de prevenção de paralisação de obras).
 
-\citeonline{hevner2007} descreve a DSR em três ciclos. O \textbf{ciclo de
-relevância} conecta o artefato ao ambiente, de onde vêm requisitos e para onde
-voltam os resultados. O \textbf{ciclo de rigor} conecta o artefato à base de
-conhecimento: teorias, métodos e trabalhos anteriores. O \textbf{ciclo de
-design} itera entre a construção e a avaliação do artefato. Aqui, o ambiente
-é o Gov Hub Cidades e o MCID, a base de conhecimento é a literatura do
-Capítulo~\ref{cap:referencial} e o ciclo de design corresponde às iterações
-de desenvolvimento da arquitetura.
+\citeonline{hevner2007} descreve a DSR em três ciclos. O \textbf{ciclo de relevância} conecta o artefato ao ambiente, de onde vêm requisitos e para onde voltam os resultados. O \textbf{ciclo de rigor} conecta o artefato à base de conhecimento: teorias, métodos e trabalhos anteriores. O \textbf{ciclo de design} itera entre a construção e a avaliação do artefato. Aqui, o ambiente é o Gov Hub Cidades e o MCID, a base de conhecimento é a literatura do Capítulo~\ref{cap:referencial} e o ciclo de design corresponde às iterações de desenvolvimento da arquitetura.
 
-Para operacionalizar o processo, adota-se a metodologia de
-\citeonline{peffers2007}, que organiza a DSR em seis atividades. A
-Tabela~\ref{tab:dsr} mostra como cada atividade se realiza neste trabalho e em
-qual etapa (TCC1 ou TCC2) ela ocorre.
+Para operacionalizar o processo, adota-se a metodologia de \citeonline{peffers2007}, que organiza a DSR em seis atividades. A Tabela~\ref{tab:dsr} mostra como cada atividade se realiza neste trabalho e em qual etapa (TCC1 ou TCC2) ela ocorre.
 
 \begin{table}[htb]
 	\centering
@@ -79,37 +50,20 @@ qual etapa (TCC1 ou TCC2) ela ocorre.
 	\fonte{Elaborado pelos autores.}
 \end{table}
 
-O ponto de entrada da pesquisa é centrado no problema
-\cite{peffers2007}: parte-se de uma necessidade observada no ambiente (antecipar
-paralisações) e de uma lacuna de engenharia (ausência de um ciclo de vida de
-ML integrado à plataforma).
+O ponto de entrada da pesquisa é centrado no problema \cite{peffers2007}: parte-se de uma necessidade observada no ambiente (antecipar paralisações) e de uma lacuna de engenharia (ausência de um ciclo de vida de ML integrado à plataforma).
 
 \section{Contexto da pesquisa}
 \label{sec:contexto}
 
-O trabalho é desenvolvido no LabLivre da Universidade de Brasília,
-no âmbito do projeto Gov Hub, que constrói plataformas de dados para órgãos do
-governo federal. O ambiente de demonstração é a plataforma de dados do
-Ministério das Cidades, organizada como um \textit{Data Lakehouse} em camadas
-medalhão (Figura~\ref{fig:govhub}), que contém:
+O trabalho é desenvolvido no LabLivre da Universidade de Brasília, no âmbito do projeto Gov Hub, que constrói plataformas de dados para órgãos do governo federal. O ambiente de demonstração é a plataforma de dados do Ministério das Cidades, organizada como um \textit{Data Lakehouse} em camadas medalhão (Figura~\ref{fig:govhub}), que contém:
 
 \begin{itemize}
-	\item fluxos orquestrados de ingestão de fontes como o SFTP da Caixa, as
-	planilhas do Novo MCMV, o histórico da Secretaria Nacional de Habitação
-	(SNH) e APIs públicas, como as do IBGE e do Banco Central;
-	\item uma zona de pouso em armazenamento de objetos, dividida em
-	\texttt{raw/}, com os arquivos no formato original da fonte, e
-	\texttt{staging/}, com os mesmos dados convertidos para Parquet;
-	\item o mascaramento de dados pessoais ainda em \texttt{raw/}: CPF e NIS
-	são pseudonimizados por HMAC, e nome e data de nascimento são suprimidos,
-	em atenção à LGPD \cite{brasil2018lgpd};
-	\item camadas bronze, prata e ouro materializadas no \textit{data warehouse}
-	por transformações declarativas versionadas, organizadas por domínio, que
-	leem o Parquet da \texttt{staging/};
-	\item painéis analíticos, que consomem apenas a camada ouro, e um catálogo
-	de dados com linhagem;
-	\item três ambientes de execução: desenvolvimento local, homologação e
-	produção.
+	\item fluxos orquestrados de ingestão de fontes como o SFTP da Caixa, as planilhas do Novo MCMV, o histórico da Secretaria Nacional de Habitação (SNH) e APIs públicas, como as do IBGE e do Banco Central;
+	\item uma zona de pouso em armazenamento de objetos, dividida em \texttt{raw/}, com os arquivos no formato original da fonte, e \texttt{staging/}, com os mesmos dados convertidos para Parquet;
+	\item o mascaramento de dados pessoais ainda em \texttt{raw/}: CPF e NIS são pseudonimizados por HMAC, e nome e data de nascimento são suprimidos, em atenção à LGPD \cite{brasil2018lgpd};
+	\item camadas bronze, prata e ouro materializadas no \textit{data warehouse} por transformações declarativas versionadas, organizadas por domínio, que leem o Parquet da \texttt{staging/};
+	\item painéis analíticos, que consomem apenas a camada ouro, e um catálogo de dados com linhagem;
+	\item três ambientes de execução: desenvolvimento local, homologação e produção.
 \end{itemize}
 
 \begin{figure}[htb]
@@ -185,48 +139,22 @@ medalhão (Figura~\ref{fig:govhub}), que contém:
 	\fonte{Elaborado pelos autores, a partir do repositório da plataforma.}
 \end{figure}
 
-As ferramentas que compõem essa plataforma, e as que foram adicionadas para o
-ML, estão na Tabela~\ref{tab:ferramentas-caso}.
+As ferramentas que compõem essa plataforma, e as que foram adicionadas para o ML, estão na Tabela~\ref{tab:ferramentas-caso}.
 
-\pendente{Descrever a equipe (papéis, número de pessoas) e o vínculo formal
-com o MCID; confirmar com os orientadores o nível de detalhe permitido sobre o
-convênio.}
+\pendente{Descrever a equipe (papéis, número de pessoas) e o vínculo formal com o MCID; confirmar com os orientadores o nível de detalhe permitido sobre o convênio.}
 
 \section{Planejamento e gestão do trabalho}
 \label{sec:gestao}
 
-O trabalho é organizado como um projeto de software de uma equipe de
-produto, com o \textit{framework} Scrum \cite{schwaber2020scrum} adaptado a um
-projeto de dados. O Scrum organiza o trabalho em ciclos de duração fixa
-(\textit{sprints}), cada um com uma meta, um planejamento no início, uma
-revisão do incremento entregue e uma retrospectiva sobre o processo, a partir
-de uma lista priorizada de itens de trabalho (\textit{backlog}). Neste
-trabalho, cada \textit{sprint} dura duas semanas.
+O trabalho é organizado como um projeto de software de uma equipe de produto, com o \textit{framework} Scrum \cite{schwaber2020scrum} adaptado a um projeto de dados. O Scrum organiza o trabalho em ciclos de duração fixa (\textit{sprints}), cada um com uma meta, um planejamento no início, uma revisão do incremento entregue e uma retrospectiva sobre o processo, a partir de uma lista priorizada de itens de trabalho (\textit{backlog}). Neste trabalho, cada \textit{sprint} dura duas semanas.
 
-\citeonline{saltz2017}, em experimento controlado com equipes de ciência de
-dados, observaram que a escolha da metodologia de gestão afeta os resultados
-dos projetos, e que abordagens ágeis precisam de ajustes quando o trabalho é
-exploratório. A principal dificuldade é que uma análise exploratória não tem um
-``pronto'' previsível como uma funcionalidade de software. Por isso, quatro
-adaptações são adotadas:
+\citeonline{saltz2017}, em experimento controlado com equipes de ciência de dados, observaram que a escolha da metodologia de gestão afeta os resultados dos projetos, e que abordagens ágeis precisam de ajustes quando o trabalho é exploratório. A principal dificuldade é que uma análise exploratória não tem um ``pronto'' previsível como uma funcionalidade de software. Por isso, quatro adaptações são adotadas:
 
 \begin{itemize}
-	\item \textbf{meta de \textit{sprint} como hipótese}: em \textit{sprints} de
-	exploração, a meta é responder a uma pergunta, e não entregar código. A
-	\textit{sprint} termina com uma decisão registrada, mesmo que ela seja
-	descartar um caminho;
-	\item \textbf{investigações com prazo fixo}: itens exploratórios, como a
-	análise de uma família de relatórios do histórico ou a sensibilidade ao
-	horizonte $h$, recebem um limite de tempo definido no planejamento;
-	\item \textbf{fases do CRISP-DM como épicos}: as fases do ciclo de vida
-	(Tabela~\ref{tab:ciclo}) organizam o \textit{backlog}, mas as
-	\textit{sprints} podem atravessá-las, sem execução em cascata. Isso segue a
-	leitura de \citeonline{martinezplumed2021}, para quem projetos de ciência de
-	dados percorrem as fases do CRISP-DM em trajetórias não lineares;
-	\item \textbf{duas trilhas no mesmo \textit{backlog}}: a trilha da
-	plataforma, com as atividades 3 a 5 da DSR (Tabela~\ref{tab:dsr}), e a
-	trilha da escrita, com os capítulos deste documento. Cada \textit{sprint}
-	entrega incremento nas duas.
+	\item \textbf{meta de \textit{sprint} como hipótese}: em \textit{sprints} de exploração, a meta é responder a uma pergunta, e não entregar código. A \textit{sprint} termina com uma decisão registrada, mesmo que ela seja descartar um caminho;
+	\item \textbf{investigações com prazo fixo}: itens exploratórios, como a análise de uma família de relatórios do histórico ou a sensibilidade ao horizonte $h$, recebem um limite de tempo definido no planejamento;
+	\item \textbf{fases do CRISP-DM como épicos}: as fases do ciclo de vida (Tabela~\ref{tab:ciclo}) organizam o \textit{backlog}, mas as \textit{sprints} podem atravessá-las, sem execução em cascata. Isso segue a leitura de \citeonline{martinezplumed2021}, para quem projetos de ciência de dados percorrem as fases do CRISP-DM em trajetórias não lineares;
+	\item \textbf{duas trilhas no mesmo \textit{backlog}}: a trilha da plataforma, com as atividades 3 a 5 da DSR (Tabela~\ref{tab:dsr}), e a trilha da escrita, com os capítulos deste documento. Cada \textit{sprint} entrega incremento nas duas.
 \end{itemize}
 
 A Tabela~\ref{tab:papeis-scrum} mostra como os papéis do Scrum se distribuem.
@@ -255,45 +183,25 @@ A Tabela~\ref{tab:papeis-scrum} mostra como os papéis do Scrum se distribuem.
 	\fonte{Elaborado pelos autores.}
 \end{table}
 
-\pendente{Confirmar com o MCID quem será o ponto focal no papel de dono do
-produto e a disponibilidade para as revisões quinzenais.}
+\pendente{Confirmar com o MCID quem será o ponto focal no papel de dono do produto e a disponibilidade para as revisões quinzenais.}
 
-O \textit{backlog} fica nas \textit{issues} e em um quadro de projeto do
-GitHub, no repositório deste documento, com campos para a \textit{sprint} e
-para o épico. Os itens da trilha da plataforma apontam para as
-\textit{issues} e os \textit{pull requests} do repositório da plataforma. O
-andamento é acompanhado por um gráfico de itens concluídos por épico
-(\textit{burnup}). A velocidade da equipe, medida comum no Scrum, tem pouco
-significado para uma equipe de duas pessoas.
+O \textit{backlog} fica nas \textit{issues} e em um quadro de projeto do GitHub, no repositório deste documento, com campos para a \textit{sprint} e para o épico. Os itens da trilha da plataforma apontam para as \textit{issues} e os \textit{pull requests} do repositório da plataforma. O andamento é acompanhado por um gráfico de itens concluídos por épico (\textit{burnup}). A velocidade da equipe, medida comum no Scrum, tem pouco significado para uma equipe de duas pessoas.
 
-Um item só é considerado pronto quando cumpre a definição de pronto da sua
-natureza:
+Um item só é considerado pronto quando cumpre a definição de pronto da sua natureza:
 
 \begin{itemize}
-	\item \textbf{código}: revisado pelo outro autor, com a integração contínua
-	aprovada e as transformações e testes executados com sucesso;
-	\item \textbf{modelo}: execução registrada no registro de experimentos, com
-	a versão do dataset e do código (R3, R4);
-	\item \textbf{texto}: o documento compila sem erros e sem pendências
-	daquele item;
-	\item \textbf{decisão}: registro no formato de ADR, no repositório
-	correspondente.
+	\item \textbf{código}: revisado pelo outro autor, com a integração contínua aprovada e as transformações e testes executados com sucesso;
+	\item \textbf{modelo}: execução registrada no registro de experimentos, com a versão do dataset e do código (R3, R4);
+	\item \textbf{texto}: o documento compila sem erros e sem pendências daquele item;
+	\item \textbf{decisão}: registro no formato de ADR, no repositório correspondente.
 \end{itemize}
 
-O trabalho do TCC1 até a data deste documento corresponde a uma
-\textit{sprint} inicial (\textit{Sprint} 0), de 27 de outubro a 15 de novembro
-de 2026: diagnóstico da plataforma, ADR da arquitetura, especificação do
-problema, levantamento inicial dos dados e primeira versão deste texto. Até a
-entrega do TCC1, em dezembro de 2026, restam duas \textit{sprints}. O
-cronograma do TCC2, também em \textit{sprints}, está no
-Capítulo~\ref{cap:consideracoes}.
+O trabalho do TCC1 até a data deste documento corresponde a uma \textit{sprint} inicial (\textit{Sprint} 0), de 27 de outubro a 15 de novembro de 2026: diagnóstico da plataforma, ADR da arquitetura, especificação do problema, levantamento inicial dos dados e primeira versão deste texto. Até a entrega do TCC1, em dezembro de 2026, restam duas \textit{sprints}. O cronograma do TCC2, também em \textit{sprints}, está no Capítulo~\ref{cap:consideracoes}.
 
 \section{Critérios e procedimentos de avaliação}
 \label{sec:avaliacao}
 
-A avaliação combina critérios sobre a arquitetura e sobre a instanciação. A
-Tabela~\ref{tab:avaliacao} relaciona cada critério às questões de pesquisa
-definidas no Capítulo~\ref{cap:introducao}.
+A avaliação combina critérios sobre a arquitetura e sobre a instanciação. A Tabela~\ref{tab:avaliacao} relaciona cada critério às questões de pesquisa definidas no Capítulo~\ref{cap:introducao}.
 
 \begin{table}[htb]
 	\centering
@@ -336,24 +244,11 @@ definidas no Capítulo~\ref{cap:introducao}.
 	\fonte{Elaborado pelos autores.}
 \end{table}
 
-O AV7 é qualitativo e não envolve implementar nada na aplicação analisada:
-ele verifica se os papéis, definidos a partir do caso preditivo, descrevem
-também uma aplicação de outra natureza. O AV5 avalia a instanciação, não a
-arquitetura: um modelo que não supere a
-regra vigente não invalida a arquitetura, desde que a comparação tenha sido
-feita de forma correta e reprodutível. Esse resultado negativo seria, ele
-próprio, uma informação útil para o órgão.
+O AV7 é qualitativo e não envolve implementar nada na aplicação analisada: ele verifica se os papéis, definidos a partir do caso preditivo, descrevem também uma aplicação de outra natureza. O AV5 avalia a instanciação, não a arquitetura: um modelo que não supere a regra vigente não invalida a arquitetura, desde que a comparação tenha sido feita de forma correta e reprodutível. Esse resultado negativo seria, ele próprio, uma informação útil para o órgão.
 
-\pendente{Decidir com os orientadores se haverá uma avaliação qualitativa
-adicional com a equipe técnica (por exemplo, questionário ou grupo focal sobre
-a facilidade de adicionar um segundo modelo à arquitetura).}
+\pendente{Decidir com os orientadores se haverá uma avaliação qualitativa adicional com a equipe técnica (por exemplo, questionário ou grupo focal sobre a facilidade de adicionar um segundo modelo à arquitetura).}
 
 \section{Ferramentas}
 \label{sec:ferramentas}
 
-A arquitetura é definida por papéis, independentes de ferramenta
-(Seção~\ref{sec:arquitetura}). As ferramentas que cumprem cada papel no caso
-estudado são definidas uma única vez, na Tabela~\ref{tab:ferramentas-caso},
-junto com a instanciação. A mesma tabela inclui as ferramentas de apoio à
-pesquisa: Jupyter, para a análise exploratória, e Git com GitHub Actions, para
-versionamento e integração contínua.
+A arquitetura é definida por papéis, independentes de ferramenta (Seção~\ref{sec:arquitetura}). As ferramentas que cumprem cada papel no caso estudado são definidas uma única vez, na Tabela~\ref{tab:ferramentas-caso}, junto com a instanciação. A mesma tabela inclui as ferramentas de apoio à pesquisa: Jupyter, para a análise exploratória, e Git com GitHub Actions, para versionamento e integração contínua.
