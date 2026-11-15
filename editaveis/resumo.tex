@@ -14,20 +14,24 @@
  avalia e escora, o orquestrador coordena as etapas e o registro de
  experimentos guarda métricas e versões de modelo. Os escores voltam ao
  \textit{lakehouse} pela camada bronze e percorrem as demais camadas como
- qualquer outra fonte, sob os mesmos testes e o mesmo catálogo. Cada treino
- congela seu dataset com um manifesto que permite refazer o resultado a partir
- da versão do código e dos dados. A pesquisa segue a \textit{Design Science
+ qualquer outra fonte, sob os mesmos testes e o mesmo catálogo. Cada treino congela seu dataset sob um identificador de conteúdo,
+ registrado junto ao experimento, o que permite refazer o resultado a partir da
+ versão do código e dos dados. Os mesmos papéis descrevem também aplicações com
+ modelos de linguagem, o que é discutido a partir de um assistente de dados já
+ existente na plataforma. A pesquisa segue a \textit{Design Science
  Research}, e a arquitetura é instanciada na previsão de paralisação de obras
  do Programa Minha Casa, Minha Vida na plataforma Gov Hub Cidades, do
  Ministério das Cidades, tendo como referência de comparação a regra de
  limiares fixos usada hoje pela fiscalização. Nesta primeira etapa, foram
  definidos os requisitos e o projeto da arquitetura e realizado o levantamento
  inicial dos dados, que revelou que as trocas de fonte ao longo da série
- histórica restringem o período em que o rótulo de paralisação é confiável. A
+ histórica restringem o período em que o rótulo de paralisação é confiável, e
+ iniciada a recuperação de uma série legada que pode ampliar esse período. A
  avaliação, prevista para a segunda etapa, considera a aderência a princípios
  de MLOps da literatura, a prontidão para produção, a reprodutibilidade, a
- ausência de vazamento temporal e o desempenho do modelo frente à regra
- vigente.
+ ausência de vazamento temporal, o desempenho do modelo frente à regra
+ vigente, inclusive por subgrupo, e a aderência dos papéis a uma aplicação com
+ modelo de linguagem.
 
  \vspace{\onelineskip}
 

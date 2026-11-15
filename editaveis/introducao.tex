@@ -28,7 +28,10 @@ paralisar nos próximos meses?''). Responder a ela exige modelos de
 aprendizado de máquina (\textit{Machine Learning}, ML). Colocar esses modelos
 em produção de forma confiável é um problema de engenharia distinto, conhecido
 como MLOps (\textit{Machine Learning Operations})
-\cite{kreuzberger2023}.
+\cite{kreuzberger2023}. O mesmo problema aparece em aplicações construídas
+sobre grandes modelos de linguagem, como assistentes que respondem a perguntas
+sobre os dados da própria plataforma: elas também precisam de versionamento,
+avaliação e monitoramento antes de serem confiáveis.
 
 \section{Problema e justificativa}
 
@@ -133,19 +136,21 @@ desta monografia:
 	fundamentação sobre plataformas de dados governamentais e arquitetura
 	\textit{lakehouse}; aprendizado de máquina em produção e MLOps; riscos na
 	modelagem com dados longitudinais, como vazamento de informação, validação
-	temporal e mudança de distribuição; uso de ML no setor público e trabalhos
-	relacionados;
+	temporal, mudança de distribuição e equidade; aplicações com modelos de
+	linguagem; uso de ML no setor público e trabalhos relacionados;
 	\item \textbf{Metodologia} (Capítulo~\ref{cap:metodologia}): classificação da
 	pesquisa; descrição da \textit{Design Science Research} e de como suas
-	atividades se distribuem entre o TCC1 e o TCC2; contexto da pesquisa,
-	critérios e procedimentos de avaliação e ferramentas utilizadas;
+	atividades se distribuem entre o TCC1 e o TCC2; contexto da pesquisa;
+	planejamento do trabalho em \textit{sprints}; critérios e procedimentos de
+	avaliação e ferramentas utilizadas;
 	\item \textbf{Proposta} (Capítulo~\ref{cap:proposta}): requisitos e
 	arquitetura de MLOps proposta, com suas camadas, papéis, ciclo de vida e
-	mecanismos de reprodutibilidade; instanciação da arquitetura no caso de
-	prevenção de paralisação de obras do MCMV;
+	mecanismos de reprodutibilidade; extensão dos papéis a aplicações com
+	modelos de linguagem; instanciação da arquitetura no caso de prevenção de
+	paralisação de obras do MCMV;
 	\item \textbf{Resultados Preliminares} (Capítulo~\ref{cap:resultados}): relato
 	das atividades realizadas até esta etapa, do plano de análise exploratória
-	dos dados e das ameaças à validade; e
+	dos dados, da recuperação da série histórica e das ameaças à validade; e
 	\item \textbf{Considerações Finais} (Capítulo~\ref{cap:consideracoes}): síntese
 	do trabalho até o momento, próximos passos e cronograma para a continuidade
 	no TCC2.

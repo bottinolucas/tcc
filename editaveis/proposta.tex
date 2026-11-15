@@ -5,9 +5,10 @@ Este capítulo apresenta o artefato proposto. A Seção~\ref{sec:requisitos}
 define os requisitos da arquitetura. A Seção~\ref{sec:arquitetura} descreve a
 arquitetura por meio das camadas do \textit{Data Lakehouse} e dos papéis que
 cada componente desempenha, sem se prender a ferramentas específicas. A
-Seção~\ref{sec:caso} apresenta a instanciação no caso de prevenção de
-paralisação de obras do MCMV, incluindo as ferramentas escolhidas para cada
-papel.
+Seção~\ref{sec:extensao-llm} discute a extensão dos papéis a aplicações com
+modelos de linguagem. A Seção~\ref{sec:caso} apresenta a instanciação no caso
+de prevenção de paralisação de obras do MCMV, incluindo as ferramentas
+escolhidas para cada papel.
 
 % ---------------------------------------------------------------------
 \section{Requisitos da arquitetura}
@@ -56,6 +57,9 @@ A Tabela~\ref{tab:requisitos} lista os requisitos resultantes.
 		qualquer outra tabela da plataforma. & \citeonline{ferreira2025}; regras 1 e 2 \\
 		R8 & Adicionar um segundo modelo não exige alterar a estrutura do
 		primeiro. & \citeonline{amershi2019} \\
+		R9 & O desempenho dos escores é calculado e monitorado também por
+		subgrupo relevante para a política pública, e não apenas no agregado. &
+		\citeonline{mehrabi2022}; \citeonline{mitchell2019} \\
 		\bottomrule
 	\end{tabularx}
 	\fonte{Elaborado pelos autores.}
@@ -117,6 +121,7 @@ A Figura~\ref{fig:arquitetura} apresenta a visão geral.
 		\node[ml] (treino) at (9.4,0)    {Ambiente de modelagem\\treino e avaliação};
 		\node[ml] (export) at (4.8,-2.6) {Orquestrador\\export do dataset};
 		\node[ml] (ds)     at (9.4,-2.6) {Armazenamento de objetos\\datasets versionados};
+		\node[ml] (dvc)    at (14.0,-2.6) {Versionamento de dados\\\textit{hash} do dataset};
 
 		% Fluxo de dados
 		\draw[arr] (ingest) -- (bronze);
@@ -129,6 +134,8 @@ A Figura~\ref{fig:arquitetura} apresenta a visão geral.
 		\draw[arr] (ouro) -- (export);
 		\draw[arr] (export) -- (ds);
 		\draw[arr] (ds) -- (treino);
+		\draw[arr, dashed] (dvc) -- node[elbl, above] {versiona} (ds);
+		\draw[arr, dashed] (dvc.north) |- node[elbl, right, pos=0.25] {versão do dataset} (reg.east);
 		\draw[arr] (treino) -- (reg);
 		\draw[arr] (reg) -- (gate);
 		\draw[arr] (gate) -- (escore);
@@ -137,7 +144,7 @@ A Figura~\ref{fig:arquitetura} apresenta a visão geral.
 
 		\begin{scope}[on background layer]
 			\node[zone, fit=(bronze)(prata)(ouro)] (z1) {};
-			\node[zone, fit=(export)(ds)(treino)(reg)(gate)(escore), draw=blue!60] (z2) {};
+			\node[zone, fit=(export)(ds)(dvc)(treino)(reg)(gate)(escore), draw=blue!60] (z2) {};
 		\end{scope}
 		\node[lbl, anchor=north east, align=right] at (z1.north west) {\textit{Data Lakehouse}\\(camadas medalhão)};
 		\node[lbl, text=blue!60!black] at (z2.north west) {extensão de MLOps};
@@ -221,8 +228,8 @@ porque é ela que impede a duplicação de lógica entre componentes.
 		Ambiente de modelagem & Treinar, avaliar e escorar, lendo apenas
 		tabelas da camada ouro & Recalcular features \\
 		Registro de experimentos e modelos & Registrar parâmetros, métricas,
-		artefatos, versões de modelo e o estágio de cada versão & Decidir a
-		promoção \\
+		artefatos, versões de modelo e o apelido de cada versão (vigente ou
+		candidata) & Decidir a promoção \\
 		Catálogo de dados & Registrar tabelas, responsáveis e linhagem de todas
 		as camadas & --- \\
 		Camada de visualização & Exibir o ranking de risco e os indicadores de
@@ -242,6 +249,26 @@ implementações da mesma feature (R1), o que elimina por construção a princip
 causa de desalinhamento entre treino e produção \cite{polyzotis2018}. Uma
 feature nova é sempre uma transformação versionada da camada ouro, testada e
 catalogada como qualquer outra tabela (R7).
+
+Por isso, a arquitetura não inclui um repositório de features dedicado
+(\textit{feature store}), embora \citeonline{kreuzberger2023} o listem entre os
+componentes de MLOps. Um repositório desses resolve dois problemas: servir
+features com baixa latência para inferência em tempo real e garantir que o
+treino use o valor de cada feature como ele era na data da observação. O
+primeiro não existe num escore mensal em lote. O segundo é resolvido pelas
+próprias tabelas da camada ouro, calculadas \textit{as of} $t$ e testadas
+contra vazamento (R2). Acrescentar um componente para repetir essa função
+criaria uma segunda implementação das mesmas features, justamente o que o R1
+proíbe.
+
+A validação de dados acontece em três pontos. Os testes da camada de
+transformação verificam esquema, unicidade, domínios e ausência de vazamento
+a cada execução \cite{schelter2018}. Os contratos de dados de cada fonte
+declaram o esquema e as garantias que a ingestão precisa cumprir antes de o
+dado chegar à camada bronze. E o ambiente de modelagem valida o esquema do
+dataset congelado ao lê-lo, antes de treinar ou escorar, para que uma
+mudança não percebida na camada ouro não chegue silenciosamente ao modelo
+\cite{breck2019}.
 
 \subsection{Ciclo de vida}
 
@@ -280,6 +307,14 @@ regra 2 da plataforma.
 	\fonte{Elaborado pelos autores.}
 \end{table}
 
+Ao redor desse ciclo há um processo de integração contínua. Cada mudança
+proposta ao repositório executa a verificação de estilo do código, as
+transformações e seus testes, incluindo os de vazamento, e um treino de
+fumaça sobre uma amostra pequena dos dados. As métricas desse treino são
+publicadas na própria revisão da mudança, para que o efeito de uma alteração
+em uma feature apareça antes da integração, e não depois do retreino
+\cite{breck2017}.
+
 \subsection{Reprodutibilidade}
 
 O treino nunca lê uma base extraída manualmente. Ele lê a camada ouro e
@@ -289,29 +324,112 @@ transformações e as competências incluídas. O versionamento dessa cópia é
 feito com o DVC (\textit{Data Version Control}) \cite{dvc}: o conteúdo do
 dataset fica no armazenamento de objetos, e o Git guarda apenas um arquivo de
 metadados com o \textit{hash} desse conteúdo, de modo que cada \textit{commit}
-aponta para uma versão exata dos dados. A versão do dataset é registrada
-no experimento. Assim, qualquer resultado pode ser refeito a partir da versão
-do código e da versão do dataset (R3, QE2), o que será verificado pelo
-critério AV3.
+aponta para uma versão exata dos dados.
+
+O registro de experimentos fecha o vínculo no sentido contrário. Cada execução
+de treino registra o \textit{commit} do código, o \textit{hash} do dataset,
+a versão das transformações, a especificação travada das dependências do
+ambiente de modelagem e as sementes aleatórias, como recomendam
+\citeonline{pineau2021}. A partir de qualquer versão de modelo registrada,
+portanto, chega-se ao código, ao dado e ao ambiente que a produziram. Assim,
+qualquer resultado pode ser refeito a partir da versão do código e da versão
+do dataset (R3, R4, QE2), o que será verificado pelo critério AV3. O
+\textit{model card} \cite{mitchell2019} e a \textit{datasheet} do dataset
+\cite{gebru2021} são gravados como artefatos da mesma execução.
 
 \subsection{Promoção e operação}
 
+O ciclo é disparado por dados, e não apenas por calendário: quando as
+transformações materializam a camada ouro de uma nova competência, o
+orquestrador encadeia o export do dataset, o escore e, quando previsto, o
+retreino. Isso corresponde ao nível 1 de maturidade descrito na
+Seção~\ref{sec:mlops}.
+
 A promoção de um modelo é controlada por um \textit{gate} aplicado pelo
-orquestrador: uma nova versão só passa a gerar o escore oficial se, no período
-de validação temporal, superar tanto a versão vigente quanto a regra de
-referência no \textit{recall@k} (R5). O escore mensal é gravado na camada
+orquestrador. Cada nova versão entra no registro como candidata
+(\textit{challenger}) e só passa a gerar o escore oficial se, no período
+de validação temporal, superar tanto a versão vigente (\textit{champion})
+quanto a regra de referência no \textit{recall@k} (R5). Promover é mover o
+apelido \textit{champion} para a nova versão, e voltar atrás é movê-lo de
+volta, sem retreinar nada. O escore mensal é gravado na camada
 bronze e promovido até a camada ouro pela camada de transformação, o que
 mantém o ranking sob os mesmos testes e o mesmo catálogo das demais tabelas.
 
-O monitoramento também fica na camada de transformação (R6): tabelas da
-camada ouro comparam a distribuição das features de cada competência com a do
-dataset de treino e, à medida que o horizonte de predição se cumpre, calculam
-o desempenho realizado dos escores passados. A camada de visualização exibe
-esses indicadores.
+O monitoramento também fica na camada de transformação (R6), em dois
+tempos, por causa do atraso do rótulo (Seção~\ref{sec:riscos}). Logo após
+cada escore, tabelas da camada ouro comparam a distribuição das features da
+competência com a do dataset de treino, por feature, com o índice de
+estabilidade populacional (PSI). Esse é o sinal antecipado. Só $h$ meses
+depois, quando o horizonte de predição se cumpre, as mesmas tabelas calculam
+o desempenho realizado dos escores passados. Esse desempenho é calculado
+também por subgrupo (unidade da federação, região e modalidade), para que uma
+queda concentrada não fique escondida na média (R9). A camada de
+visualização exibe esses indicadores.
 
-\pendente{Definir os limiares de alerta de \textit{drift} (por exemplo, PSI
-ou teste de Kolmogorov--Smirnov por feature) e a política de retreino
-(periódico ou disparado por alerta).}
+A política de retreino combina os dois tempos: o retreino é periódico e é
+antecipado quando o PSI de alguma feature relevante ultrapassa o limiar de
+alerta. Em qualquer caso, a nova versão passa pelo mesmo \textit{gate}.
+
+\pendente{Calibrar os limiares de PSI na EDA (a referência usual é 0,1 para
+atenção e 0,25 para alerta) e definir a periodicidade do retreino com o
+MCID.}
+
+\subsection{Extensão para aplicações com modelos de linguagem}
+\label{sec:extensao-llm}
+
+A arquitetura foi projetada para um modelo preditivo em lote, mas seus papéis
+não dependem do tipo de modelo. Para verificar até onde eles se aplicam a uma
+aplicação com LLM, toma-se como referência o graphrag-tais
+\cite{graphragtais}, assistente do próprio Gov Hub que responde a perguntas
+sobre os dados da plataforma e gera consultas SQL para indicadores. Ele
+combina busca vetorial e um grafo de conhecimento (GraphRAG,
+Seção~\ref{sec:llm}) construídos a partir dos metadados do catálogo de dados,
+e já adota parte das práticas discutidas no Referencial: \textit{prompts}
+versionados fora do código, um conjunto de avaliação \textit{gold}, uma
+\textit{baseline} aceita que qualquer mudança na recuperação precisa superar,
+regras de proteção (\textit{guardrails}) aplicadas antes de o modelo ser
+chamado e mascaramento de dados sensíveis na saída.
+
+A Tabela~\ref{tab:extensao-llm} mostra como cada papel se manifesta no caso
+preditivo e em uma aplicação desse tipo.
+
+\begin{table}[htb]
+	\centering
+	\caption{Papéis da arquitetura no caso preditivo e em uma aplicação RAG.}
+	\label{tab:extensao-llm}
+	\small
+	\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X}
+		\toprule
+		\textbf{Papel} & \textbf{Caso preditivo (paralisação)} & \textbf{Aplicação RAG (por exemplo, o graphrag-tais)} \\
+		\midrule
+		Catálogo de dados & Linhagem e responsáveis das tabelas & Fonte do índice: tabelas, colunas, relações e linhagem viram os documentos recuperados \\
+		Camada de transformação & Painel, rótulo e features \textit{as of} $t$ & Descrições e testes das tabelas, que alimentam o catálogo e, por ele, o índice \\
+		Orquestrador & Export, treino, \textit{gate} e escore mensal & Reconstrução do índice quando o catálogo muda \\
+		Versionamento de dados & Dataset congelado de cada treino & Conjunto \textit{gold} de avaliação e cópia do índice usada em cada avaliação \\
+		Ambiente de modelagem & Treino, avaliação e escore & Configuração da recuperação, \textit{prompts} e escolha do modelo de linguagem \\
+		Registro de experimentos e modelos & Execuções de treino e apelidos das versões & Execuções de avaliação, versões de \textit{prompt} e \textit{traces} \\
+		\textit{Gate} de promoção (R5) & Candidata supera a vigente e a regra de referência & Nova configuração supera a \textit{baseline} aceita no \textit{gold} \\
+		Monitoramento (R6) & PSI e desempenho realizado & Métricas de recuperação e retorno dos usuários \\
+		\textit{Papel adicional} & --- & Serviço de inferência sempre disponível, com \textit{guardrails} \\
+		\bottomrule
+	\end{tabularx}
+	\fonte{Elaborado pelos autores, a partir do repositório do graphrag-tais.}
+\end{table}
+
+Duas observações saem da tabela. A primeira é que a regra que sustenta o R1
+tem um equivalente direto: assim como nenhuma feature é calculada fora da
+camada de transformação, nenhum documento do índice deve existir fora do
+catálogo de dados. Uma descrição de tabela escrita só para o assistente seria
+uma segunda fonte de verdade, sujeita a divergir da primeira. A segunda é que
+uma aplicação interativa precisa de um papel que o caso preditivo não tem: um
+serviço de inferência sempre disponível, com as proteções de segurança e de
+dados pessoais discutidas na Seção~\ref{sec:llm}. Esse papel fica restrito a
+aplicações interativas e não altera a tabela de papéis do núcleo da
+arquitetura (Tabela~\ref{tab:responsabilidades}).
+
+Essa extensão não é implementada neste trabalho. Ela é avaliada de forma
+qualitativa pelo critério AV7 (Seção~\ref{sec:avaliacao}), como evidência de
+que os papéis se generalizam para além do caso estudado.
 
 % ---------------------------------------------------------------------
 \section{Instanciação: prevenção de paralisação de obras do MCMV}
@@ -356,6 +474,12 @@ a troca de fonte é uma mudança de distribuição conhecida
 (Seção~\ref{sec:riscos}) que a preparação dos dados precisa tratar
 explicitamente.
 
+Em paralelo, está sendo recuperada a série anterior ao painel atual, a partir
+do \textit{dump} de um banco de dados legado com relatórios mensais da Caixa e
+do Banco do Brasil desde 2009. Ela contém situação e percentual de execução
+de obra por empreendimento e pode ampliar o período em que há rótulo
+(Seção~\ref{sec:historico}).
+
 \subsection{Referência de comparação}
 
 A regra vigente (\texttt{ouro\_reloginho\_indicadores\_gargalo\_desempenho})
@@ -385,8 +509,8 @@ em um \textit{model card} \cite{mitchell2019}.
 
 A Tabela~\ref{tab:ferramentas-caso} mostra a ferramenta que cumpre cada papel
 da arquitetura no Gov Hub Cidades e onde ela fica no repositório. A maior
-parte das ferramentas já fazia parte da plataforma. As novas são o MLflow, o DVC e as
-bibliotecas de modelagem.
+parte das ferramentas já fazia parte da plataforma. As novas são o MLflow, o
+DVC, o Pandera e as bibliotecas de modelagem.
 
 \begin{table}[htb]
 	\centering
@@ -402,12 +526,13 @@ bibliotecas de modelagem.
 		Motor analítico & PostgreSQL com a extensão pg\_duckdb & --- \\
 		Armazenamento de objetos & RustFS, compatível com S3 & prefixos \texttt{raw/}, \texttt{staging/} e \texttt{ml/} \\
 		Ambiente de modelagem & Python, com pandas, scikit-learn, LightGBM e SHAP & \texttt{ml/<modelo>/} \\
-		Registro de experimentos e modelos & MLflow \cite{zaharia2018} & artefatos em \texttt{ml/mlflow/} \\
-		Versionamento de dados & DVC \cite{dvc} & --- \\
+		Registro de experimentos e modelos & MLflow \cite{zaharia2018}: servidor de rastreamento e registro de modelos com apelidos \texttt{champion} e \texttt{challenger} & artefatos em \texttt{ml/mlflow/} \\
+		Versionamento de dados & DVC \cite{dvc}, com o armazenamento de objetos como remoto & \texttt{.dvc/} (configuração) e \texttt{ml/<modelo>/dvc.yaml} \\
+		Validação de dados & testes do dbt, contratos ODCS das fontes e Pandera na leitura do dataset & \texttt{dbt/mcid/}, \texttt{contracts/} e \texttt{ml/<modelo>/} \\
 		Catálogo de dados & OpenMetadata \cite{openmetadata} & --- \\
 		Camada de visualização & Apache Superset & --- \\
 		Análise exploratória & Jupyter & \texttt{ml/<modelo>/notebooks/} \\
-		Versionamento e integração contínua & Git e GitHub Actions & --- \\
+		Versionamento e integração contínua & Git e GitHub Actions; ambiente travado com uv & \texttt{.github/workflows/}, \texttt{uv.lock} \\
 		\bottomrule
 	\end{tabularx}
 	\fonte{Elaborado pelos autores.}

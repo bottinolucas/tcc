@@ -6,7 +6,8 @@ Seção~\ref{sec:classificacao} classifica a pesquisa. A
 Seção~\ref{sec:dsr} apresenta a \textit{Design Science Research} e o
 mapeamento de suas atividades para este trabalho. A
 Seção~\ref{sec:contexto} descreve o contexto em que o artefato é
-desenvolvido. A Seção~\ref{sec:avaliacao} define os critérios e
+desenvolvido, e a Seção~\ref{sec:gestao}, como o trabalho é planejado e
+acompanhado. A Seção~\ref{sec:avaliacao} define os critérios e
 procedimentos de avaliação, e a Seção~\ref{sec:ferramentas} lista as
 ferramentas utilizadas.
 
@@ -69,7 +70,7 @@ qual etapa (TCC1 ou TCC2) ela ocorre.
 		Execução do ciclo completo no caso de prevenção de paralisação de obras
 		do MCMV & TCC2 \\
 		5. Avaliar &
-		Critérios AV1--AV5 (Seção~\ref{sec:avaliacao}) & TCC2 \\
+		Critérios AV1--AV7 (Seção~\ref{sec:avaliacao}) & TCC2 \\
 		6. Comunicar &
 		Este documento, a monografia final e os ADRs e a documentação no
 		repositório do projeto & TCC1/TCC2 \\
@@ -191,6 +192,102 @@ ML, estão na Tabela~\ref{tab:ferramentas-caso}.
 com o MCID; confirmar com os orientadores o nível de detalhe permitido sobre o
 convênio.}
 
+\section{Planejamento e gestão do trabalho}
+\label{sec:gestao}
+
+O trabalho é organizado como um projeto de software de uma equipe de
+produto, com o \textit{framework} Scrum \cite{schwaber2020scrum} adaptado a um
+projeto de dados. O Scrum organiza o trabalho em ciclos de duração fixa
+(\textit{sprints}), cada um com uma meta, um planejamento no início, uma
+revisão do incremento entregue e uma retrospectiva sobre o processo, a partir
+de uma lista priorizada de itens de trabalho (\textit{backlog}). Neste
+trabalho, cada \textit{sprint} dura duas semanas.
+
+\citeonline{saltz2017}, em experimento controlado com equipes de ciência de
+dados, observaram que a escolha da metodologia de gestão afeta os resultados
+dos projetos, e que abordagens ágeis precisam de ajustes quando o trabalho é
+exploratório. A principal dificuldade é que uma análise exploratória não tem um
+``pronto'' previsível como uma funcionalidade de software. Por isso, quatro
+adaptações são adotadas:
+
+\begin{itemize}
+	\item \textbf{meta de \textit{sprint} como hipótese}: em \textit{sprints} de
+	exploração, a meta é responder a uma pergunta, e não entregar código. A
+	\textit{sprint} termina com uma decisão registrada, mesmo que ela seja
+	descartar um caminho;
+	\item \textbf{investigações com prazo fixo}: itens exploratórios, como a
+	análise de uma família de relatórios do histórico ou a sensibilidade ao
+	horizonte $h$, recebem um limite de tempo definido no planejamento;
+	\item \textbf{fases do CRISP-DM como épicos}: as fases do ciclo de vida
+	(Tabela~\ref{tab:ciclo}) organizam o \textit{backlog}, mas as
+	\textit{sprints} podem atravessá-las, sem execução em cascata. Isso segue a
+	leitura de \citeonline{martinezplumed2021}, para quem projetos de ciência de
+	dados percorrem as fases do CRISP-DM em trajetórias não lineares;
+	\item \textbf{duas trilhas no mesmo \textit{backlog}}: a trilha da
+	plataforma, com as atividades 3 a 5 da DSR (Tabela~\ref{tab:dsr}), e a
+	trilha da escrita, com os capítulos deste documento. Cada \textit{sprint}
+	entrega incremento nas duas.
+\end{itemize}
+
+A Tabela~\ref{tab:papeis-scrum} mostra como os papéis do Scrum se distribuem.
+
+\begin{table}[htb]
+	\centering
+	\caption{Papéis do Scrum neste trabalho.}
+	\label{tab:papeis-scrum}
+	\small
+	\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.6cm}>{\raggedright\arraybackslash}p{3.8cm}X}
+		\toprule
+		\textbf{Papel} & \textbf{Quem} & \textbf{Responsabilidade} \\
+		\midrule
+		Dono do produto (\textit{Product Owner}) & Ponto focal técnico do MCID &
+		Priorizar o \textit{backlog} da trilha da plataforma e decidir as
+		questões de negócio (horizonte, capacidade, usuário do alerta) \\
+		Equipe de desenvolvimento & Os dois autores & Planejar, executar e
+		revisar o trabalho das duas trilhas; revisar os \textit{pull requests}
+		um do outro \\
+		Facilitador (\textit{Scrum Master}) & Os autores, em revezamento por
+		\textit{sprint} & Conduzir as cerimônias e remover impedimentos \\
+		Partes interessadas & Orientadora e coorientador & Participar da revisão
+		de cada \textit{sprint}, com foco no rigor metodológico e na escrita \\
+		\bottomrule
+	\end{tabularx}
+	\fonte{Elaborado pelos autores.}
+\end{table}
+
+\pendente{Confirmar com o MCID quem será o ponto focal no papel de dono do
+produto e a disponibilidade para as revisões quinzenais.}
+
+O \textit{backlog} fica nas \textit{issues} e em um quadro de projeto do
+GitHub, no repositório deste documento, com campos para a \textit{sprint} e
+para o épico. Os itens da trilha da plataforma apontam para as
+\textit{issues} e os \textit{pull requests} do repositório da plataforma. O
+andamento é acompanhado por um gráfico de itens concluídos por épico
+(\textit{burnup}). A velocidade da equipe, medida comum no Scrum, tem pouco
+significado para uma equipe de duas pessoas.
+
+Um item só é considerado pronto quando cumpre a definição de pronto da sua
+natureza:
+
+\begin{itemize}
+	\item \textbf{código}: revisado pelo outro autor, com a integração contínua
+	aprovada e as transformações e testes executados com sucesso;
+	\item \textbf{modelo}: execução registrada no registro de experimentos, com
+	a versão do dataset e do código (R3, R4);
+	\item \textbf{texto}: o documento compila sem erros e sem pendências
+	daquele item;
+	\item \textbf{decisão}: registro no formato de ADR, no repositório
+	correspondente.
+\end{itemize}
+
+O trabalho do TCC1 até a data deste documento corresponde a uma
+\textit{sprint} inicial (\textit{Sprint} 0), de 27 de outubro a 15 de novembro
+de 2026: diagnóstico da plataforma, ADR da arquitetura, especificação do
+problema, levantamento inicial dos dados e primeira versão deste texto. Até a
+entrega do TCC1, em dezembro de 2026, restam duas \textit{sprints}. O
+cronograma do TCC2, também em \textit{sprints}, está no
+Capítulo~\ref{cap:consideracoes}.
+
 \section{Critérios e procedimentos de avaliação}
 \label{sec:avaliacao}
 
@@ -225,12 +322,24 @@ definidas no Capítulo~\ref{cap:introducao}.
 		AV5 & \textbf{Comparação com a regra vigente.} \textit{Recall@k} e
 		\textit{precision@k} do modelo e da regra de gargalo no período de
 		teste, com $k$ igual à capacidade mensal de fiscalização. & QE3 \\
+		AV6 & \textbf{Equidade.} \textit{Recall@k} do modelo e da regra
+		vigente por unidade da federação, região e modalidade, e a diferença
+		entre o melhor e o pior subgrupo, verificando se o modelo reduz ou
+		amplia a desigualdade de cobertura da regra (R9). & QE3 \\
+		AV7 & \textbf{Generalização dos papéis.} Análise de aderência dos
+		papéis da arquitetura a uma aplicação com modelo de linguagem já
+		existente no Gov Hub, o graphrag-tais
+		(Seção~\ref{sec:extensao-llm}): para cada papel, o componente que o
+		cumpre ou a lacuna encontrada. & QP, QE1 \\
 		\bottomrule
 	\end{tabularx}
 	\fonte{Elaborado pelos autores.}
 \end{table}
 
-O AV5 avalia a instanciação, não a arquitetura: um modelo que não supere a
+O AV7 é qualitativo e não envolve implementar nada na aplicação analisada:
+ele verifica se os papéis, definidos a partir do caso preditivo, descrevem
+também uma aplicação de outra natureza. O AV5 avalia a instanciação, não a
+arquitetura: um modelo que não supere a
 regra vigente não invalida a arquitetura, desde que a comparação tenha sido
 feita de forma correta e reprodutível. Esse resultado negativo seria, ele
 próprio, uma informação útil para o órgão.

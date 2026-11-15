@@ -25,6 +25,10 @@ Registro das decisões que dão forma ao trabalho. Como o TCC é em dupla, uma d
 | [0006](0006-criterios-de-avaliacao.md) | Critérios de avaliação AV1–AV5 | proposto | 2026-11-10 |
 | [0007](0007-convencoes-de-escrita.md) | Convenções de escrita, referências e compilação | proposto | 2026-11-10 |
 | [0008](0008-arquitetura-por-papeis-sobre-lakehouse.md) | Arquitetura descrita por papéis, sobre um Data Lakehouse em camadas medalhão | proposto | 2026-11-10 |
+| [0009](0009-stack-de-mlops.md) | Stack de MLOps da instanciação (maturidade, DVC, MLflow, validação, monitoramento, CI) | proposto | 2026-11-15 |
+| [0010](0010-rag-como-extensao-discutida.md) | Aplicações com LLM entram como extensão discutida (graphrag-tais, AV7) | proposto | 2026-11-15 |
+| [0011](0011-gestao-em-sprints-scrum.md) | Gestão do trabalho em sprints (Scrum adaptado a dados) | proposto | 2026-11-15 |
+| [0012](0012-requisito-de-equidade.md) | Requisito de equidade (R9) e critério AV6 | proposto | 2026-11-15 |
 
 ## Decisões em aberto
 
@@ -38,5 +42,7 @@ Estas decisões ainda não foram tomadas. Quando forem, cada uma vira um arquivo
 | Quem usa o alerta (área do MCID, agente financeiro ou ambos) | MCID | E10 |
 | Haverá avaliação qualitativa com a equipe técnica? | Orientadores | E8 |
 | Nível de detalhe permitido sobre o convênio com o MCID | Orientadores | E8 |
-| Limiares de alerta de drift e política de retreino | Dupla | E9 |
+| Valores dos limiares de PSI (proposta: 0,1 atenção, 0,25 alerta) e periodicidade do retreino; a política em si está na 0009 | Dupla e MCID | E9 |
+| Quem é o ponto focal do MCID no papel de PO | MCID | E8 |
+| Usar a série histórica (pré-2019) no rótulo? Depende da revisão do de-para | Dupla | E11 |
 | Divisão do trabalho entre os dois autores | Dupla | Todas |

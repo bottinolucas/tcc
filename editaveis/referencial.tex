@@ -5,8 +5,9 @@ Este capítulo apresenta os conceitos que fundamentam a proposta. A
 Seção~\ref{sec:plataformas} trata das plataformas de dados sobre as quais a
 arquitetura se apoia. A Seção~\ref{sec:ml-producao} discute os desafios de
 sistemas de ML em produção e os modelos de processo que organizam seu ciclo
-de vida. A Seção~\ref{sec:mlops} define MLOps, seus princípios e componentes.
-A Seção~\ref{sec:riscos} aborda os riscos específicos da modelagem com dados
+de vida. A Seção~\ref{sec:mlops} define MLOps, seus princípios e componentes,
+e a Seção~\ref{sec:llm} discute o que muda quando o artefato é uma aplicação
+com modelos de linguagem. A Seção~\ref{sec:riscos} aborda os riscos específicos da modelagem com dados
 longitudinais. A Seção~\ref{sec:setor-publico} discute o uso de ML no setor
 público e a Seção~\ref{sec:relacionados} apresenta os trabalhos relacionados.
 
@@ -188,7 +189,43 @@ automatizada com monitoramento e retreino.
 O nível de maturidade adequado depende do contexto. Um modelo que gera
 um escore mensal sobre dados atualizados mensalmente não exige inferência em
 tempo real, mas exige que o retreino e o escore sejam reprodutíveis e
-auditáveis.
+auditáveis. Por isso, este trabalho adota o nível 1 como alvo: o pipeline de
+treino, avaliação e promoção é automatizado e disparado pela chegada de dados
+novos, enquanto a implantação do próprio pipeline continua sob revisão humana.
+O nível 2 traria um custo de engenharia desproporcional para um escore em lote
+mensal.
+
+\subsection{Versionamento de dados}
+
+O Git versiona bem código e arquivos de texto, mas não foi feito para
+conjuntos de dados de centenas de megabytes que mudam a cada competência.
+Sem um mecanismo próprio, o vínculo entre um modelo e o dado que o treinou
+fica num caminho de arquivo ou na memória de quem o treinou, o que
+contraria os princípios P3 e P4 \cite{kreuzberger2023}.
+\citeonline{shankar2024} apontam o versionamento de dados, código e modelos
+como um dos três fatores de sucesso de uma implantação.
+
+O DVC (\textit{Data Version Control}) \cite{dvc} resolve esse vínculo
+mantendo o conteúdo dos dados fora do Git. Cada conjunto versionado é
+representado por um pequeno arquivo de metadados com o \textit{hash} do
+conteúdo, e esse arquivo é versionado no Git junto com o código. O conteúdo
+fica em um armazenamento remoto, como um armazenamento de objetos compatível
+com S3. O DVC também descreve etapas de processamento em um arquivo de
+pipeline (\texttt{dvc.yaml}) e registra, em um arquivo de trava
+(\texttt{dvc.lock}), os \textit{hashes} das entradas e saídas de cada
+execução. Assim, cada \textit{commit} aponta para uma versão exata dos dados
+e da cadeia que os produziu. \citeonline{barrak2021}, em estudo empírico de
+projetos de código aberto que usam o DVC, mostram que os arquivos de pipeline
+de dados evoluem junto com o código-fonte e exigem manutenção frequente.
+Isso reforça que o versionamento de dados é parte da engenharia do sistema, e
+não um passo auxiliar.
+
+Em \textit{lakehouses} com formatos de tabela abertos, como Delta Lake e
+Apache Iceberg, o próprio formato oferece versões consultáveis de cada tabela
+(\textit{time travel}) \cite{armbrust2021}. Ferramentas como o DVC continuam
+úteis quando o motor analítico não oferece esse recurso, ou quando o que
+precisa ser versionado é um recorte congelado para treino, e não a tabela
+inteira.
 
 \subsection{Rastreamento de experimentos e registro de modelos}
 
@@ -196,13 +233,94 @@ O MLflow \cite{zaharia2018} é uma plataforma aberta para o ciclo de vida de
 ML com três componentes originais: \textit{Tracking}, que registra
 parâmetros, métricas e artefatos de cada execução; \textit{Projects}, que
 empacota código de forma reprodutível; e \textit{Models}, que define um
-formato padrão para implantação. O componente de registro de modelos permite
-versionar modelos e controlar sua promoção entre estágios.
+formato padrão para implantação. \citeonline{chen2020mlflow} descrevem a
+evolução da plataforma, que acrescentou um registro de modelos com
+versionamento, linhagem até a execução de origem e anotações.
+
+No registro, cada versão de um modelo aponta para a execução que a gerou. A
+prática atual é marcar as versões com apelidos (\textit{aliases}) atribuídos
+pelo processo de promoção, como \texttt{champion} para a versão em uso e
+\texttt{challenger} para a candidata, em vez dos estágios fixos das primeiras
+versões da ferramenta \cite{mlflowdocs}. O consumidor do modelo carrega sempre
+o apelido, e a promoção se resume a mover o apelido para outra versão, o que
+torna a troca e o retorno à versão anterior operações auditáveis. A mesma
+plataforma passou a rastrear e avaliar aplicações com modelos de linguagem,
+registrando execuções de avaliação e \textit{traces} de cada chamada
+\cite{mlflowgenai}.
+
+\citeonline{pineau2021}, ao relatar o programa de reprodutibilidade da
+NeurIPS, mostram que a reprodução de um resultado de ML depende de mais do que
+o código: exige também a versão dos dados, o ambiente de execução, as sementes
+aleatórias e os hiperparâmetros. Rastreamento de experimentos e versionamento
+de dados são, portanto, complementares. O primeiro registra o que foi feito, e o
+segundo garante que os dados usados ainda possam ser recuperados.
 
 \citeonline{breck2017} propõem o \textit{ML Test Score}, uma rubrica de 28
 testes e verificações agrupados em features e dados, desenvolvimento do
 modelo, infraestrutura de ML e monitoramento. A rubrica oferece um critério
 objetivo para medir a prontidão de um sistema de ML para produção.
+
+% ---------------------------------------------------------------------
+\section{Aplicações com modelos de linguagem}
+\label{sec:llm}
+
+MLOps não se limita a modelos preditivos treinados pela própria equipe.
+Aplicações construídas sobre grandes modelos de linguagem (\textit{Large
+Language Models}, LLMs) também precisam de versionamento, avaliação,
+promoção controlada e monitoramento. O que muda são os artefatos que passam
+por esse ciclo.
+
+\subsection{Geração aumentada por recuperação}
+
+Na geração aumentada por recuperação (\textit{Retrieval-Augmented
+Generation}, RAG), o modelo de linguagem responde com base em trechos
+recuperados de uma base externa no momento da pergunta, em vez de depender
+apenas do que memorizou no treino \cite{lewis2020rag}. A abordagem reduz
+respostas inventadas e permite atualizar o conhecimento sem retreinar o
+modelo, trocando apenas o índice \cite{gao2023rag}. O GraphRAG estende a
+ideia com um grafo de conhecimento: a recuperação percorre relações explícitas
+entre entidades, e não apenas a semelhança entre textos
+\cite{edge2024graphrag}.
+
+Uma aplicação próxima do contexto deste trabalho é a tradução de perguntas em
+linguagem natural para consultas SQL (\textit{text-to-SQL}). Os
+\textit{benchmarks} Spider \cite{yu2018spider} e BIRD \cite{li2023bird}
+mostram que a dificuldade cresce com o tamanho e a sujeira das bases reais:
+nomes de coluna pouco descritivos, valores fora do padrão e a necessidade de
+conhecimento do domínio para escolher as tabelas certas. É exatamente o
+cenário de uma plataforma de dados governamentais, em que o catálogo de dados
+é a principal fonte desse conhecimento.
+
+\subsection{O que muda na operação}
+
+Em uma aplicação RAG, o lugar das features e do rótulo é ocupado por outros
+artefatos: o corpus ou catálogo de onde vêm os documentos, o índice
+construído a partir dele, os \textit{prompts} enviados ao modelo e um
+conjunto de avaliação com perguntas e respostas esperadas (\textit{gold}).
+Todos mudam com o tempo e precisam ser versionados, como o código e os
+datasets de um modelo preditivo.
+
+A avaliação também muda. \citeonline{es2024ragas} e
+\citeonline{saadfalcon2024ares} propõem avaliar separadamente a qualidade da
+recuperação (se os trechos certos foram encontrados) e a da geração (se a
+resposta é fiel a esses trechos), porque uma resposta errada pode vir de
+qualquer uma das duas etapas. Parte dessa avaliação costuma usar o próprio LLM
+como juiz. \citeonline{zheng2023judge} mostram que juízes baseados em LLM
+concordam com avaliadores humanos em boa parte dos casos, mas têm vieses
+conhecidos, como a preferência por respostas mais longas.
+\citeonline{shankar2024validators} alertam que os critérios do juiz também
+precisam ser validados contra o julgamento humano.
+
+Por fim, uma aplicação interativa precisa de um serviço de inferência sempre
+disponível e traz riscos de segurança próprios. A injeção indireta de
+instruções, em que um conteúdo recuperado manipula o comportamento do modelo,
+foi demonstrada em aplicações reais \cite{greshake2023}, e a divulgação de
+informação sensível está entre os principais riscos listados pela OWASP para
+aplicações com LLM \cite{owasp2025llm}. No setor público, isso se soma à LGPD
+\cite{brasil2018lgpd}: um dado pessoal que entra no \textit{prompt} de um
+modelo hospedado por terceiros sai do controle do órgão. Por isso, convém
+preferir modelos executados na própria infraestrutura e mascarar os dados
+antes de qualquer chamada externa.
 
 % ---------------------------------------------------------------------
 \section{Riscos na modelagem com dados longitudinais}
@@ -239,7 +357,10 @@ o código usados para treinar o modelo e os usados para gerar predições. Uma
 causa frequente é a reimplementação de uma mesma feature em dois lugares.
 \citeonline{breck2019} propõem a validação sistemática de dados com esquemas
 declarados e comparação de distribuições entre os conjuntos de treino e de
-produção.
+produção. \citeonline{schelter2018} tratam as verificações de qualidade como
+testes unitários sobre os dados, declarados junto ao pipeline e executados a
+cada carga, o que permite barrar um lote defeituoso antes que ele chegue ao
+modelo.
 
 \subsection{Avaliação sob capacidade limitada e classes desbalanceadas}
 
@@ -259,9 +380,19 @@ e na relação entre entradas e alvo (\textit{concept drift}).
 mudanças. \citeonline{rabanser2019} comparam empiricamente métodos de
 detecção de mudança de distribuição e concluem que testes estatísticos de duas
 amostras sobre representações de dimensão reduzida são uma linha de base
-eficaz. No caso estudado, a troca da fonte de dados ao longo da série é uma
-mudança de distribuição conhecida, que precisa ser tratada já na preparação
-dos dados.
+eficaz. \citeonline{lu2019drift} organizam o tratamento de \textit{concept
+drift} em três etapas: detectar a mudança, entender quando, como e onde ela
+ocorre, e adaptar o modelo. No caso estudado, a troca da fonte de dados ao
+longo da série é uma mudança de distribuição conhecida, que precisa ser
+tratada já na preparação dos dados.
+
+Um agravante é o atraso do rótulo. Quando o modelo prevê um evento até $h$
+meses à frente, só se sabe se um escore acertou $h$ meses depois de
+emiti-lo. Durante esse intervalo, o desempenho realizado não pode ser medido,
+e o monitoramento depende de sinais indiretos, como a mudança da distribuição
+das features de entrada em relação ao conjunto de treino. Esses sinais não
+provam que o modelo piorou, mas indicam quando vale a pena antecipar uma
+reavaliação.
 
 \subsection{Modelos para dados tabulares e explicabilidade}
 
@@ -277,7 +408,23 @@ precisa ser explicável. Os valores SHAP \cite{lundberg2017} atribuem a cada
 feature uma contribuição para uma predição individual, com fundamentação na
 teoria dos jogos cooperativos. \citeonline{mitchell2019} propõem os
 \textit{model cards}, documentos curtos que acompanham um modelo e descrevem
-seu uso pretendido, desempenho por subgrupos e limitações.
+seu uso pretendido, desempenho por subgrupos e limitações. De forma análoga,
+\citeonline{gebru2021} propõem as \textit{datasheets} de conjuntos de dados,
+que registram motivação, composição, processo de coleta e usos recomendados
+de cada conjunto.
+
+\subsection{Equidade}
+
+Um modelo com bom desempenho médio pode errar de forma sistemática em
+subgrupos da população. \citeonline{mehrabi2022} catalogam as fontes desse
+viés, que vão da coleta e da representação dos dados ao próprio processo de
+avaliação, e as definições de equidade usadas para medi-lo. Quando um escore
+orienta onde a fiscalização vai, um viés regional ou por tipo de obra desloca
+a atenção do Estado de forma desigual. Por isso, o desempenho precisa ser
+reportado por subgrupo, e não apenas no agregado. \citeonline{sambasivan2021}
+mostram, em entrevistas com profissionais de IA em domínios de alto impacto,
+que problemas de dados não tratados cedo se propagam em cascata até o uso do
+modelo, e raramente são percebidos antes disso.
 
 % ---------------------------------------------------------------------
 \section{Aprendizado de máquina no setor público}

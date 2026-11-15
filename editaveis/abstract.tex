@@ -15,9 +15,11 @@
    scores, the orchestrator coordinates the steps, and the experiment registry
    stores metrics and model versions. Scores re-enter the lakehouse through the
    bronze layer and flow through the remaining layers like any other source,
-   under the same tests and the same catalog. Each training run freezes its
-   dataset with a manifest that allows the result to be reproduced from the
-   code and data versions. The research follows Design Science Research, and
+   under the same tests and the same catalog. Each training run freezes its dataset under a content identifier recorded
+   with the experiment, which allows the result to be reproduced from the code
+   and data versions. The same roles also describe applications built on
+   language models, which is discussed using a data assistant that already
+   exists on the platform. The research follows Design Science Research, and
    the architecture is instantiated in the prediction of construction
    stoppages in the Minha Casa, Minha Vida housing program on the Gov Hub
    Cidades platform of the Brazilian Ministry of Cities, using the
@@ -25,10 +27,12 @@
    this first stage, the requirements and the architecture design were defined
    and an initial data survey was carried out, which showed that source changes
    along the historical series limit the period in which the stoppage label is
-   reliable. The evaluation, planned for the second stage, covers adherence to
+   reliable, and the recovery of a legacy series that may extend this period
+   was started. The evaluation, planned for the second stage, covers adherence to
    MLOps principles from the literature, production readiness,
-   reproducibility, absence of temporal leakage, and model performance against
-   the current rule.
+   reproducibility, absence of temporal leakage, model performance against the
+   current rule, including by subgroup, and the adherence of the roles to a
+   language model application.
 
    \vspace{\onelineskip}
 
