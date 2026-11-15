@@ -1,6 +1,6 @@
 \chapter[Introdução]{Introdução}
 \label{cap:introducao}
-Este capítulo introduz o(a) leitor(a) aos principais temas deste trabalho. São contextualizados o uso de dados na administração pública federal e o papel de plataformas governamentais, como o Gov Hub, na consolidação desses dados, bem como a passagem de análises descritivas para análises preditivas apoiadas por aprendizado de máquina e a disciplina  de MLOps. Em seguida, são apresentados o problema da paralisação de obras do Programa Minha Casa, Minha Vida e a justificativa para integrar o ciclo de vida de modelos a uma plataforma de dados existente. Na sequência, são expostos a questão de pesquisa que guia toda esta investigação e os objetivos. Por fim, são descritas a metodologia em síntese e a organização dos demais capítulos.
+Este capítulo introduz o(a) leitor(a) aos principais temas deste trabalho. São contextualizados o uso de dados na administração pública federal e o papel de plataformas de dados governamentais, como o Gov Hub, na consolidação desses dados, bem como a passagem de análises descritivas para análises preditivas apoiadas por aprendizado de máquina e a disciplina de MLOps. Em seguida, são apresentados o problema da paralisação de obras do Programa Minha Casa, Minha Vida e a justificativa para integrar o ciclo de vida de modelos a uma plataforma de dados existente. Na sequência, são expostos a questão de pesquisa que guia esta investigação e os objetivos. Por fim, são descritas a metodologia em síntese e a organização dos demais capítulos.
 \section{Contextualização}
 
 A administração pública federal brasileira produz, em seus sistemas
@@ -121,13 +121,32 @@ etapas.
 
 \section{Organização do trabalho}
 
-O restante deste documento está organizado da seguinte forma. O
-Capítulo~\ref{cap:referencial} apresenta o referencial teórico sobre
-plataformas de dados, sistemas de ML em produção, MLOps e o uso de ML no
-setor público, além dos trabalhos relacionados. O
-Capítulo~\ref{cap:metodologia} descreve a metodologia de pesquisa. O
-Capítulo~\ref{cap:proposta} apresenta a arquitetura proposta e sua
-instanciação no caso das obras do MCMV. O Capítulo~\ref{cap:resultados}
-relata os resultados preliminares obtidos até esta etapa. Por fim, o
-Capítulo~\ref{cap:consideracoes} traz as considerações finais e o cronograma
-para a continuidade do trabalho.
+Esta seção apresenta a estrutura do documento e o conteúdo de cada capítulo
+desta monografia:
+
+\begin{itemize}
+	\item \textbf{Introdução}: contextualização do uso de dados na administração
+	pública federal e da disciplina de MLOps; apresentação do problema da
+	paralisação de obras do MCMV e da sua justificativa, da questão de pesquisa,
+	dos objetivos e da metodologia em síntese;
+	\item \textbf{Referencial Teórico} (Capítulo~\ref{cap:referencial}):
+	fundamentação sobre plataformas de dados governamentais e arquitetura
+	\textit{lakehouse}; aprendizado de máquina em produção e MLOps; riscos na
+	modelagem com dados longitudinais, como vazamento de informação, validação
+	temporal e mudança de distribuição; uso de ML no setor público e trabalhos
+	relacionados;
+	\item \textbf{Metodologia} (Capítulo~\ref{cap:metodologia}): classificação da
+	pesquisa; descrição da \textit{Design Science Research} e de como suas
+	atividades se distribuem entre o TCC1 e o TCC2; contexto da pesquisa,
+	critérios e procedimentos de avaliação e ferramentas utilizadas;
+	\item \textbf{Proposta} (Capítulo~\ref{cap:proposta}): requisitos e
+	arquitetura de MLOps proposta, com suas camadas, papéis, ciclo de vida e
+	mecanismos de reprodutibilidade; instanciação da arquitetura no caso de
+	prevenção de paralisação de obras do MCMV;
+	\item \textbf{Resultados Preliminares} (Capítulo~\ref{cap:resultados}): relato
+	das atividades realizadas até esta etapa, do plano de análise exploratória
+	dos dados e das ameaças à validade; e
+	\item \textbf{Considerações Finais} (Capítulo~\ref{cap:consideracoes}): síntese
+	do trabalho até o momento, próximos passos e cronograma para a continuidade
+	no TCC2.
+\end{itemize}

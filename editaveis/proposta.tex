@@ -217,6 +217,7 @@ porque é ela que impede a duplicação de lógica entre componentes.
 		ouro & --- \\
 		Armazenamento de objetos & Guardar a zona de pouso, os datasets
 		congelados e os artefatos de modelo & --- \\
+		Versionamento de dados & Atribuir a cada dataset congelado um identificador de conteúdo (\textit{hash}) vinculado ao \textit{commit} do código, permitindo recuperar a versão exata usada em cada experimento & Armazenar o conteúdo dos dados \\
 		Ambiente de modelagem & Treinar, avaliar e escorar, lendo apenas
 		tabelas da camada ouro & Recalcular features \\
 		Registro de experimentos e modelos & Registrar parâmetros, métricas,
@@ -284,7 +285,11 @@ regra 2 da plataforma.
 O treino nunca lê uma base extraída manualmente. Ele lê a camada ouro e
 congela uma cópia versionada no armazenamento de objetos, acompanhada de um
 manifesto com a versão do código (\textit{commit}), a versão das
-transformações e as competências incluídas. A versão do dataset é registrada
+transformações e as competências incluídas. O versionamento dessa cópia é
+feito com o DVC (\textit{Data Version Control}) \cite{dvc}: o conteúdo do
+dataset fica no armazenamento de objetos, e o Git guarda apenas um arquivo de
+metadados com o \textit{hash} desse conteúdo, de modo que cada \textit{commit}
+aponta para uma versão exata dos dados. A versão do dataset é registrada
 no experimento. Assim, qualquer resultado pode ser refeito a partir da versão
 do código e da versão do dataset (R3, QE2), o que será verificado pelo
 critério AV3.
@@ -380,7 +385,7 @@ em um \textit{model card} \cite{mitchell2019}.
 
 A Tabela~\ref{tab:ferramentas-caso} mostra a ferramenta que cumpre cada papel
 da arquitetura no Gov Hub Cidades e onde ela fica no repositório. A maior
-parte das ferramentas já fazia parte da plataforma. As novas são o MLflow e as
+parte das ferramentas já fazia parte da plataforma. As novas são o MLflow, o DVC e as
 bibliotecas de modelagem.
 
 \begin{table}[htb]
@@ -398,6 +403,7 @@ bibliotecas de modelagem.
 		Armazenamento de objetos & RustFS, compatível com S3 & prefixos \texttt{raw/}, \texttt{staging/} e \texttt{ml/} \\
 		Ambiente de modelagem & Python, com pandas, scikit-learn, LightGBM e SHAP & \texttt{ml/<modelo>/} \\
 		Registro de experimentos e modelos & MLflow \cite{zaharia2018} & artefatos em \texttt{ml/mlflow/} \\
+		Versionamento de dados & DVC \cite{dvc} & --- \\
 		Catálogo de dados & OpenMetadata \cite{openmetadata} & --- \\
 		Camada de visualização & Apache Superset & --- \\
 		Análise exploratória & Jupyter & \texttt{ml/<modelo>/notebooks/} \\
