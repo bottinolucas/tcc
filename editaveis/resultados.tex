@@ -17,8 +17,6 @@ O diagnóstico da plataforma Gov Hub Cidades mostrou que:
 
 Os requisitos R1--R9 (Tabela~\ref{tab:requisitos}) foram definidos a partir da literatura e das regras de engenharia da plataforma. A decisão de estender a plataforma existente, em vez de construir uma plataforma de ML separada, foi registrada no ADR 0001 do repositório do projeto, com status ``proposto'', em 27 de outubro de 2026.
 
-\pendente{Atualizar o status do ADR 0001 (proposto/aceito) e citar o ADR 0002, sobre o MLflow, quando for escrito.}
-
 \section{Projeto e desenvolvimento}
 
 Até esta etapa foram produzidos:
@@ -107,8 +105,6 @@ Se esses dados se confirmarem, o período com rótulo confiável deixa de se res
 \end{itemize}
 
 Os três são exemplos dos problemas de dados que \citeonline{sambasivan2021} descrevem como cascatas: invisíveis na origem e caros quando chegam ao modelo. Por isso, a decisão de usar a série histórica no rótulo fica para a EDA, depois da revisão do de-para de colunas.
-
-\pendente{Validar com a revisão humana o de-para de colunas e a semântica de \texttt{situacao\_de\_obra} no relatório executivo da Caixa, e decidir o prefixo definitivo do \textbf{cleansed} fora da área de testes.}
 
 \section{Ameaças à validade}
 

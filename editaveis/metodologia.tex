@@ -55,7 +55,7 @@ O ponto de entrada da pesquisa é centrado no problema \cite{peffers2007}: parte
 \section{Contexto da pesquisa}
 \label{sec:contexto}
 
-O trabalho é desenvolvido no LabLivre da Universidade de Brasília, no âmbito do projeto Gov Hub, que constrói plataformas de dados para órgãos do governo federal. O ambiente de demonstração é a plataforma de dados do Ministério das Cidades, organizada como um \textit{Data Lakehouse} em camadas medalhão (Figura~\ref{fig:govhub}), que contém:
+O trabalho é desenvolvido no Labooratório de Competência em Software Livre (LabLivre) da Universidade de Brasília, no âmbito do projeto Gov Hub, que constrói plataformas de dados para órgãos do governo federal. O ambiente de demonstração é a plataforma de dados do Ministério das Cidades, organizada como um \textit{Data Lakehouse} em camadas medalhão (Figura~\ref{fig:govhub}), que contém:
 
 \begin{itemize}
 	\item fluxos orquestrados de ingestão de fontes como o SFTP da Caixa, as planilhas do Novo MCMV, o histórico da Secretaria Nacional de Habitação (SNH) e APIs públicas, como as do IBGE e do Banco Central;
@@ -141,8 +141,6 @@ O trabalho é desenvolvido no LabLivre da Universidade de Brasília, no âmbito 
 
 As ferramentas que compõem essa plataforma, e as que foram adicionadas para o ML, estão na Tabela~\ref{tab:ferramentas-caso}.
 
-\pendente{Descrever a equipe (papéis, número de pessoas) e o vínculo formal com o MCID; confirmar com os orientadores o nível de detalhe permitido sobre o convênio.}
-
 \section{Planejamento e gestão do trabalho}
 \label{sec:gestao}
 
@@ -168,7 +166,7 @@ A Tabela~\ref{tab:papeis-scrum} mostra como os papéis do Scrum se distribuem.
 		\toprule
 		\textbf{Papel} & \textbf{Quem} & \textbf{Responsabilidade} \\
 		\midrule
-		Dono do produto (\textit{Product Owner}) & Ponto focal técnico do MCID &
+		Dono do produto (\textit{Product Owner}) & Ponto focal técnico do MCID (Hugo) &
 		Priorizar o \textit{backlog} da trilha da plataforma e decidir as
 		questões de negócio (horizonte, capacidade, usuário do alerta) \\
 		Equipe de desenvolvimento & Os dois autores & Planejar, executar e
@@ -182,8 +180,6 @@ A Tabela~\ref{tab:papeis-scrum} mostra como os papéis do Scrum se distribuem.
 	\end{tabularx}
 	\fonte{Elaborado pelos autores.}
 \end{table}
-
-\pendente{Confirmar com o MCID quem será o ponto focal no papel de dono do produto e a disponibilidade para as revisões quinzenais.}
 
 O \textit{backlog} fica nas \textit{issues} e em um quadro de projeto do GitHub, no repositório deste documento, com campos para a \textit{sprint} e para o épico. Os itens da trilha da plataforma apontam para as \textit{issues} e os \textit{pull requests} do repositório da plataforma. O andamento é acompanhado por um gráfico de itens concluídos por épico (\textit{burnup}). A velocidade da equipe, medida comum no Scrum, tem pouco significado para uma equipe de duas pessoas.
 
@@ -245,8 +241,6 @@ A avaliação combina critérios sobre a arquitetura e sobre a instanciação. A
 \end{table}
 
 O AV7 é qualitativo e não envolve implementar nada na aplicação analisada: ele verifica se os papéis, definidos a partir do caso preditivo, descrevem também uma aplicação de outra natureza. O AV5 avalia a instanciação, não a arquitetura: um modelo que não supere a regra vigente não invalida a arquitetura, desde que a comparação tenha sido feita de forma correta e reprodutível. Esse resultado negativo seria, ele próprio, uma informação útil para o órgão.
-
-\pendente{Decidir com os orientadores se haverá uma avaliação qualitativa adicional com a equipe técnica (por exemplo, questionário ou grupo focal sobre a facilidade de adicionar um segundo modelo à arquitetura).}
 
 \section{Ferramentas}
 \label{sec:ferramentas}

@@ -257,9 +257,9 @@ A promoção de um modelo é controlada por um \textit{gate} aplicado pelo orque
 
 O monitoramento também fica na camada de transformação (R6), em dois tempos, por causa do atraso do rótulo (Seção~\ref{sec:riscos}). Logo após cada escore, tabelas da camada ouro comparam a distribuição das features da competência com a do dataset de treino, por feature, com o índice de estabilidade populacional (PSI). Esse é o sinal antecipado. Só $h$ meses depois, quando o horizonte de predição se cumpre, as mesmas tabelas calculam o desempenho realizado dos escores passados. Esse desempenho é calculado também por subgrupo (unidade da federação, região e modalidade), para que uma queda concentrada não fique escondida na média (R9). A camada de visualização exibe esses indicadores.
 
-A política de retreino combina os dois tempos: o retreino é periódico e é antecipado quando o PSI de alguma feature relevante ultrapassa o limiar de alerta. Em qualquer caso, a nova versão passa pelo mesmo \textit{gate}.
+A política de retreino combina os dois tempos: o retreino é mensal e é antecipado quando o PSI de alguma feature relevante ultrapassa o limiar de alerta. Em qualquer caso, a nova versão passa pelo mesmo \textit{gate}.
 
-\pendente{Calibrar os limiares de PSI na EDA (a referência usual é 0,1 para atenção e 0,25 para alerta) e definir a periodicidade do retreino com o MCID.}
+\pendente{Calibrar os limiares de PSI na EDA (a referência usual é 0,1 para atenção e 0,25 para alerta).}
 
 \subsection{Extensão para aplicações com modelos de linguagem}
 \label{sec:extensao-llm}
