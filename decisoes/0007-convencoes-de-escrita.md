@@ -28,6 +28,10 @@ referências ficam difíceis de conferir.
 6. **A compilação** usa pdflatex e bibtex, igual ao Overleaf. Antes de enviar, o documento precisa
    compilar sem erros e sem citações indefinidas.
 7. **Push na `main`** sincroniza com o Overleaf. Só vai para a `main` o que compila.
+8. **Estrangeirismos.** Termos já incorporados ao jargão da área ficam sem itálico: feature,
+   dataset, pipeline, ranking, software. Termos de ferramenta ou de processo ficam em itálico:
+   *gate*, *champion*, *challenger*, *sprint*, *backfill*, *lakehouse*, *hash*, *commit*,
+   *as of*, *model card*, *datasheet*. Identificadores de código usam `\cod{}`.
 
 ## Alternativas consideradas
 

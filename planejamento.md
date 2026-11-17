@@ -1,6 +1,6 @@
 # Planejamento do TCC1
 
-Última atualização: 16/11/2026 (revisão a partir do parecer e da devolutiva do TCC1)
+Última atualização: 17/11/2026 (revisão editorial: consistência, formatação e referências)
 
 ## 1. Tema
 
@@ -87,7 +87,7 @@ Scrum adaptado, com sprints de 2 semanas (decisão 0011).
 | 0 | 27/10 a 15/11/2026 | Diagnóstico, ADR da arquitetura, especificação do caso, levantamento dos dados, primeira versão do TCC1 e refinamento (stack, LLM, sprints, histórico) | ✅ |
 | T1 | 16/11 a 29/11/2026 | Regra vigente no mês t no período SFTP; tabela de transições; EDA perguntas 1 a 3; busca estruturada; integrar `ml/` e ADR 0001 na plataforma | ⬜ |
 | T2 | 30/11 a 13/12/2026 | Resultados da T1 no texto (E11); revisão com os orientadores; entrega do TCC1 | ⬜ |
-| S1–S12 | TCC2 | Ver a tabela `tab:cronograma` em `consideracoes.tex` | ⬜ |
+| S1–S9 | TCC2 | Ver a tabela `tab:cronograma` em `consideracoes.tex` (nove sprints entre 15/03 e 16/07/2027) | ⬜ |
 
 **Definição de pronto:**
 - código: PR revisado, CI verde, `dbt build`;
@@ -175,10 +175,8 @@ afirmação).
 | Gebru et al. (2021), CACM | Datasheets de datasets | 2.5, 4.2 | ○ |
 | Mehrabi et al. (2022), CSUR | Viés e equidade em ML. Base do R9 | 2.5, R9 | ★ |
 | Sambasivan et al. (2021), CHI | Cascatas de dados em IA de alto impacto | 2.5, 5.4 | ★ |
-| Lewis et al. (2020), NeurIPS; Gao et al. (2023); Edge et al. (2024) | RAG e GraphRAG | 2.4 | ○ |
-| Yu et al. (2018), Spider; Li et al. (2023), BIRD | Text-to-SQL em bases reais | 2.4 | ○ |
-| Es et al. (2024), RAGAS; Saad-Falcon et al. (2024), ARES | Avaliar recuperação e geração separadamente | 2.4 | ○ |
-| Zheng et al. (2023); Shankar et al. (2024), UIST | LLM como juiz e a validação do juiz | 2.4 | ○ |
+| Lewis et al. (2020), NeurIPS; Edge et al. (2024) | RAG e GraphRAG | 2.4 | ○ |
+| Es et al. (2024), RAGAS | Avaliar recuperação e geração separadamente | 2.4 | ○ |
 | Greshake et al. (2023), AISec; OWASP Top 10 LLM (2025) | Segurança de aplicações com LLM | 2.4 | ○ |
 | Schwaber e Sutherland (2020), Scrum Guide | Scrum | 3.4 | ○ |
 | Saltz, Shamshurin e Crowston (2017), HICSS | Metodologias de gestão em ciência de dados | 3.4 | ○ |
@@ -197,6 +195,17 @@ afirmação).
 | Davidson-Pilon (2019), lifelines | Biblioteca de sobrevivência na instanciação | Tabela 10 | ○ |
 | Amou Najafabadi et al. (2024), ECSA | Mapeamento de 43 estudos, 35 componentes de arquiteturas de MLOps | 2.7 | ★ |
 | Databricks (2023), Big Book of MLOps | Literatura cinzenta: dados e ativos de ML no mesmo lakehouse | 2.7 | ★ |
+
+### Adicionadas em 17/11/2026 (revisão editorial; conferidas na fonte, ainda não lidas pelos autores)
+
+| Ref. | Por que | Onde | Prior. |
+|---|---|---|---|
+| Siddiqi (2006); Yurdakul (2018) | Origem dos limiares 0,1 e 0,25 do PSI e suas propriedades estatísticas | 2.5, 4.2.6 | ○ |
+| Grinsztajn, Oyallon e Varoquaux (2022), NeurIPS | Gradient boosting continua entre os melhores em dados tabulares | 2.5 | ○ |
+| Veale e Brass (2019); Engstrom et al. (2020) | ML na administração pública: níveis de gestão e levantamento em agências federais | 2.6 | ○ |
+| Brasil (2021), EBIA (Portaria MCTI 4.617) | Aplicação de IA no poder público como eixo da estratégia nacional | 2.6 | ○ |
+| Gil (2002) | Classificação da pesquisa | 3.1 | ○ |
+| van Houwelingen (2007) | Predição por marco (landmark) em sobrevivência: features fixadas em t e deslocamento j | 4.3.1 | ★ |
 
 ## 5. Busca estruturada pendente (E7)
 

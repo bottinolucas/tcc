@@ -1,12 +1,12 @@
 \chapter[Metodologia]{Metodologia}
 \label{cap:metodologia}
 
-Este capítulo descreve como a pesquisa é conduzida. A Seção~\ref{sec:classificacao} classifica a pesquisa. A Seção~\ref{sec:dsr} apresenta a \textit{Design Science Research} e o mapeamento de suas atividades para este trabalho. A Seção~\ref{sec:contexto} descreve o contexto em que o artefato é desenvolvido, e a Seção~\ref{sec:gestao}, como o trabalho é planejado e acompanhado. A Seção~\ref{sec:avaliacao} define os critérios e procedimentos de avaliação e liga cada objetivo à evidência que o verificará, e a Seção~\ref{sec:ferramentas} trata das ferramentas utilizadas.
+Este capítulo descreve como a pesquisa é conduzida. A Seção~\ref{sec:classificacao} classifica a pesquisa. A Seção~\ref{sec:dsr} apresenta a \textit{Design Science Research} e o mapeamento de suas atividades para este trabalho. A Seção~\ref{sec:contexto} descreve o contexto em que o artefato é desenvolvido, e a Seção~\ref{sec:gestao}, como o trabalho é planejado e acompanhado. A Seção~\ref{sec:avaliacao} define os critérios e procedimentos de avaliação e liga cada objetivo à evidência que o verificará.
 
 \section{Classificação da pesquisa}
 \label{sec:classificacao}
 
-Quanto à natureza, a pesquisa é \textbf{aplicada}: busca resolver um problema concreto de uma plataforma de dados governamentais em operação. Quanto à abordagem, é \textbf{mista}: combina medidas quantitativas (métricas do modelo, reprodutibilidade de execuções) com análise qualitativa da aderência da arquitetura a princípios da literatura. Quanto aos procedimentos, segue a \textbf{Design Science Research}, apoiada em pesquisa bibliográfica e em pesquisa documental sobre o sistema existente.
+Quanto à natureza, a pesquisa é \textbf{aplicada} \cite{gil2002}: busca resolver um problema concreto de uma plataforma de dados governamentais em operação. Quanto à abordagem, é \textbf{mista}: combina medidas quantitativas (métricas do modelo, reprodutibilidade de execuções) com análise qualitativa da aderência da arquitetura a princípios da literatura. Quanto aos procedimentos, segue a \textbf{Design Science Research}, apoiada em pesquisa bibliográfica e em pesquisa documental sobre o sistema existente. A pesquisa bibliográfica segue o protocolo de busca descrito na Seção~\ref{sec:relacionados}. A pesquisa documental foi feita sobre o repositório da plataforma \cite{govhubcidades}: o código das transformações, em especial o SQL da regra vigente (Seção~\ref{sec:regra-vigente}), os registros de decisão (ADRs) e a documentação de ingestão das fontes.
 
 \section{Design Science Research}
 \label{sec:dsr}
@@ -22,37 +22,37 @@ Para operacionalizar o processo, adota-se a metodologia de \citeonline{peffers20
 	\resizebox{\textwidth}{!}{%
 	\begin{tikzpicture}[
 		act/.style={draw, rounded corners, align=center, minimum height=1.5cm,
-			text width=2.5cm, font=\footnotesize\bfseries},
+			text width=2.3cm, font=\footnotesize\bfseries},
 		t1/.style={act, fill=green!20},
 		t12/.style={act, top color=green!20, bottom color=blue!15},
 		t2/.style={act, fill=blue!15},
-		note/.style={align=center, text width=2.5cm, font=\scriptsize},
+		note/.style={align=center, text width=2.4cm, font=\scriptsize},
 		arr/.style={-{Stealth[length=2mm]}, thick},
 		back/.style={-{Stealth[length=2mm]}, thick, dashed, gray!70!black},
 		elbl/.style={font=\scriptsize\itshape, fill=white, inner sep=1pt}
 	]
 		\node[t1]  (a1) at (0,0)    {1. Identificar o problema e motivar};
-		\node[t1]  (a2) at (3.1,0)  {2. Definir os objetivos da solução};
-		\node[t12] (a3) at (6.2,0)  {3. Projetar e desenvolver};
-		\node[t2]  (a4) at (9.3,0)  {4. Demonstrar};
-		\node[t2]  (a5) at (12.4,0) {5. Avaliar};
-		\node[t12] (a6) at (15.5,0) {6. Comunicar};
+		\node[t1]  (a2) at (2.9,0)  {2. Definir os objetivos da solução};
+		\node[t12] (a3) at (5.8,0)  {3. Projetar e desenvolver};
+		\node[t2]  (a4) at (8.7,0)  {4. Demonstrar};
+		\node[t2]  (a5) at (11.6,0) {5. Avaliar};
+		\node[t12] (a6) at (14.5,0) {6. Comunicar};
 
 		\foreach \a/\b in {a1/a2, a2/a3, a3/a4, a4/a5, a5/a6}
 			\draw[arr] (\a) -- (\b);
 
-		\node[note, below=0.25cm of a1] {regra vigente nunca comparada; plataforma sem ML};
+		\node[note, below=0.25cm of a1] {regra nunca comparada; plataforma sem ML};
 		\node[note, below=0.25cm of a2] {requisitos R1--R9};
 		\node[note, below=0.25cm of a3] {projeto (TCC1) e implementação (TCC2)};
-		\node[note, below=0.25cm of a4] {reprodução da operação sobre o histórico};
+		\node[note, below=0.25cm of a4] {reprodução sobre o histórico};
 		\node[note, below=0.25cm of a5] {critérios AV1--AV8};
 		\node[note, below=0.25cm of a6] {monografia, ADRs e repositório};
 
 		\draw[back] (a5.north) -- ++(0,0.9) -| node[elbl, pos=0.25, above] {iteração: volta ao projeto} (a3.north);
 		\draw[back] (a5.north) ++(0.4,0) -- ++(0,1.5) -| node[elbl, pos=0.25, above] {iteração: revisão dos objetivos} (a2.north);
 
-		\node[font=\scriptsize\itshape, anchor=east, align=right] (entrada) at (-1.6,1.4) {ponto de entrada:\\centrado no problema};
-		\draw[arr] (entrada.south) |- (a1.west);
+		\node[font=\scriptsize\itshape, anchor=south, align=center] (entrada) at (0,1.4) {ponto de entrada:\\centrado no problema};
+		\draw[arr] (entrada.south) -- (a1.north);
 
 		\begin{scope}[shift={(3.5,-3.0)}]
 			\node[t1, minimum height=0.4cm, text width=0.5cm] at (0,0) {};
@@ -71,18 +71,18 @@ Para operacionalizar o processo, adota-se a metodologia de \citeonline{peffers20
 
 \begin{table}[htbp]
 	\centering
-	\caption{Atividades da DSR \cite{peffers2007} aplicadas a este trabalho.}
+	\caption[Atividades da DSR aplicadas a este trabalho.]{Atividades da DSR \cite{peffers2007} aplicadas a este trabalho.}
 	\label{tab:dsr}
 	\small
 	\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.3cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{1.6cm}@{}}
 		\toprule
 		\textbf{Atividade} & \textbf{Realização neste trabalho} & \textbf{Etapa} \\
 		\midrule
-		1. Identificar o problema e motivar & Diagnóstico da regra vigente, levantamento dos dados disponíveis e da ausência de infraestrutura de ML na plataforma (Capítulos~\ref{cap:introducao} e~\ref{cap:resultados}) & TCC1 \\
-		2. Definir os objetivos da solução & Requisitos da arquitetura derivados da literatura e das regras da plataforma (Seção~\ref{sec:requisitos}) & TCC1 \\
-		3. Projetar e desenvolver & Projeto da arquitetura (Capítulo~\ref{cap:proposta}) e implementação dos componentes: transformações de painel, rótulo e features; código de treino, avaliação e escore; fluxos de orquestração & TCC1 e TCC2 \\
-		4. Demonstrar & Reprodução da operação mensal sobre o histórico rotulado, no caso de previsão de paralisação de obras do MCMV (Seção~\ref{sec:avaliacao}) & TCC2 \\
-		5. Avaliar & Critérios AV1--AV8 (Seção~\ref{sec:avaliacao}) & TCC2 \\
+		1. Identificar o problema e motivar & Diagnóstico da regra vigente, levantamento dos dados disponíveis e da ausência de infraestrutura de ML na plataforma (Capítulos~\ref{cap:introducao} e~\ref{cap:resultados}) & TCC1 \\ \addlinespace
+		2. Definir os objetivos da solução & Requisitos da arquitetura derivados da literatura e das regras da plataforma (Seção~\ref{sec:requisitos}) & TCC1 \\ \addlinespace
+		3. Projetar e desenvolver & Projeto da arquitetura (Capítulo~\ref{cap:proposta}) e implementação dos componentes: transformações de painel, rótulo e features; código de treino, avaliação e escore; fluxos de orquestração & TCC1 e TCC2 \\ \addlinespace
+		4. Demonstrar & Reprodução da operação mensal sobre o histórico rotulado, no caso de previsão de paralisação de obras do MCMV (Seção~\ref{sec:avaliacao}) & TCC2 \\ \addlinespace
+		5. Avaliar & Critérios AV1--AV8 (Seção~\ref{sec:avaliacao}) & TCC2 \\ \addlinespace
 		6. Comunicar & Este documento, a monografia final, os ADRs e a documentação nos repositórios da plataforma \cite{govhubcidades} e deste trabalho \cite{repositoriotcc} & TCC1 e TCC2 \\
 		\bottomrule
 	\end{tabularx}
@@ -92,7 +92,7 @@ Para operacionalizar o processo, adota-se a metodologia de \citeonline{peffers20
 \section{Contexto da pesquisa}
 \label{sec:contexto}
 
-O trabalho é desenvolvido no Laboratório de Competência em Software Livre (LabLivre) da Universidade de Brasília, no âmbito do projeto Gov Hub, que constrói plataformas de dados para órgãos do governo federal. O ambiente de demonstração é a plataforma de dados do Ministério das Cidades, organizada como um \textit{Data Lakehouse} em camadas medalhão (Figura~\ref{fig:govhub}), que contém:
+O trabalho é desenvolvido no LabLivre da Universidade de Brasília, no âmbito do projeto Gov Hub, que constrói plataformas de dados para órgãos do governo federal. O ambiente de demonstração é a plataforma de dados do Ministério das Cidades, organizada como um \textit{Data Lakehouse} em camadas medalhão (Figura~\ref{fig:govhub}), que contém:
 
 \begin{itemize}
 	\item fluxos orquestrados de ingestão de fontes como o SFTP da Caixa, as planilhas do Novo MCMV, o histórico da Secretaria Nacional de Habitação (SNH) e APIs públicas, como as do IBGE e do Banco Central;
@@ -176,14 +176,16 @@ O trabalho é desenvolvido no Laboratório de Competência em Software Livre (La
 	\fonte{Elaborado pelos autores, a partir do repositório da plataforma \cite{govhubcidades}.}
 \end{figure}
 
-As ferramentas que compõem essa plataforma, e as que serão adicionadas para o ML, estão na Tabela~\ref{tab:ferramentas-caso}.
+As ferramentas que compõem essa plataforma e as que serão adicionadas para o ML estão na Tabela~\ref{tab:ferramentas-caso}, junto com as de apoio à pesquisa: Jupyter, para a análise exploratória, e Git com GitHub Actions, para versionamento e integração contínua.
+
+O acesso aos dados ocorre no âmbito da parceria entre o LabLivre e o MCID que sustenta a plataforma, e os autores trabalham sobre os dados já mascarados na zona de pouso. \pendente{Confirmar com os orientadores o nível de detalhe permitido sobre o acordo com o MCID.}
 
 \section{Planejamento e gestão do trabalho}
 \label{sec:gestao}
 
 O trabalho é organizado com o \textit{framework} Scrum \cite{schwaber2020scrum}, em ciclos (\textit{sprints}) de duas semanas, cada um com uma meta, planejamento, revisão e retrospectiva. \citeonline{saltz2017} observaram que abordagens ágeis precisam de ajustes quando o trabalho é exploratório, porque uma análise de dados não tem um ``pronto'' previsível. Por isso, adotam-se quatro adaptações. Em \textit{sprints} de exploração, a meta é responder a uma pergunta e termina com uma decisão registrada, mesmo que seja descartar um caminho. Itens exploratórios, como a sensibilidade ao horizonte $h$, recebem um prazo fixo. As fases do CRISP-DM (Tabela~\ref{tab:ciclo}) organizam o \textit{backlog} como épicos, mas podem ser atravessadas em uma mesma \textit{sprint}, como sugerem \citeonline{martinezplumed2021}. E o mesmo \textit{backlog} reúne duas trilhas, a da plataforma (atividades 3 a 5 da DSR) e a da escrita, com incremento nas duas a cada \textit{sprint}.
 
-Os dois autores formam a equipe de desenvolvimento, revisam o trabalho um do outro e se revezam na condução das cerimônias. O ponto focal técnico do MCID atua como dono do produto, priorizando a trilha da plataforma e decidindo as questões de negócio (horizonte, capacidade e usuário do alerta). O orientador e os coorientadores participam da revisão de cada \textit{sprint}, com foco no rigor metodológico e na escrita. O \textit{backlog} fica no quadro de projeto do repositório deste trabalho \cite{repositoriotcc}, com ligação para as \textit{issues} e \textit{pull requests} do repositório da plataforma \cite{govhubcidades}.
+Os dois autores formam a equipe de desenvolvimento, revisam o trabalho um do outro e se revezam na condução das cerimônias. O ponto focal técnico do MCID, a confirmar, atuará como dono do produto, priorizando a trilha da plataforma e decidindo as questões de negócio (horizonte, capacidade e usuário do alerta). O orientador e os coorientadores participam da revisão de cada \textit{sprint}, com foco no rigor metodológico e na escrita. O \textit{backlog} fica no quadro de projeto do repositório deste trabalho \cite{repositoriotcc}, com ligação para as \textit{issues} e \textit{pull requests} do repositório da plataforma \cite{govhubcidades}.
 
 Um item só é considerado pronto quando cumpre a definição de pronto da sua natureza: o código, quando revisado pelo outro autor, com a integração contínua aprovada; o modelo, quando a execução estiver registrada com a versão do dataset e do código (R3, R4); o texto, quando o documento compilar sem pendências daquele item; e a decisão, quando estiver registrada como ADR.
 
@@ -192,7 +194,7 @@ O trabalho do TCC1 até a data deste documento corresponde a uma \textit{sprint}
 \section{Critérios e procedimentos de avaliação}
 \label{sec:avaliacao}
 
-A avaliação combina critérios sobre a arquitetura e sobre a instanciação. Esta seção apresenta como a arquitetura será demonstrada, os critérios e o procedimento de cada um, a condição em que cada critério é considerado atendido e, por fim, a ligação entre objetivos, requisitos e critérios.
+A avaliação combina critérios sobre a arquitetura e sobre a instanciação. Esta seção apresenta como a arquitetura será demonstrada, os critérios e o procedimento de cada um, a condição em que cada critério é considerado atendido e, por fim, a ligação entre objetivos, requisitos e critérios. Os requisitos R1 a R9 referidos nesta seção são definidos na Seção~\ref{sec:requisitos}.
 
 \subsection{Demonstração}
 
@@ -211,13 +213,13 @@ A Tabela~\ref{tab:avaliacao} apresenta os critérios, o procedimento de cada um 
 		\toprule
 		\textbf{ID} & \textbf{Critério e procedimento} & \textbf{Questão} \\
 		\midrule
-		AV1 & \textbf{Aderência aos princípios de MLOps.} Análise de cada princípio P1--P9 de \citeonline{kreuzberger2023}, indicando o componente da arquitetura que o atende, ou a justificativa para não atendê-lo no nível 1 de maturidade. & QP, QE1 \\
-		AV2 & \textbf{Prontidão para produção.} Aplicação da rubrica \textit{ML Test Score} \cite{breck2017} sobre a instanciação, considerando os testes aplicáveis ao nível 1 de maturidade. & QP \\
-		AV3 & \textbf{Reprodutibilidade.} Reexecução do treino a partir de um \textit{commit} e de uma versão de dataset registrados, em ambiente limpo, comparando métricas e predições com a execução original. & QE2 \\
-		AV4 & \textbf{Ausência de vazamento temporal.} Testes automatizados na camada de transformação que verificam que nenhuma feature do mês $t$ usa dado posterior a $t$ e que os cortes temporais respeitam a ordem; e injeção proposital de um vazamento, que os testes precisam detectar. & QE3 \\
-		AV5 & \textbf{Comparação com a regra vigente.} \textit{Recall@k} e \textit{precision@k} do modelo e da regra vigente no mês $t$ (Seção~\ref{sec:regra-vigente}), no horizonte $h$, por origem móvel, com intervalo de confiança por \textit{bootstrap} e uma faixa de valores de $k$. & QE3 \\
-		AV6 & \textbf{Equidade.} \textit{Recall@k} do modelo e da regra vigente por unidade da federação, região e modalidade, e a diferença entre o melhor e o pior subgrupo, verificando se o modelo reduz ou amplia a desigualdade de cobertura da regra (R9). & QE3 \\
-		AV7 & \textbf{Rastreabilidade.} Para uma amostra de escores da camada ouro, reconstrução da cadeia escore, versão do modelo, execução de treino, \textit{hash} do dataset, \textit{commit} e tabelas de origem pela linhagem do catálogo. & QP, QE2 \\
+		AV1 & \textbf{Aderência aos princípios de MLOps.} Análise de cada princípio P1--P9 de \citeonline{kreuzberger2023}, indicando o componente da arquitetura que o atende, ou a justificativa para não atendê-lo no nível 1 de maturidade. & QP, QE1 \\ \addlinespace
+		AV2 & \textbf{Prontidão para produção.} Aplicação da rubrica \textit{ML Test Score} \cite{breck2017} sobre a instanciação, considerando os testes aplicáveis ao nível 1 de maturidade. & QP \\ \addlinespace
+		AV3 & \textbf{Reprodutibilidade.} Reexecução do treino a partir de um \textit{commit} e de uma versão de dataset registrados, em ambiente limpo, comparando métricas e predições com a execução original. & QE2 \\ \addlinespace
+		AV4 & \textbf{Ausência de vazamento temporal.} Testes automatizados na camada de transformação que verificam que nenhuma feature do mês $t$ usa dado posterior a $t$ e que os cortes temporais respeitam a ordem; e injeção proposital de um vazamento, que os testes precisam detectar. & QE3 \\ \addlinespace
+		AV5 & \textbf{Comparação com a regra vigente.} \textit{Recall@k} e \textit{precision@k} do modelo e da regra vigente no mês $t$ (Seção~\ref{sec:regra-vigente}), no horizonte $h$, por origem móvel, com intervalo de confiança por \textit{bootstrap} e uma faixa de valores de $k$. & QE3 \\ \addlinespace
+		AV6 & \textbf{Equidade.} \textit{Recall@k} do modelo e da regra vigente por unidade da federação, região e modalidade, e a diferença entre o melhor e o pior subgrupo, verificando se o modelo reduz ou amplia a desigualdade de cobertura da regra (R9). & QE3 \\ \addlinespace
+		AV7 & \textbf{Rastreabilidade.} Para uma amostra de escores da camada ouro, reconstrução da cadeia escore, versão do modelo, execução de treino, \textit{hash} do dataset, \textit{commit} e tabelas de origem pela linhagem do catálogo. & QP, QE2 \\ \addlinespace
 		AV8 & \textbf{Extensibilidade.} Implementação da regra vigente no mês $t$ como segundo escorador, na mesma estrutura do modelo, e verificação das alterações que isso exigiu nos artefatos do primeiro. & QP, QE1 \\
 		\bottomrule
 	\end{tabularx}
@@ -233,20 +235,20 @@ A Tabela~\ref{tab:avaliacao} apresenta os critérios, o procedimento de cada um 
 		\toprule
 		\textbf{ID} & \textbf{Requisitos} & \textbf{Atendido quando} & \textbf{Quem aplica} \\
 		\midrule
-		AV1 & R4, R5, R6, R7 & Todo princípio relevante ao nível 1 tem um componente que o cumpre ou uma justificativa aceita pelo revisor & Autores, com revisor externo \\
-		AV2 & R1, R5, R6 & A nota é de pelo menos 2 em cada uma das quatro seções da rubrica & Autores, com revisor externo \\
-		AV3 & R3 & Métricas e predições reproduzidas dentro da tolerância numérica definida antes da execução & Autores (automatizado) \\
-		AV4 & R2 & Os testes passam sobre os dados reais e falham sobre o vazamento injetado & Autores (automatizado) \\
-		AV5 & R5 & A comparação roda de ponta a ponta a partir de artefatos versionados; o resultado do modelo é relatado, favorável ou não & Autores \\
-		AV6 & R9 & As métricas por subgrupo são calculadas e monitoradas para o modelo e para a regra & Autores \\
-		AV7 & R4, R7 & Nenhum elo da cadeia falta em nenhum escore da amostra & Autores, com revisor externo \\
-		AV8 & R8 & O segundo escorador não exige nenhuma alteração nos artefatos do primeiro modelo & Autores \\
+		AV1 & R4, R5, R6, R7 & Todo princípio relevante ao nível 1 tem um componente que o cumpre ou uma justificativa aceita pelo revisor & Autores, com revisor externo \\ \addlinespace
+		AV2 & R1, R5, R6 & A nota é de pelo menos 2 em cada uma das quatro seções da rubrica & Autores, com revisor externo \\ \addlinespace
+		AV3 & R3 & Métricas e predições reproduzidas dentro da tolerância numérica definida antes da execução & Autores (automatizado) \\ \addlinespace
+		AV4 & R2 & Os testes passam sobre os dados reais e falham sobre o vazamento injetado & Autores (automatizado) \\ \addlinespace
+		AV5 & R5 & A comparação roda de ponta a ponta a partir de artefatos versionados; o resultado do modelo é relatado, favorável ou não & Autores \\ \addlinespace
+		AV6 & R9 & As métricas por subgrupo são calculadas e monitoradas para o modelo e para a regra & Autores \\ \addlinespace
+		AV7 & R4, R7 & Nenhum elo da cadeia falta em nenhum escore da amostra & Autores, com revisor externo \\ \addlinespace
+		AV8 & R8 & O segundo escorador não exige nenhuma alteração nos artefatos do primeiro modelo, congelados por uma etiqueta no repositório ao fim da \textit{sprint} S4 & Autores \\
 		\bottomrule
 	\end{tabularx}
 	\fonte{Elaborado pelos autores.}
 \end{table}
 
-Três observações completam os critérios. Primeiro, AV1, AV2 e AV7 envolvem julgamento, e os autores participam do desenvolvimento da plataforma; por isso, um integrante da equipe do Gov Hub que não seja autor revisa esses três critérios. Segundo, o AV2 é aplicado como meta, e não como comparação entre antes e depois: antes deste trabalho a plataforma não tinha nenhum componente de ML, e a nota inicial seria zero por construção. Terceiro, o AV5 avalia a instanciação, não a arquitetura: um modelo que não supere a regra vigente não invalida a arquitetura, desde que a comparação tenha sido feita de forma correta e reprodutível. Esse resultado negativo seria, ele próprio, uma informação útil para o órgão.
+Quatro observações completam os critérios. Primeiro, AV1, AV2 e AV7 envolvem julgamento, e os autores participam do desenvolvimento da plataforma; por isso, um integrante da equipe do Gov Hub que não seja autor revisa esses três critérios. Segundo, o AV2 é aplicado como meta, e não como comparação entre antes e depois: antes deste trabalho a plataforma não tinha nenhum componente de ML, e a nota inicial seria zero por construção. Terceiro, o AV5 avalia a instanciação, não a arquitetura: um modelo que não supere a regra vigente não invalida a arquitetura, desde que a comparação tenha sido feita de forma correta e reprodutível. Esse resultado negativo seria, ele próprio, uma informação útil para o órgão. Quarto, para que o AV8 não seja verdadeiro por construção, a estrutura do primeiro modelo recebe uma etiqueta (\textit{tag}) no repositório ao fim da \textit{sprint} S4, antes de o segundo escorador ser implementado, e a ausência de alterações é medida contra essa etiqueta.
 
 \subsection{Objetivos, requisitos e evidências}
 
@@ -261,17 +263,14 @@ A Tabela~\ref{tab:objetivos-evidencias} liga cada objetivo específico (Seção~
 		\toprule
 		\textbf{Objetivo específico} & \textbf{Questão} & \textbf{Requisitos} & \textbf{Evidência} & \textbf{\textit{Sprint}} \\
 		\midrule
-		OE1. Definir os requisitos da arquitetura & QP & R1--R9 & Tabela~\ref{tab:requisitos} & TCC1 \\
-		OE2. Projetar a arquitetura por papéis sobre o \textit{lakehouse} & QE1 & R1, R7, R8 & Capítulo~\ref{cap:proposta}; AV1 & TCC1; S7 \\
-		OE3. Instanciar a arquitetura no caso & QE2, QE3 & R1--R6, R9 & implementação; AV3, AV4 & S1--S6 \\
-		OE4. Avaliar a arquitetura & QP, QE1 & R4--R8 & AV1, AV2, AV8 & S5, S7 \\
+		OE1. Definir os requisitos da arquitetura & QP & R1--R9 & Tabela~\ref{tab:requisitos} & TCC1 \\ \addlinespace
+		OE2. Projetar a arquitetura por papéis sobre o \textit{lakehouse} & QE1 & R1, R7, R8 & Capítulo~\ref{cap:proposta}; AV1 & TCC1; S7 \\ \addlinespace
+		OE3. Instanciar a arquitetura no caso & QE2, QE3 & R1--R6, R9 & implementação; AV3, AV4 & S1--S6 \\ \addlinespace
+		OE4. Avaliar a arquitetura & QP, QE1 & R1, R4--R8 & AV1, AV2, AV8 & S5, S7 \\ \addlinespace
 		OE5. Avaliar a instanciação & QE2, QE3 & R2--R5, R7, R9 & AV3--AV7 & S4--S7 \\
 		\bottomrule
 	\end{tabularx}
 	\fonte{Elaborado pelos autores.}
 \end{table}
 
-\section{Ferramentas}
-\label{sec:ferramentas}
 
-A arquitetura é definida por papéis, independentes de ferramenta (Seção~\ref{sec:arquitetura}). As ferramentas que cumprem cada papel no caso estudado são definidas uma única vez, na Tabela~\ref{tab:ferramentas-caso}, junto com a instanciação. A mesma tabela inclui as ferramentas de apoio à pesquisa: Jupyter, para a análise exploratória, e Git com GitHub Actions, para versionamento e integração contínua.

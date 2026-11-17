@@ -36,7 +36,7 @@ exploratória.
 5. **Calendário:**
    - Sprint 0: 27/10 a 15/11/2026, o TCC1 feito até aqui;
    - T1 e T2: duas sprints até a entrega do TCC1, em dezembro/2026;
-   - S1 a S12: TCC2.
+   - S1 a S9: TCC2 (nove sprints de duas semanas entre 15/03 e 16/07/2027).
 
 ## Alternativas consideradas
 

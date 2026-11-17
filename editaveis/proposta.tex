@@ -26,14 +26,14 @@ A Tabela~\ref{tab:requisitos} lista os requisitos resultantes. Cada um é verifi
 		\toprule
 		\textbf{ID} & \textbf{Requisito} & \textbf{Origem} \\
 		\midrule
-		R1 & Toda feature é calculada uma única vez, por uma transformação declarativa e versionada, e usada tanto no treino quanto no escore. & \citeonline{sculley2015}; \citeonline{polyzotis2018}; regra 1 \\
-		R2 & Toda feature de uma observação no mês $t$ usa apenas dados disponíveis até $t$, e isso é verificado por teste automatizado. & \citeonline{kaufman2012} \\
-		R3 & Todo resultado de treino pode ser refeito a partir da versão do código e da versão do dataset. & \citeonline{kreuzberger2023} (P3, P4); \citeonline{shankar2024} \\
-		R4 & Todo experimento registra parâmetros, métricas, artefatos e a origem dos dados. & \citeonline{zaharia2018}; \citeonline{kreuzberger2023} (P7) \\
-		R5 & Um modelo só substitui o vigente se superar o vigente e a regra vigente, na mesma métrica e no mesmo período. & \citeonline{studer2021}; \citeonline{breck2017} \\
-		R6 & Distribuição das features e desempenho realizado são monitorados continuamente. & \citeonline{gama2014}; \citeonline{kreuzberger2023} (P8) \\
-		R7 & Tabelas de ML passam pelas mesmas camadas, testes e catálogo que qualquer outra tabela da plataforma. & \citeonline{ferreira2025}; regras 1 e 2 \\
-		R8 & Adicionar um segundo modelo não exige alterar a estrutura do primeiro. & \citeonline{amershi2019} \\
+		R1 & Toda feature é calculada uma única vez, por uma transformação declarativa e versionada, e usada tanto no treino quanto no escore. & \citeonline{sculley2015}; \citeonline{polyzotis2018}; regra 1 \\ \addlinespace
+		R2 & Toda feature de uma observação no mês $t$ usa apenas dados disponíveis até $t$, e isso é verificado por teste automatizado. & \citeonline{kaufman2012} \\ \addlinespace
+		R3 & Todo resultado de treino pode ser refeito a partir da versão do código e da versão do dataset. & \citeonline{kreuzberger2023} (P3, P4); \citeonline{shankar2024} \\ \addlinespace
+		R4 & Todo experimento registra parâmetros, métricas, artefatos e a origem dos dados. & \citeonline{zaharia2018}; \citeonline{kreuzberger2023} (P7) \\ \addlinespace
+		R5 & Um modelo só substitui a versão em uso (\textit{champion}) se superar essa versão e a regra vigente, na mesma métrica e no mesmo período. & \citeonline{studer2021}; \citeonline{breck2017} \\ \addlinespace
+		R6 & Distribuição das features e desempenho realizado são monitorados continuamente. & \citeonline{gama2014}; \citeonline{kreuzberger2023} (P8) \\ \addlinespace
+		R7 & Tabelas de ML passam pelas mesmas camadas, testes e catálogo que qualquer outra tabela da plataforma. & \citeonline{ferreira2025}; regras 1 e 2 \\ \addlinespace
+		R8 & Adicionar um segundo modelo não exige alterar a estrutura do primeiro. & \citeonline{amershi2019} \\ \addlinespace
 		R9 & O desempenho dos escores é calculado e monitorado também por subgrupo relevante para a política pública, e não apenas no agregado. & \citeonline{mehrabi2022}; \citeonline{mitchell2019} \\
 		\bottomrule
 	\end{tabularx}
@@ -158,14 +158,14 @@ A principal decisão da arquitetura é qual papel assume cada responsabilidade d
 		\toprule
 		\textbf{Papel} & \textbf{Responsabilidade} & \textbf{Não faz} \\
 		\midrule
-		Orquestrador & Agendar e encadear ingestão, export de datasets, treino, promoção e escore; aplicar o \textit{gate} de promoção & Conter cálculo sobre dados \\
-		Camada de transformação & Calcular painel, rótulo, features \textit{as of} $t$, leitura dos escores e métricas de monitoramento; executar testes de dados e de vazamento & Treinar modelos \\
-		Motor analítico & Materializar e consultar as camadas bronze, prata e ouro & --- \\
-		Armazenamento de objetos & Guardar a zona de pouso, os datasets congelados e os artefatos de modelo & --- \\
-		Versionamento de dados & Atribuir a cada dataset congelado um identificador de conteúdo (\textit{hash}) vinculado ao \textit{commit} do código, permitindo recuperar a versão exata usada em cada experimento & Armazenar o conteúdo dos dados \\
-		Ambiente de modelagem & Treinar, avaliar e escorar, lendo apenas tabelas da camada ouro & Recalcular features \\
-		Registro de experimentos e modelos & Registrar parâmetros, métricas, artefatos, versões de modelo e o apelido de cada versão (vigente ou candidata) & Decidir a promoção \\
-		Catálogo de dados & Registrar tabelas, responsáveis e linhagem de todas as camadas & --- \\
+		Orquestrador & Agendar e encadear ingestão, export de datasets, treino, promoção e escore; aplicar o \textit{gate} de promoção & Conter cálculo sobre dados \\ \addlinespace
+		Camada de transformação & Calcular painel, rótulo, features \textit{as of} $t$, leitura dos escores e métricas de monitoramento; executar testes de dados e de vazamento & Treinar modelos \\ \addlinespace
+		Motor analítico & Materializar e consultar as camadas bronze, prata e ouro & --- \\ \addlinespace
+		Armazenamento de objetos & Guardar a zona de pouso, os datasets congelados e os artefatos de modelo & --- \\ \addlinespace
+		Versionamento de dados & Atribuir a cada dataset congelado um identificador de conteúdo (\textit{hash}) vinculado ao \textit{commit} do código, permitindo recuperar a versão exata usada em cada experimento & Armazenar o conteúdo dos dados \\ \addlinespace
+		Ambiente de modelagem & Treinar e avaliar a partir do dataset congelado exportado da camada ouro; escorar a partir das features \textit{as of} $t$ da camada ouro & Recalcular features \\ \addlinespace
+		Registro de experimentos e modelos & Registrar parâmetros, métricas, artefatos, versões de modelo e o apelido de cada versão (em uso ou candidata) & Decidir a promoção \\ \addlinespace
+		Catálogo de dados & Registrar tabelas, responsáveis e linhagem de todas as camadas & --- \\ \addlinespace
 		Camada de visualização & Exibir o ranking de risco e os indicadores de monitoramento & Calcular métricas \\
 		\bottomrule
 	\end{tabularx}
@@ -193,11 +193,11 @@ Cada modelo percorre as fases do CRISP-DM \cite{wirth2000} (Figura~\ref{fig:cris
 		\toprule
 		\textbf{Fase} & \textbf{Onde mora} & \textbf{Saída} \\
 		\midrule
-		1. Entendimento do problema & Documentação do modelo, versionada com o código & Definição do evento, usuário, antecedência, capacidade e regra vigente de comparação \\
-		2. Entendimento dos dados & Análise exploratória, que lê a camada prata e nunca vai para produção & Relatório com decisões de rótulo, janela e features \\
-		3. Preparação & Camada de transformação (prata e ouro) & Painel, rótulo e features \textit{as of} $t$, com teste de vazamento \\
-		4. Modelagem & Ambiente de modelagem e registro de experimentos & Experimentos registrados \\
-		5. Avaliação & Ambiente de modelagem & Métricas contra a regra vigente, em corte temporal \\
+		1. Entendimento do problema & Documentação do modelo, versionada com o código & Definição do evento, usuário, antecedência, capacidade e regra vigente de comparação \\ \addlinespace
+		2. Entendimento dos dados & Análise exploratória, que lê a camada prata e nunca vai para produção & Relatório com decisões de rótulo, janela e features \\ \addlinespace
+		3. Preparação & Camada de transformação (prata e ouro) & Painel, rótulo e features \textit{as of} $t$, com teste de vazamento \\ \addlinespace
+		4. Modelagem & Ambiente de modelagem e registro de experimentos & Experimentos registrados \\ \addlinespace
+		5. Avaliação & Ambiente de modelagem & Métricas contra a regra vigente, em corte temporal \\ \addlinespace
 		6. Implantação e operação & Orquestrador, camada de transformação e camada de visualização & Escore mensal, retreino com \textit{gate}, monitoramento \\
 		\bottomrule
 	\end{tabularx}
@@ -208,21 +208,24 @@ Ao redor desse ciclo há um processo de integração contínua. Cada mudança pr
 
 \subsection{Reprodutibilidade e rastreabilidade}
 
-Pelo projeto, o treino não lê uma base extraída manualmente. Ele lê a camada ouro e congela uma cópia versionada no armazenamento de objetos, acompanhada de um manifesto com a versão do código (\textit{commit}), a versão das transformações e as competências incluídas. O versionamento dessa cópia é feito com o DVC (\textit{Data Version Control}) \cite{dvc}: o conteúdo do dataset fica no armazenamento de objetos, e o Git guarda apenas um arquivo de metadados com o \textit{hash} desse conteúdo, de modo que cada \textit{commit} aponta para uma versão exata dos dados.
+Pelo projeto, o treino não lê uma base extraída manualmente. O orquestrador exporta da camada ouro um dataset congelado, gravado no armazenamento de objetos com um manifesto que registra a versão do código (\textit{commit}) e as competências incluídas, e o treino lê apenas essa cópia; o escore mensal, por sua vez, lê as features \textit{as of} $t$ da camada ouro da competência corrente. O papel de versionamento de dados atribui ao dataset congelado um identificador de conteúdo (\textit{hash}), guardado no repositório de código junto do \textit{commit}, de modo que cada versão do código aponta para uma versão exata dos dados. A ferramenta que cumpre esse papel no caso estudado está na Seção~\ref{sec:ferramentas-caso}.
 
-O registro de experimentos fecha o vínculo no sentido contrário. Cada execução de treino registra o \textit{commit} do código, o \textit{hash} do dataset, a versão das transformações, a especificação travada das dependências do ambiente de modelagem e as sementes aleatórias, como recomendam \citeonline{pineau2021}. A partir de qualquer versão de modelo registrada, portanto, chega-se ao código, ao dado e ao ambiente que a produziram. Assim, qualquer resultado pode ser refeito a partir da versão do código e da versão do dataset (R3, R4, QE2), o que será verificado pelo critério AV3. O \textit{model card} \cite{mitchell2019} e a \textit{datasheet} do dataset \cite{gebru2021} são gravados como artefatos da mesma execução.
+O registro de experimentos fecha o vínculo no sentido contrário. Cada execução de treino registra o \textit{commit} do código, o \textit{hash} do dataset, a especificação travada das dependências do ambiente de modelagem e as sementes aleatórias, como recomendam \citeonline{pineau2021}. A partir de qualquer versão de modelo registrada, portanto, chega-se ao código, ao dado e ao ambiente que a produziram. Assim, qualquer resultado pode ser refeito a partir da versão do código e da versão do dataset (R3, R4, QE2), o que será verificado pelo critério AV3. O \textit{model card} \cite{mitchell2019} e a \textit{datasheet} do dataset \cite{gebru2021} são gravados como artefatos da mesma execução.
 
 A rastreabilidade é o mesmo vínculo percorrido a partir do produto final. Cada escore na camada ouro guarda a versão do modelo que o gerou; a versão do modelo aponta para a execução de treino no registro de experimentos; a execução aponta para o \textit{hash} do dataset e para o \textit{commit}; e a linhagem do catálogo de dados liga o dataset às tabelas e às fontes de origem (R4, R7). O critério AV7 verifica se essa cadeia se reconstrói sem elo faltando.
 
 \subsection{Promoção e operação}
+\label{sec:promocao}
 
-O ciclo é disparado por dados, e não apenas por calendário: quando as transformações materializam a camada ouro de uma nova competência, o orquestrador encadeia o export do dataset, o escore e, quando previsto, o retreino. Isso corresponde ao nível 1 de maturidade descrito na Seção~\ref{sec:mlops}. A Figura~\ref{fig:operacao} mostra o ciclo de uma competência.
+O ciclo é disparado por dados, e não apenas por calendário: quando as transformações materializam a camada ouro de uma nova competência, o orquestrador encadeia o export do dataset, o escore e, quando previsto, o retreino. Isso corresponde ao nível 1 de maturidade descrito na Seção~\ref{sec:mlops}: um modelo que gera um escore mensal sobre dados atualizados mensalmente não exige inferência em tempo real, mas exige que o retreino e o escore sejam reprodutíveis e auditáveis. Por isso, o pipeline de treino, avaliação e promoção é automatizado e disparado pela chegada de dados novos, enquanto a implantação do próprio pipeline continua sob revisão humana; o nível 2 traria um custo de engenharia desproporcional para um escore em lote mensal. A Figura~\ref{fig:operacao} mostra o ciclo de uma competência.
 
-A promoção de um modelo é controlada por um \textit{gate} aplicado pelo orquestrador. Cada nova versão entra no registro como candidata (\textit{challenger}) e só passa a gerar o escore oficial se, no período de validação temporal, superar tanto a versão vigente (\textit{champion}) quanto a regra vigente no \textit{recall@k} (R5). Promover é mover o apelido \textit{champion} para a nova versão, e voltar atrás é movê-lo de volta, sem retreinar nada. O escore mensal é gravado na camada bronze e promovido até a camada ouro pela camada de transformação, o que mantém o ranking sob os mesmos testes e o mesmo catálogo das demais tabelas.
+A promoção de um modelo é controlada por um \textit{gate} aplicado pelo orquestrador. Cada nova versão entra no registro como candidata (\textit{challenger}) e só passa a gerar o escore oficial se, no período de validação temporal, superar tanto a versão em uso (\textit{champion}) quanto a regra vigente no \textit{recall@k} (R5). Promover é mover o apelido \textit{champion} para a nova versão, e voltar atrás é movê-lo de volta, sem retreinar nada. O escore mensal é gravado na zona de pouso, lido pela camada bronze e promovido até a camada ouro pela camada de transformação, o que mantém o ranking sob os mesmos testes e o mesmo catálogo das demais tabelas.
+
+Antes de existir um modelo promovido, a regra vigente no mês $t$, implementada como segundo escorador (Seção~\ref{sec:regra-vigente}), ocupa o lugar de \textit{champion}: o escore mensal nunca deixa de existir, e a primeira promoção acontece quando um modelo supera a regra no \textit{gate}. Se nenhuma versão a superar, a plataforma continua a publicar o ranking da regra, agora sob os mesmos testes, o mesmo catálogo e o mesmo monitoramento previstos para o modelo.
 
 O monitoramento também fica na camada de transformação (R6), em dois tempos, por causa do atraso do rótulo (Seção~\ref{sec:riscos}). Logo após cada escore, tabelas da camada ouro comparam a distribuição das features da competência com a do dataset de treino, por feature, com o índice de estabilidade populacional (PSI). Esse é o sinal antecipado. Só $h$ meses depois, quando o horizonte de predição se cumpre, as mesmas tabelas calculam o desempenho realizado dos escores passados. Esse desempenho é calculado também por subgrupo (unidade da federação, região e modalidade), para que uma queda concentrada não fique escondida na média (R9). A camada de visualização exibe esses indicadores.
 
-A política de retreino combina os dois tempos: o retreino é mensal e é antecipado quando o PSI de alguma feature relevante ultrapassa o limiar de alerta. Como valores iniciais, adotam-se os limiares usuais de 0,1 para atenção e 0,25 para alerta, a recalibrar na análise exploratória. Em qualquer caso, a nova versão passa pelo mesmo \textit{gate}.
+A política de retreino combina os dois tempos: o retreino é mensal e é antecipado quando o PSI de alguma feature relevante ultrapassa o limiar de alerta. Como valores iniciais, adotam-se os limiares de 0,1 para atenção e 0,25 para alerta, usuais na prática de \textit{credit scoring} \cite{siddiqi2006} (Seção~\ref{sec:riscos}), a recalibrar na análise exploratória. Em qualquer caso, a nova versão passa pelo mesmo \textit{gate}.
 
 \begin{figure}[htbp]
 	\centering
@@ -240,7 +243,7 @@ A política de retreino combina os dois tempos: o retreino é mensal e é anteci
 	]
 		% Linha superior: chegada da competência e ciclo
 		\node[ouro] (nova)   at (0,0)    {Camada ouro da\\competência $t$\\materializada};
-		\node[ml]   (export) at (3.6,0)  {Export do dataset\\(\textit{hash} DVC)};
+		\node[ml]   (export) at (3.6,0)  {Export do dataset\\(\textit{hash} do dataset)};
 		\node[ml]   (treino) at (7.2,0)  {Retreino:\\nova versão\\\textit{challenger}};
 		\node[dec]  (gate)   at (11.2,0) {\textbf{\textit{Gate}}: supera o \textit{champion} e a regra vigente no \textit{recall@k}?};
 		\node[ml]   (promo)  at (15.2,0.9) {Move o apelido\\\textit{champion}};
@@ -300,73 +303,15 @@ A unidade de análise é a obra (\cod{id_empreendimento}, que acompanha o empree
 
 A saída do modelo, para cada obra em $t$, é o risco acumulado de paralisar até $t+h$, isto é, $1 - \prod_{j=1}^{h} \left(1 - \lambda_{t+j}\right)$, em que $\lambda_{t+j}$ é o risco discreto estimado para o mês $t+j$. O ranking mensal ordena as obras por esse valor.
 
-O escopo inclui as modalidades com execução de obra a acompanhar: Fundo de Arrendamento Residencial (FAR), Fundo de Desenvolvimento Social (FDS), Rural, Pró-Moradia e Financiado (FGTS). Modalidades que são contratos ou propostas, sem execução de obra, ficam de fora.
+No mês $t$, as features de $t+1$ a $t+h$ ainda não existem. Por isso, adota-se a abordagem de marco (\textit{landmark}) \cite{vanhouwelingen2007}: as features são congeladas \textit{as of} $t$, e o risco de cada mês futuro $t+j$ é estimado em função delas e do deslocamento $j$, que entra no modelo como covariável. O painel pessoa-período continua sendo a base de treino; cada linha de treino corresponde a uma obra em um mês $t$ e a um deslocamento $j$ até $h$, com o rótulo indicando se a obra paralisou em $t+j$, dado que não paralisou antes. \pendente{Confirmar com os orientadores a abordagem de marco, adotada aqui como valor padrão.}
+
+O escopo do TCC2 são as três modalidades cujo histórico já está nas tabelas prata e foi levantado neste trabalho (Seção~\ref{sec:levantamento}): Fundo de Arrendamento Residencial (FAR), Fundo de Desenvolvimento Social (FDS) e Rural. As demais modalidades com execução de obra a acompanhar, Pró-Moradia e Financiado (FGTS), têm tabelas próprias ainda não levantadas e entram como extensão, quando esse levantamento for feito. Modalidades que são contratos ou propostas, sem execução de obra, ficam de fora.
 
 \subsection{Dados e período rotulado}
 
-O painel histórico do FAR, do FDS e do Rural está em tabelas prata de histórico por empreendimento, uma por modalidade, com grão de obra por mês, de dezembro de 2019 a julho de 2026. A situação da obra é harmonizada em uma coluna canônica com os valores \cod{em_obras}, \cod{paralisada}, \cod{concluida}, \cod{cancelada} e \cod{nao_iniciada}. O FGTS tem tabelas próprias, com percentual previsto e realizado, data da última vistoria e motivos de paralisação.
+O painel histórico do FAR, do FDS e do Rural está em tabelas prata de histórico por empreendimento, uma por modalidade, com grão de obra por mês, de dezembro de 2019 a julho de 2026. A situação da obra é harmonizada em uma coluna canônica com os valores \cod{em_obras}, \cod{paralisada}, \cod{concluida}, \cod{cancelada} e \cod{nao_iniciada}. O FGTS tem tabelas próprias, com percentual previsto e realizado, data da última vistoria e motivos de paralisação, ainda não levantadas.
 
 A fonte da situação muda ao longo da série, e o levantamento dos dados (Seção~\ref{sec:levantamento}) mostrou que só o período do SFTP da Caixa tem rótulo confiável no painel atual. Para ampliar a base de treino, o rótulo incorpora também a série legada recuperada do relatório executivo da Caixa (Seção~\ref{sec:historico}), desde que cada família de relatório cumpra os critérios de aceite da Seção~\ref{sec:historico}. O período rotulado é, portanto, de julho de 2015 a agosto de 2018 e de dezembro de 2019 a novembro de 2024 (Figura~\ref{fig:fontes}). Depois de novembro de 2024, o painel serve para escorar e monitorar, mas não para treinar.
-
-\begin{figure}[htbp]
-	\centering
-	\resizebox{\textwidth}{!}{%
-	\begin{tikzpicture}[x=1cm, y=1cm,
-		bar/.style={draw, minimum height=0.55cm, inner sep=0pt},
-		ok/.style={bar, fill=green!35},
-		nok/.style={bar, fill=gray!25},
-		parc/.style={bar, fill=orange!30},
-		row/.style={font=\footnotesize, anchor=east, align=right},
-		blbl/.style={font=\scriptsize}
-	]
-		% Eixo: x = ano - 2009
-		\foreach \a in {2009,2011,...,2027} {
-			\pgfmathsetmacro{\xx}{\a-2009}
-			\draw[gray!50] (\xx,0.2) -- (\xx,-4.6);
-			\node[font=\scriptsize, below] at (\xx,-4.6) {\a};
-		}
-		% Faixa de rótulo confiável
-		\fill[green!8] (6.5,0.2) rectangle (9.67,-4.6);
-		\fill[green!8] (10.92,0.2) rectangle (15.92,-4.6);
-		% Lacuna
-		\draw[red!60, dashed, thick] (9.67,0.2) -- (9.67,-4.6);
-		\draw[red!60, dashed, thick] (10.92,0.2) -- (10.92,-4.6);
-		\node[font=\scriptsize\itshape, text=red!60!black, align=center] at (10.3,0.55) {lacuna\\no rótulo};
-
-		% Linhas
-		\node[row] at (-0.2,-0.5) {Legado Caixa\\(relatório executivo)};
-		\draw[nok] (3.0,-0.78) rectangle (6.5,-0.22);
-		\node[blbl] at (4.75,-0.5) {só percentual de obra};
-		\draw[ok] (6.5,-0.78) rectangle (9.67,-0.22);
-		\node[blbl] at (8.08,-0.5) {situação da obra};
-
-		\node[row] at (-0.2,-1.5) {Legado Banco do Brasil};
-		\draw[parc] (9.17,-1.78) rectangle (10.33,-1.22);
-		\node[blbl, anchor=east, fill=white, inner sep=1pt] at (9.05,-1.5) {ponte com o código atual só para cerca de 200 obras do FAR};
-
-		\node[row] at (-0.2,-2.5) {SFTP da Caixa};
-		\draw[ok] (10.92,-2.78) rectangle (15.92,-2.22);
-		\node[blbl] at (13.42,-2.5) {situação (FAR, FDS e Rural)};
-
-		\node[row] at (-0.2,-3.5) {Sistema da SNH};
-		\draw[nok] (15.42,-3.78) rectangle (17.25,-3.22);
-		\node[blbl, anchor=east, fill=white, inner sep=1pt] at (15.3,-3.5) {quase sem paralisações novas};
-
-		\node[row] at (-0.2,-4.25) {Planilha mensal};
-		\draw[nok] (17.25,-4.43) rectangle (17.58,-4.07);
-
-		% Legenda
-		\begin{scope}[shift={(0.5,-5.8)}]
-			\draw[ok] (0,0) rectangle (0.5,0.3); \node[blbl, anchor=west] at (0.6,0.15) {rótulo usado no treino};
-			\draw[parc] (4.6,0) rectangle (5.1,0.3); \node[blbl, anchor=west] at (5.2,0.15) {rótulo parcial};
-			\draw[nok] (8.0,0) rectangle (8.5,0.3); \node[blbl, anchor=west] at (8.6,0.15) {sem rótulo confiável};
-		\end{scope}
-	\end{tikzpicture}%
-	}
-	\caption{Fontes da situação das obras ao longo do tempo e período rotulado usado no treino.}
-	\label{fig:fontes}
-	\fonte{Elaborado pelos autores, a partir do levantamento dos dados (Seções~\ref{sec:levantamento} e~\ref{sec:historico}).}
-\end{figure}
 
 \subsection{Regra vigente}
 \label{sec:regra-vigente}
@@ -392,11 +337,75 @@ A tabela é calculada sobre a data corrente e só existe para o mês em que roda
 	\item enquanto o MCID não fixar a capacidade de fiscalização, $k$ é tratado como uma faixa de valores (Seção~\ref{sec:decisoes-abertas}).
 \end{enumerate}
 
-Dois limites dessa definição ficam registrados. Primeiro, a regra cobre apenas o FAR e o FDS; no Rural, onde ocorre a maior parte das paralisações, não há regra a comparar, e a referência passa a ser a curva de Kaplan-Meier da modalidade. Segundo, algumas datas, como a previsão de conclusão, podem ter sido revistas depois de $t$; quando o histórico não guardar o valor vigente em $t$, a regra usa o primeiro valor registrado, e esse ponto é tratado como ameaça à validade. Na arquitetura, a regra vigente no mês $t$ é implementada como um segundo escorador, com a mesma estrutura do modelo, o que verifica também o R8 (critério AV8).
+\begin{figure}[htbp]
+	\centering
+	\resizebox{\textwidth}{!}{%
+	\begin{tikzpicture}[x=0.78cm, y=1cm,
+		bar/.style={draw, minimum height=0.5cm, inner sep=0pt},
+		ok/.style={bar, fill=green!35},
+		nok/.style={bar, fill=gray!25},
+		parc/.style={bar, fill=orange!30},
+		row/.style={font=\footnotesize, anchor=east, align=right},
+		blbl/.style={font=\scriptsize, anchor=south}
+	]
+		% Eixo: x = ano - 2009
+		\foreach \a in {2009,2011,...,2027} {
+			\pgfmathsetmacro{\xx}{\a-2009}
+			\draw[gray!50] (\xx,0.5) -- (\xx,-5.6);
+			\node[font=\scriptsize, below] at (\xx,-5.6) {\a};
+		}
+		% Faixa de rótulo confiável
+		\fill[green!8] (6.5,0.5) rectangle (9.67,-5.6);
+		\fill[green!8] (10.92,0.5) rectangle (15.92,-5.6);
+		% Lacuna
+		\draw[red!60, dashed, thick] (9.67,0.5) -- (9.67,-5.6);
+		\draw[red!60, dashed, thick] (10.92,0.5) -- (10.92,-5.6);
+		\node[font=\scriptsize\itshape, text=red!60!black, align=center] at (10.3,0.85) {lacuna\\no rótulo};
+
+		% Legado Caixa
+		\node[row] at (-0.2,-0.6) {Legado Caixa\\(rel. executivo)};
+		\draw[nok] (3.0,-0.85) rectangle (6.5,-0.35);
+		\node[blbl] at (4.75,-0.33) {só percentual de obra};
+		\draw[ok] (6.5,-0.85) rectangle (9.67,-0.35);
+		\node[font=\scriptsize, anchor=north] at (8.08,-0.87) {situação da obra};
+
+		% Legado Banco do Brasil
+		\node[row] at (-0.2,-1.8) {Legado\\Banco do Brasil};
+		\draw[parc] (9.17,-2.05) rectangle (10.33,-1.55);
+		\node[font=\scriptsize, anchor=west, align=left, text width=5.4cm, fill=white, inner sep=1pt] at (10.45,-1.8) {ponte com o código atual só para cerca de 200 obras do FAR};
+
+		% SFTP da Caixa
+		\node[row] at (-0.2,-3.0) {SFTP da Caixa};
+		\draw[ok] (10.92,-3.25) rectangle (15.92,-2.75);
+		\node[blbl] at (13.42,-2.73) {situação (FAR, FDS e Rural)};
+
+		% Sistema da SNH
+		\node[row] at (-0.2,-4.2) {Sistema da SNH};
+		\draw[nok] (15.42,-4.45) rectangle (17.25,-3.95);
+		\node[blbl, anchor=south east, fill=white, inner sep=1pt] at (17.3,-3.93) {quase sem paralisações novas};
+
+		% Planilha mensal
+		\node[row] at (-0.2,-5.1) {Planilha mensal};
+		\draw[nok] (17.25,-5.3) rectangle (17.58,-4.9);
+
+		% Legenda
+		\begin{scope}[shift={(0.5,-6.7)}]
+			\draw[ok] (0,0) rectangle (0.5,0.3); \node[font=\scriptsize, anchor=west] at (0.6,0.15) {rótulo usado no treino};
+			\draw[parc] (4.6,0) rectangle (5.1,0.3); \node[font=\scriptsize, anchor=west] at (5.2,0.15) {rótulo parcial};
+			\draw[nok] (8.0,0) rectangle (8.5,0.3); \node[font=\scriptsize, anchor=west] at (8.6,0.15) {sem rótulo confiável};
+		\end{scope}
+	\end{tikzpicture}%
+	}
+	\caption{Fontes da situação das obras ao longo do tempo e período rotulado usado no treino.}
+	\label{fig:fontes}
+	\fonte{Elaborado pelos autores, a partir do levantamento dos dados (Seções~\ref{sec:levantamento} e~\ref{sec:historico}).}
+\end{figure}
+
+Dois limites dessa definição ficam registrados. Primeiro, a regra cobre apenas o FAR e o FDS; no Rural, onde ocorre a maior parte das paralisações, não há regra a comparar, e a linha de base é o ranking pelo risco de Kaplan-Meier da modalidade no tempo em obra de cada unidade, isto é, pela idade da obra. Segundo, algumas datas, como a previsão de conclusão, podem ter sido revistas depois de $t$; quando o histórico não guardar o valor vigente em $t$, a regra usa o primeiro valor registrado, e esse ponto é tratado como ameaça à validade. Na arquitetura, a regra vigente no mês $t$ é implementada como um segundo escorador, com a mesma estrutura do modelo, o que verifica também o R8 (critério AV8), e serve de \textit{champion} inicial até que um modelo a supere (Seção~\ref{sec:promocao}).
 
 \subsection{Métrica e modelagem}
 
-A métrica principal é o \textit{recall@k} no horizonte $h$: a fração das obras que paralisam até $t+h$ que estão entre as $k$ primeiras do ranking do mês $t$, em que $k$ é a capacidade mensal de fiscalização. Como métricas secundárias, usam-se \textit{precision@k}, a área sob a curva precisão-revocação, mais informativa que a curva ROC em classes desbalanceadas \cite{saito2015}, o índice de concordância (\textit{C-index}) \cite{harrell1996} e o escore de Brier integrado \cite{graf1999}, que avaliam o modelo de sobrevivência como um todo. A avaliação é temporal, com origem móvel (\textit{rolling origin}) e cortes nos dois trechos do período rotulado.
+A métrica principal é o \textit{recall@k} no horizonte $h$: a fração das obras que paralisam até $t+h$ que estão entre as $k$ primeiras do ranking do mês $t$, em que $k$ é a capacidade mensal de fiscalização; obras concluídas ou canceladas antes de $t+h$ contam como não evento, porque não paralisaram no horizonte. Como métricas secundárias, usam-se \textit{precision@k}, a área sob a curva precisão-revocação, mais informativa que a curva ROC em classes desbalanceadas \cite{saito2015}, o índice de concordância (\textit{C-index}) \cite{harrell1996} e o escore de Brier integrado \cite{graf1999}, que avaliam o modelo de sobrevivência como um todo. A avaliação é temporal, com origem móvel (\textit{rolling origin}) e cortes nos dois trechos do período rotulado.
 
 Como linhas de base, usam-se a curva de Kaplan-Meier por modalidade \cite{kaplan1958} e o modelo de riscos proporcionais de Cox \cite{cox1972}. O modelo principal é um \textit{gradient boosting} com LightGBM \cite{ke2017} ajustado ao risco discreto mensal no formato pessoa-período \cite{tutz2016}, com explicações individuais por valores SHAP \cite{lundberg2017}, para que a fiscalização saiba por que uma obra foi priorizada. O modelo será documentado em um \textit{model card} \cite{mitchell2019}.
 
@@ -410,21 +419,21 @@ A Tabela~\ref{tab:ferramentas-caso} mostra a ferramenta que cumpre cada papel da
 	\caption{Ferramentas que materializam cada papel no Gov Hub Cidades e estado de cada uma.}
 	\label{tab:ferramentas-caso}
 	\footnotesize
-	\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.7cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{3.3cm}>{\raggedright\arraybackslash}p{2.3cm}@{}}
+	\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{3.1cm}@{}}
 		\toprule
 		\textbf{Papel} & \textbf{Ferramenta} & \textbf{Local no repositório} & \textbf{Estado} \\
 		\midrule
-		Orquestrador & Apache Airflow \cite{airflow} & \cod{dags/ml/} & ferramenta já existia; fluxos de ML previstos (S4--S6) \\
-		Camada de transformação & dbt \cite{dbt} & \cod{dbt/mcid/models/ml_<modelo>_dbt/} & ferramenta já existia; modelos de ML previstos (S3) \\
-		Motor analítico & PostgreSQL com a extensão pg\_duckdb & --- & já existia \\
-		Armazenamento de objetos & RustFS, compatível com S3 & prefixos \cod{raw/}, \cod{staging/} e \cod{ml/} & já existia; prefixo \cod{ml/} previsto (S4) \\
-		Ambiente de modelagem & Python, com pandas, scikit-learn, LightGBM, lifelines \cite{lifelines} e SHAP & \cod{ml/<modelo>/} & pasta e documentação criadas no TCC1; bibliotecas novas previstas (S4--S5) \\
-		Registro de experimentos e modelos & MLflow \cite{zaharia2018}: rastreamento e registro de modelos com apelidos \cod{champion} e \cod{challenger} & artefatos em \cod{ml/mlflow/} & previsto (S4) \\
-		Versionamento de dados & DVC \cite{dvc}, com o armazenamento de objetos como remoto & \cod{.dvc/} e \cod{ml/<modelo>/dvc.yaml} & previsto (S4) \\
-		Validação de dados & testes do dbt, contratos ODCS das fontes e Pandera na leitura do dataset & \cod{dbt/mcid/}, \cod{contracts/} e \cod{ml/<modelo>/} & testes e contratos já existiam; Pandera previsto (S4) \\
-		Catálogo de dados & OpenMetadata \cite{openmetadata} & --- & já existia \\
-		Camada de visualização & Apache Superset & --- & já existia \\
-		Análise exploratória & Jupyter & \cod{ml/<modelo>/notebooks/} & em andamento (T1, S1--S2) \\
+		Orquestrador & Apache Airflow \cite{airflow} & \cod{dags/ml/} & ferramenta já existia; fluxos de ML previstos (S4--S6) \\ \addlinespace
+		Camada de transformação & dbt \cite{dbt} & \cod{dbt/mcid/models/ml_<modelo>_dbt/} & ferramenta já existia; modelos de ML previstos (S3) \\ \addlinespace
+		Motor analítico & PostgreSQL com a extensão pg\_duckdb & --- & já existia \\ \addlinespace
+		Armazenamento de objetos & RustFS, compatível com S3 & prefixos \cod{raw/}, \cod{staging/} e \cod{ml/} & já existia; prefixo \cod{ml/} previsto (S4) \\ \addlinespace
+		Ambiente de modelagem & Python, com pandas, scikit-learn, LightGBM, lifelines \cite{lifelines} e SHAP & \cod{ml/<modelo>/} & pasta e documentação criadas no TCC1; bibliotecas novas previstas (S4--S5) \\ \addlinespace
+		Registro de experimentos e modelos & MLflow \cite{zaharia2018}: rastreamento e registro de modelos com apelidos \cod{champion} e \cod{challenger} & artefatos em \cod{ml/mlflow/} & previsto (S4) \\ \addlinespace
+		Versionamento de dados & DVC \cite{dvc}, com o armazenamento de objetos como remoto & \cod{.dvc/} e \cod{ml/<modelo>/dvc.yaml} & previsto (S4) \\ \addlinespace
+		Validação de dados & testes do dbt, contratos ODCS das fontes e Pandera na leitura do dataset & \cod{dbt/mcid/}, \cod{contracts/} e \cod{ml/<modelo>/} & testes e contratos já existiam; Pandera previsto (S4) \\ \addlinespace
+		Catálogo de dados & OpenMetadata \cite{openmetadata} & --- & já existia \\ \addlinespace
+		Camada de visualização & Apache Superset & --- & já existia \\ \addlinespace
+		Análise exploratória & Jupyter & \cod{ml/<modelo>/notebooks/} & em andamento (T1, S1--S2) \\ \addlinespace
 		Versionamento e integração contínua & Git e GitHub Actions; ambiente travado com uv & \cod{.github/workflows/}, \cod{uv.lock} & já existia; treino de fumaça previsto (S4) \\
 		\bottomrule
 	\end{tabularx}

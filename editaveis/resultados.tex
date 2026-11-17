@@ -1,35 +1,15 @@
 \chapter[Resultados Preliminares]{Resultados Preliminares}
 \label{cap:resultados}
 
-Este capítulo relata o que foi produzido até o fim do TCC1, organizado pelas atividades da DSR (Tabela~\ref{tab:dsr}). As três primeiras seções tratam da identificação do problema, da definição dos objetivos da solução e do que já foi construído. As seções seguintes apresentam os resultados sobre os dados do caso: o levantamento inicial, que delimitou o período em que o rótulo é confiável, o desempenho da regra vigente no histórico, o plano da análise exploratória e a recuperação da série legada. O capítulo termina com as ameaças à validade.
+Este capítulo relata o que foi produzido até o fim do TCC1, organizado pelas atividades da DSR (Tabela~\ref{tab:dsr}). A primeira seção percorre as três primeiras atividades da DSR: a identificação do problema, a definição dos objetivos da solução e o que já foi projetado e construído. As seções seguintes apresentam os resultados sobre os dados do caso: o levantamento inicial, que delimitou o período em que o rótulo é confiável, o desempenho da regra vigente no histórico, o plano da análise exploratória e a recuperação da série legada. O capítulo termina com as ameaças à validade.
 
-\section{Identificação do problema}
+\section{Atividades concluídas}
 
-O diagnóstico da plataforma Gov Hub Cidades mostrou que:
+\textbf{Identificação do problema.} O diagnóstico da plataforma Gov Hub Cidades mostrou que o repositório não continha nenhum componente de ML: não havia código de treino, registro de experimentos, datasets versionados nem monitoramento de modelos. A identificação de obras em risco dependia da regra vigente (Seção~\ref{sec:regra-vigente}), uma pontuação de sinalizadores calculada apenas sobre a data corrente, restrita ao FAR e ao FDS e nunca confrontada com as paralisações observadas. Os dados necessários para um modelo preditivo já existiam nas camadas prata, com histórico mensal de dezembro de 2019 a julho de 2026, e podiam ser ampliados por uma série legada desde 2009.
 
-\begin{itemize}
-	\item o repositório da plataforma não continha nenhum componente de ML: não havia código de treino, registro de experimentos, datasets versionados nem monitoramento de modelos;
-	\item a identificação de obras em risco dependia da regra vigente (Seção~\ref{sec:regra-vigente}), uma pontuação de sinalizadores calculada apenas sobre a data corrente, restrita ao FAR e ao FDS e nunca confrontada com as paralisações observadas;
-	\item os dados necessários para um modelo preditivo já existiam nas camadas prata, com histórico mensal de dezembro de 2019 a julho de 2026, e podiam ser ampliados por uma série legada desde 2009.
-\end{itemize}
+\textbf{Definição dos objetivos da solução.} Os requisitos R1--R9 (Tabela~\ref{tab:requisitos}) foram definidos a partir da literatura e das regras de engenharia da plataforma. A decisão de estender a plataforma existente, em vez de construir uma plataforma de ML separada, foi registrada em 27 de outubro de 2026 no ADR 0001 da plataforma, com status ``proposto''. Esse ADR e a documentação do ciclo de vida ainda estão em revisão e serão integrados ao repositório da plataforma \cite{govhubcidades} na próxima \textit{sprint}. As decisões sobre o trabalho em si estão registradas como ADRs no repositório deste documento \cite{repositoriotcc}.
 
-\section{Definição dos objetivos da solução}
-
-Os requisitos R1--R9 (Tabela~\ref{tab:requisitos}) foram definidos a partir da literatura e das regras de engenharia da plataforma. A decisão de estender a plataforma existente, em vez de construir uma plataforma de ML separada, foi registrada em 27 de outubro de 2026 no ADR 0001 da plataforma, com status ``proposto''. Esse ADR e a documentação do ciclo de vida ainda estão em revisão e serão integrados ao repositório da plataforma \cite{govhubcidades} na próxima \textit{sprint}. As decisões sobre o trabalho em si estão registradas como ADRs no repositório deste documento \cite{repositoriotcc}.
-
-\section{Projeto e desenvolvimento}
-
-Até esta etapa foram produzidos:
-
-\begin{enumerate}
-	\item o projeto da arquitetura (Capítulo~\ref{cap:proposta});
-	\item a estrutura de pastas do ML (\cod{ml/} e \cod{ml/prevencao_paralisacao/}), com a documentação do ciclo de vida;
-	\item a especificação do problema (fase 1 do CRISP-DM), com pergunta, unidade de análise, escopo, regra vigente e decisões em aberto (Seção~\ref{sec:caso});
-	\item o levantamento inicial dos dados (Seção~\ref{sec:levantamento});
-	\item o fluxo de recuperação da série legada (Seção~\ref{sec:historico}).
-\end{enumerate}
-
-Nenhum componente de execução da arquitetura (transformações de ML, treino, registro de experimentos, \textit{gate} ou monitoramento) foi implementado ainda; eles estão previstos para o TCC2, com a \textit{sprint} de cada um indicada na Tabela~\ref{tab:ferramentas-caso}.
+\textbf{Projeto e desenvolvimento.} Até esta etapa foram produzidos o projeto da arquitetura (Capítulo~\ref{cap:proposta}); a estrutura de pastas do ML (\cod{ml/} e \cod{ml/prevencao_paralisacao/}), com a documentação do ciclo de vida; a especificação do problema (fase 1 do CRISP-DM), com pergunta, unidade de análise, escopo, regra vigente e decisões em aberto (Seção~\ref{sec:caso}); o levantamento inicial dos dados (Seção~\ref{sec:levantamento}); e o fluxo de recuperação da série legada (Seção~\ref{sec:historico}). Nenhum componente de execução da arquitetura (transformações de ML, treino, registro de experimentos, \textit{gate} ou monitoramento) foi implementado ainda; eles estão previstos para o TCC2, com a \textit{sprint} de cada um indicada na Tabela~\ref{tab:ferramentas-caso}.
 
 \section{Levantamento dos dados}
 \label{sec:levantamento}
@@ -55,21 +35,21 @@ O levantamento inicial leu as tabelas prata de histórico do FAR, do FDS e do Ru
 	\fonte{Elaborado pelos autores, a partir das tabelas prata da plataforma.}
 \end{table}
 
-A fonte da situação muda duas vezes ao longo da série: SFTP da Caixa até novembro de 2024, sistema da SNH de junho de 2024 a março de 2026, e planilha de acompanhamento mensal a partir de abril de 2026. No período de sobreposição, as duas primeiras fontes concordam em 96 a 98\% dos casos. Ainda assim, um terço das paralisações do FAR ocorre exatamente no mês da troca de fonte, e dentro do período SNH quase não surgem paralisações novas. No período SFTP há cerca de 1.500 transições para \cod{paralisada}, a maioria no Rural.
+A fonte da situação muda duas vezes ao longo da série: SFTP da Caixa até novembro de 2024, sistema da SNH de junho de 2024 a março de 2026, e planilha de acompanhamento mensal a partir de abril de 2026. No período de sobreposição, as duas primeiras fontes concordam em 96 a 98\% dos casos. Ainda assim, um terço das paralisações do FAR ocorre exatamente no mês da troca de fonte, isto é, na primeira competência em que a coluna canônica de situação passa a vir da SNH, e dentro do período SNH quase não surgem paralisações novas. No período SFTP há cerca de 1.500 transições para \cod{paralisada}, a maioria no Rural. \pendente{Indicar a competência exata da troca de fonte, apurada na \textit{sprint} T1.}
 
 Esses achados têm três implicações para o plano. Primeiro, o rótulo só é confiável no período SFTP, e a troca de fonte é uma mudança de distribuição conhecida (Seção~\ref{sec:riscos}) que a preparação dos dados precisa tratar explicitamente; as transições no mês da troca não contam como evento. Segundo, como a maioria dos eventos está no Rural, o FAR e o FDS sozinhos podem não ter eventos suficientes para treino e teste com vários cortes; por isso, o modelo é ajustado sobre todas as modalidades, com a modalidade como feature, e o desempenho é relatado por modalidade com intervalo de confiança. Terceiro, a regra vigente cobre apenas o FAR e o FDS, justamente as modalidades com menos eventos, o que reforça a necessidade de ampliar o período rotulado com a série legada (Seção~\ref{sec:historico}).
 
 \section{Desempenho da regra vigente no histórico}
 \label{sec:regra-historico}
 
-O primeiro número que o modelo terá de superar já pode ser obtido sem nenhum modelo: o desempenho da regra vigente no mês $t$ (Seção~\ref{sec:regra-vigente}) sobre as paralisações que de fato ocorreram. O cálculo percorre as competências do período SFTP em que $t+h$ ainda está dentro do período rotulado. Para cada competência, recalcula a pontuação da regra com os dados disponíveis até $t$, ordena as obras em execução, toma as $k$ primeiras e verifica quais delas paralisaram até $t+h$. Como o MCID ainda não fixou $k$, o resultado é relatado para uma faixa de valores, expressa como fração das obras em execução no mês. A Tabela~\ref{tab:regra-historico} apresenta o resultado, com $h$ igual a seis meses.
+O primeiro número que o modelo terá de superar já pode ser obtido sem nenhum modelo: o desempenho da regra vigente no mês $t$ (Seção~\ref{sec:regra-vigente}) sobre as paralisações que de fato ocorreram. O cálculo percorre as competências do período SFTP em que $t+h$ ainda está dentro do período rotulado. Para cada competência, recalcula a pontuação da regra com os dados disponíveis até $t$, ordena as obras em execução, toma as $k$ primeiras e verifica quais delas paralisaram até $t+h$. Como o MCID ainda não fixou $k$, o resultado é relatado para uma faixa de valores, expressa como fração das obras em execução no mês. A Tabela~\ref{tab:regra-historico} apresentará o resultado, com $h$ igual a seis meses.
 
 \begin{table}[htbp]
 	\centering
 	\caption{Desempenho da regra vigente no período SFTP, com $h = 6$ meses.}
 	\label{tab:regra-historico}
 	\footnotesize
-	\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X>{\raggedleft\arraybackslash}p{1.7cm}>{\raggedleft\arraybackslash}p{1.7cm}>{\raggedleft\arraybackslash}p{1.7cm}>{\raggedleft\arraybackslash}p{1.7cm}>{\raggedleft\arraybackslash}p{1.7cm}@{}}
+	\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X>{\raggedleft\arraybackslash}p{2.2cm}>{\raggedleft\arraybackslash}p{2.2cm}>{\raggedleft\arraybackslash}p{2.2cm}>{\raggedleft\arraybackslash}p{2.2cm}>{\raggedleft\arraybackslash}p{2.2cm}@{}}
 		\toprule
 		\textbf{Modalidade} & \textbf{Eventos} & \textbf{\textit{Recall} ($k$ = 5\%)} & \textbf{\textit{Recall} ($k$ = 10\%)} & \textbf{\textit{Recall} ($k$ = 20\%)} & \textbf{\textit{Precision} ($k$ = 10\%)} \\
 		\midrule
@@ -110,7 +90,7 @@ Um \textit{dump} legado traz problemas que uma fonte viva não tem: a mesma tabe
 \begin{enumerate}
 	\item \textbf{raw}: os arquivos como foram exportados, imutáveis;
 	\item \textbf{staging}: cada CSV convertido para Parquet, sem alterar o conteúdo, exceto pelos dados pessoais, que são mascarados nesta etapa. A conversão é idempotente: um arquivo só é reconvertido se mudar na raw;
-	\item \textbf{analytics}: apenas os arquivos com conteúdo próprio. Saem os vazios, as cópias exatas e um modelo de planilha de 2009 que a exportação gravou no lugar de 273 tabelas;
+	\item \textbf{analytics} (nome da etapa no pipeline, sem relação com a camada analítica): apenas os arquivos com conteúdo próprio. Saem os vazios, as cópias exatas e um modelo de planilha de 2009 que a exportação gravou no lugar de 273 tabelas;
 	\item \textbf{cleansed}: tratamento estrutural de cada arquivo. Desfaz a duplicação da exportação, corrige o cabeçalho, separa as linhas que não são dado, confere que nenhuma linha foi perdida e atribui a cada arquivo a competência e a data de corte.
 \end{enumerate}
 
@@ -168,11 +148,11 @@ As etapas \textbf{analytics} e \textbf{cleansed} tratam o arquivo, e não o neg�
 		\toprule
 		\textbf{Etapa} & \textbf{Resultado} \\
 		\midrule
-		Arquivos na raw & 754, de 115 competências (out./2009 a mar./2026) \\
-		Seleção (analytics) & 440 arquivos com conteúdo próprio (435 tratados e 5 painéis formatados excluídos), 39 cópias, 273 modelos sem dado e 2 vazios \\
-		Tratamento (cleansed) & 450 tabelas (15 arquivos traziam mais de uma tabela empilhada) e 14,9 milhões de linhas reais, contra 30,9 milhões na staging, que inclui a duplicação da exportação e os arquivos descartados \\
-		Descartes registrados & 6.671 linhas, cada uma com o motivo e a posição de origem: linhas vazias (5.362), totais (583), subtítulos (525), cabeçalhos (177), títulos (21) e rodapés (3) \\
-		Famílias de relatório & 54, cada uma o mesmo relatório ao longo do tempo \\
+		Arquivos na raw & 754, de 115 competências (out./2009 a mar./2026) \\ \addlinespace
+		Seleção (analytics) & 440 arquivos com conteúdo próprio (435 tratados e 5 painéis formatados excluídos), 39 cópias, 273 modelos sem dado e 2 vazios \\ \addlinespace
+		Tratamento (cleansed) & 450 tabelas (15 arquivos traziam mais de uma tabela empilhada) e 14,9 milhões de linhas reais, contra 30,9 milhões na staging, que inclui a duplicação da exportação e os arquivos descartados \\ \addlinespace
+		Descartes registrados & 6.671 linhas, cada uma com o motivo e a posição de origem: linhas vazias (5.362), totais (583), subtítulos (525), cabeçalhos (177), títulos (21) e rodapés (3) \\ \addlinespace
+		Famílias de relatório & 54, cada uma o mesmo relatório ao longo do tempo \\ \addlinespace
 		Nomes de coluna & 574 nomes distintos, com 506 nomes canônicos propostos, ainda sem revisão \\
 		\bottomrule
 	\end{tabularx}
@@ -183,9 +163,9 @@ Cada etapa segue uma prática estabelecida na literatura. A raw imutável, o reg
 
 O problema mais trabalhoso é o dos nomes de coluna. O mesmo dado muda de nome entre layouts: o código do empreendimento na Caixa aparece como \cod{codapf}, \cod{cod_apf}, \cod{icodigo_apf}, \cod{nu_apf} e \cod{apf} em 12 famílias. Isso é uma forma de correspondência de esquemas (\textit{schema matching}) ao longo do tempo. A proposta de nome canônico combina os dois tipos de evidência da taxonomia de \citeonline{rahm2001}: a semelhança entre os nomes, no nível do esquema, e a presença dos mesmos valores dos dois lados de uma troca de layout, no nível das instâncias. Cada correspondência proposta passa por revisão humana antes de ser usada, porque uma troca de nome mal resolvida pode juntar dados diferentes sem que nenhum teste perceba. A mudança de esquema ao longo do tempo é um problema conhecido em bancos de dados \cite{curino2008}. Aqui, porém, ela precisa ser reconstruída a partir dos dados, pois não há registro das migrações.
 
-Para o caso estudado, o achado mais relevante até aqui é que a série legada tem rótulo. O relatório executivo da Caixa traz a situação da obra de julho de 2015 a agosto de 2018, com 6.942 linhas marcadas como paralisada, além do percentual de obra executada desde 2012. O código APF desse relatório aparece em 98\% dos casos na fonte atual da SNH, o que permite ligar o histórico à obra de hoje. No Banco do Brasil, a situação da obra aparece de março de 2018 a abril de 2019, mas a ponte entre o código antigo e o atual cobre apenas cerca de 200 empreendimentos do FAR.
+Para o caso estudado, o achado mais relevante até aqui é que a série legada tem rótulo. O relatório executivo da Caixa traz a situação da obra de julho de 2015 a agosto de 2018, com 6.942 linhas marcadas como paralisada, além do percentual de obra executada desde 2012. O código APF desse relatório aparece em 98\% dos casos na fonte atual da SNH, o que permite ligar o histórico à obra de hoje. No Banco do Brasil, a situação da obra aparece de março de 2018 a abril de 2019, mas a ponte entre o código antigo e o atual cobre apenas cerca de 200 empreendimentos do FAR; por isso, o Banco do Brasil entra no rótulo apenas para os empreendimentos em que essa ponte existe.
 
-Por isso, a série legada entra no rótulo, ampliando o período rotulado para julho de 2015 a agosto de 2018, além do período SFTP (Figura~\ref{fig:fontes}). Isso dá mais eventos para treino e permite uma validação temporal com cortes nos dois trechos. Como os dados legados têm problemas que podem fabricar eventos, cada família de relatório só entra no rótulo se cumprir cinco critérios de aceite:
+Assim, a série legada entra no rótulo, ampliando o período rotulado para julho de 2015 a agosto de 2018, além do período SFTP (Figura~\ref{fig:fontes}). Isso dá mais eventos para treino e permite uma validação temporal com cortes nos dois trechos. Como os dados legados têm problemas que podem fabricar eventos, cada família de relatório só entra no rótulo se cumprir cinco critérios de aceite:
 
 \begin{enumerate}
 	\item o de-para das colunas de situação, de percentual de obra e de código APF foi revisado por uma pessoa;

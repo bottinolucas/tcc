@@ -19,7 +19,7 @@ No contexto governamental, a etapa de ingestão é particularmente difícil. Os 
 
 \citeonline{armbrust2021} propõem o \textit{lakehouse} como arquitetura que combina o armazenamento aberto e barato de um \textit{data lake} com funcionalidades de gestão típicas de um \textit{data warehouse}, como transações, versionamento e controle de esquema. Os autores argumentam que essa unificação atende, sobre os mesmos dados, tanto a análise via SQL quanto cargas de trabalho de ciência de dados e ML.
 
-Uma organização frequente nessas plataformas é a arquitetura em camadas conhecida como medalhão, com três camadas de qualidade crescente:
+Uma organização frequente nessas plataformas é a arquitetura em camadas conhecida como medalhão \cite{databricks2023mlops}, com três camadas de qualidade crescente:
 
 \begin{itemize}
 	\item \textbf{bronze}: preserva o dado bruto como recebido da fonte, sem modificações;
@@ -182,11 +182,13 @@ Esses princípios se materializam em nove componentes técnicos, e cada componen
 
 \citeonline{testi2022} propõem uma taxonomia de trabalhos sobre MLOps e uma metodologia para conduzir projetos de ML com práticas de MLOps. Em um dos primeiros relatos brasileiros, \citeonline{aguiar2020} descreve a adoção de MLOps por uma equipe com experiência prévia em DevOps durante 24 meses de co-desenvolvimento entre governo e academia, e aponta que, embora implantar modelos tenha ficado mais simples, manter e evoluir sistemas de ML segue pouco discutido.
 
+Na direção da prontidão para produção, \citeonline{breck2017} propõem o \textit{ML Test Score}, uma rubrica de 28 testes e verificações agrupados em features e dados, desenvolvimento do modelo, infraestrutura de ML e monitoramento. A rubrica oferece um critério objetivo para medir a prontidão de um sistema de ML para produção.
+
 \subsection{Níveis de maturidade}
 
 A documentação de arquitetura do Google Cloud descreve três níveis de maturidade em MLOps \cite{google2020mlops} (Figura~\ref{fig:maturidade}): no nível 0, o processo é manual e o modelo é entregue como artefato; no nível 1, o pipeline de treino é automatizado e permite treino contínuo; no nível 2, o próprio pipeline é testado e implantado por CI/CD. \citeonline{john2021} propõem um modelo de maturidade derivado de revisão de literatura e estudos de caso, com estágios que vão de processos manuais orientados a dados até operação totalmente automatizada com monitoramento e retreino.
 
-O nível de maturidade adequado depende do contexto. Um modelo que gera um escore mensal sobre dados atualizados mensalmente não exige inferência em tempo real, mas exige que o retreino e o escore sejam reprodutíveis e auditáveis. Por isso, este trabalho adota o nível 1 como alvo: o pipeline de treino, avaliação e promoção é automatizado e disparado pela chegada de dados novos, enquanto a implantação do próprio pipeline continua sob revisão humana. O nível 2 traria um custo de engenharia desproporcional para um escore em lote mensal.
+O nível de maturidade adequado depende do contexto. A Seção~\ref{sec:promocao} justifica a escolha do nível 1 como alvo deste trabalho, destacado na Figura~\ref{fig:maturidade}.
 
 \begin{figure}[htbp]
 	\centering
@@ -202,18 +204,18 @@ O nível de maturidade adequado depende do contexto. Um modelo que gera um escor
 			$\bullet$ retreino raro e manual\\
 			$\bullet$ sem monitoramento sistemático};
 		\node[lvl, fill=green!15, very thick, draw=green!50!black] (n1) at (5.2,0) {%
-			$\bullet$ \textit{pipeline} de treino automatizado\\
+			$\bullet$ pipeline de treino automatizado\\
 			$\bullet$ treino contínuo disparado por dados ou calendário\\
 			$\bullet$ validação de dados e de modelo\\
 			$\bullet$ registro de modelos e de metadados\\
 			$\bullet$ monitoramento em produção};
 		\node[lvl, fill=gray!10] (n2) at (10.4,0) {%
 			$\bullet$ tudo do nível 1\\
-			$\bullet$ o próprio \textit{pipeline} é testado e implantado por CI/CD\\
-			$\bullet$ muitas variações do \textit{pipeline} em paralelo};
+			$\bullet$ o próprio pipeline é testado e implantado por CI/CD\\
+			$\bullet$ muitas variações do pipeline em paralelo};
 		\node[hd] at (n0.north) {Nível 0: processo manual};
 		\node[hd] at (n1.north) {Nível 1: treino contínuo};
-		\node[hd] at (n2.north) {Nível 2: CI/CD do \textit{pipeline}};
+		\node[hd] at (n2.north) {Nível 2: CI/CD do pipeline};
 		\draw[arr] (n0.east) -- (n1.west);
 		\draw[arr] (n1.east) -- (n2.west);
 		\node[font=\scriptsize\itshape, text=green!40!black, anchor=north] at (n1.south) {alvo deste trabalho};
@@ -240,8 +242,6 @@ No registro, cada versão de um modelo aponta para a execução que a gerou. A p
 
 \citeonline{pineau2021}, ao relatar o programa de reprodutibilidade da NeurIPS, mostram que a reprodução de um resultado de ML depende de mais do que o código: exige também a versão dos dados, o ambiente de execução, as sementes aleatórias e os hiperparâmetros. Rastreamento de experimentos e versionamento de dados são, portanto, complementares. O primeiro registra o que foi feito, e o segundo garante que os dados usados ainda possam ser recuperados.
 
-\citeonline{breck2017} propõem o \textit{ML Test Score}, uma rubrica de 28 testes e verificações agrupados em features e dados, desenvolvimento do modelo, infraestrutura de ML e monitoramento. A rubrica oferece um critério objetivo para medir a prontidão de um sistema de ML para produção.
-
 % ---------------------------------------------------------------------
 \section{Aplicações com modelos de linguagem}
 \label{sec:llm}
@@ -254,38 +254,36 @@ Duas diferenças em relação a um modelo preditivo em lote importam para a arqu
 \section{Riscos na modelagem com dados longitudinais}
 \label{sec:riscos}
 
-O caso estudado usa dados longitudinais: cada obra é observada mês a mês, e o objetivo é prever um evento futuro. Esse tipo de dado traz riscos próprios, discutidos nesta seção: vazamento de informação, validação que ignora a ordem temporal, desalinhamento entre treino e produção, métricas inadequadas a uma capacidade de ação limitada e mudança de distribuição ao longo do tempo. Em seguida, apresenta-se a análise de sobrevivência em tempo discreto, que é a formulação adotada para o caso, e as práticas de explicabilidade e equidade que acompanham um escore de risco.
+O caso estudado usa dados longitudinais: cada obra é observada mês a mês, e o objetivo é prever um evento futuro. Esse tipo de dado traz riscos próprios, discutidos nesta seção: vazamento de informação e validação que ignora a ordem temporal; desalinhamento entre treino e produção e mudança de distribuição ao longo do tempo; e métricas inadequadas a uma capacidade de ação limitada. Em seguida, apresenta-se a análise de sobrevivência em tempo discreto, que é a formulação adotada para o caso, e as práticas de explicabilidade e equidade que acompanham um escore de risco.
 
-\subsection{Vazamento de informação}
+\subsection{Vazamento de informação e validação temporal}
 
 \citeonline{kaufman2012} definem vazamento (\textit{leakage}) como a introdução, nos dados de treino, de informação sobre o alvo que não estaria legitimamente disponível no momento da predição. O vazamento produz modelos que parecem excelentes na avaliação e falham em produção. Em dados longitudinais, a forma mais comum é usar, para prever o estado no mês $t+h$, features calculadas com informação posterior a $t$. A prevenção exige que cada feature seja calculada ``na data'' (\textit{as of}) da observação, e que a separação entre treino e teste respeite a ordem temporal.
 
-\subsection{Validação temporal}
-
 A validação cruzada com partições aleatórias supõe observações independentes, hipótese que dados temporais violam. \citeonline{bergmeir2012} comparam esquemas de avaliação para preditores de séries temporais, como a validação cruzada em blocos e a avaliação fora da amostra sobre o trecho final da série, e discutem em que condições cada um produz estimativas confiáveis. Para o caso estudado, em que as features dependem do histórico de cada obra e o objetivo é prever eventos futuros, adota-se a avaliação por origem móvel (\textit{rolling origin}): vários cortes temporais documentados, com o treino sempre anterior à validação e ao teste em cada corte, o que dá mais de uma estimativa do desempenho fora da amostra.
 
-\subsection{Desalinhamento entre treino e produção}
+\subsection{Desalinhamento entre treino e produção e mudança de distribuição}
 
 \citeonline{polyzotis2018} descrevem o chamado \textit{training-serving skew}, o desalinhamento entre treino e produção: diferenças entre os dados ou o código usados para treinar o modelo e os usados para gerar predições. Uma causa frequente é a reimplementação de uma mesma feature em dois lugares. \citeonline{breck2019} propõem a validação sistemática de dados com esquemas declarados e comparação de distribuições entre os conjuntos de treino e de produção. \citeonline{schelter2018} tratam as verificações de qualidade como testes unitários sobre os dados, declarados junto ao pipeline e executados a cada carga, o que permite barrar um lote defeituoso antes que ele chegue ao modelo.
 
-\subsection{Avaliação sob capacidade limitada e classes desbalanceadas}
 
-Quando o modelo orienta uma ação de capacidade limitada, como vistorias, a métrica relevante não é a acurácia global, e sim quantos eventos reais estão entre os $k$ itens priorizados (\textit{recall@k}) ou qual a proporção de acertos entre eles (\textit{precision@k}). Paralisações são eventos raros em relação ao total de obras-mês, o que caracteriza um problema de classes desbalanceadas. \citeonline{saito2015} mostram que, nesse cenário, a curva precisão-revocação é mais informativa do que a curva ROC.
-
-\subsection{Mudança de distribuição e monitoramento}
-
-Modelos em produção enfrentam mudanças na distribuição dos dados de entrada e na relação entre entradas e alvo (\textit{concept drift}). \citeonline{gama2014} revisam técnicas de detecção e adaptação a essas mudanças. \citeonline{rabanser2019} comparam empiricamente métodos de detecção de mudança de distribuição e concluem que testes estatísticos de duas amostras sobre representações de dimensão reduzida são uma linha de base eficaz. \citeonline{lu2019drift} organizam o tratamento de \textit{concept drift} em três etapas: detectar a mudança, entender quando, como e onde ela ocorre, e adaptar o modelo. No caso estudado, a troca da fonte de dados ao longo da série é uma mudança de distribuição conhecida, que precisa ser tratada já na preparação dos dados.
+Modelos em produção enfrentam mudanças na distribuição dos dados de entrada e na relação entre entradas e alvo (\textit{concept drift}). \citeonline{gama2014} revisam técnicas de detecção e adaptação a essas mudanças. \citeonline{rabanser2019} comparam empiricamente métodos de detecção de mudança de distribuição e concluem que testes estatísticos de duas amostras sobre representações de dimensão reduzida são uma linha de base eficaz. \citeonline{lu2019drift} organizam o tratamento de \textit{concept drift} em três etapas: detectar a mudança, entender quando, como e onde ela ocorre, e adaptar o modelo. No caso estudado, a troca da fonte de dados ao longo da série é uma mudança de distribuição conhecida, que precisa ser tratada já na preparação dos dados. Para acompanhar a distribuição de cada feature em produção, uma medida simples e difundida na prática de \textit{credit scoring} é o índice de estabilidade populacional (PSI), que compara, por faixas de valores, a distribuição de uma variável em dois momentos; os limiares usuais de 0,1 (atenção) e 0,25 (alerta) são regras práticas herdadas dessa área \cite{siddiqi2006}, e as propriedades estatísticas do índice dependem do número de faixas e do tamanho das amostras \cite{yurdakul2018}.
 
 Um agravante é o atraso do rótulo. Quando o modelo prevê um evento até $h$ meses à frente, só se sabe se um escore acertou $h$ meses depois de emiti-lo. Durante esse intervalo, o desempenho realizado não pode ser medido, e o monitoramento depende de sinais indiretos, como a mudança da distribuição das features de entrada em relação ao conjunto de treino. Esses sinais não provam que o modelo piorou, mas indicam quando vale a pena antecipar uma reavaliação.
+
+\subsection{Avaliação sob capacidade limitada e classes desbalanceadas}
+\label{sec:avaliacao-capacidade}
+
+Quando o modelo orienta uma ação de capacidade limitada, como vistorias, a métrica relevante não é a acurácia global, e sim quantos eventos reais estão entre os $k$ itens priorizados (\textit{recall@k}) ou qual a proporção de acertos entre eles (\textit{precision@k}). Paralisações são eventos raros em relação ao total de obras-mês, o que caracteriza um problema de classes desbalanceadas. \citeonline{saito2015} mostram que, nesse cenário, a curva precisão-revocação é mais informativa do que a curva ROC.
 
 \subsection{Análise de sobrevivência em tempo discreto}
 \label{sec:sobrevivencia}
 
 A análise de sobrevivência estuda o tempo até a ocorrência de um evento. Sua particularidade é lidar com observações incompletas. Uma observação é \textbf{censurada} quando o acompanhamento termina antes do evento, porque a série acabou ou porque outro desfecho ocorreu primeiro; ela informa que o evento não aconteceu até ali, e descartá-la enviesaria a estimativa. Uma observação é \textbf{truncada à esquerda} quando o indivíduo só passa a ser observado depois de já estar em risco; ela só entra no cálculo a partir do primeiro momento observado. O estimador de \citeonline{kaplan1958} estima a curva de sobrevivência sem supor uma forma para ela, e o modelo de riscos proporcionais de \citeonline{cox1972} relaciona o risco a covariáveis.
 
-Quando o tempo é medido em intervalos, como meses, a análise pode ser feita em \textbf{tempo discreto} \cite{singer2003,tutz2016}. Cada indivíduo contribui com uma linha por período em que esteve em risco, no formato pessoa-período, e o rótulo de cada linha indica se o evento ocorreu naquele período (Figura~\ref{fig:pessoaperiodo}). A probabilidade condicional de o evento ocorrer no período $t$, dado que não ocorreu antes, é o \textbf{risco discreto} $\lambda_t$, e pode ser estimada por qualquer classificador aplicado às linhas pessoa-período, inclusive métodos de \textit{gradient boosting} como o LightGBM \cite{ke2017}, frequentes em dados tabulares pela boa relação entre desempenho e custo. Esse formato tem duas vantagens para o caso estudado: as covariáveis podem mudar a cada período, como as features calculadas \textit{as of} $t$, e a censura e o truncamento são tratados simplesmente pela presença ou ausência das linhas. \citeonline{wang2019survival} revisam outros métodos de ML para sobrevivência. Quando há mais de um desfecho possível, como conclusão e paralisação de uma obra, os desfechos são riscos competitivos, e tratar os demais como censura é uma simplificação que precisa ser avaliada \cite{fine1999}.
+Quando o tempo é medido em intervalos, como meses, a análise pode ser feita em \textbf{tempo discreto} \cite{singer2003,tutz2016}. Cada indivíduo contribui com uma linha por período em que esteve em risco, no formato pessoa-período, e o rótulo de cada linha indica se o evento ocorreu naquele período (Figura~\ref{fig:pessoaperiodo}). A probabilidade condicional de o evento ocorrer no período $t$, dado que não ocorreu antes, é o \textbf{risco discreto} $\lambda_t$, e pode ser estimada por qualquer classificador aplicado às linhas pessoa-período, inclusive métodos de \textit{gradient boosting} como o LightGBM \cite{ke2017}, que permanecem entre os mais eficazes em dados tabulares de tamanho médio \cite{grinsztajn2022}. Esse formato tem duas vantagens para o caso estudado: as covariáveis podem mudar a cada período, como as features calculadas \textit{as of} $t$ (com a ressalva de que, para prever vários meses à frente, as covariáveis conhecidas em $t$ precisam ser fixadas, como discute a Seção~\ref{sec:caso}), e a censura e o truncamento são tratados simplesmente pela presença ou ausência das linhas. \citeonline{wang2019survival} revisam outros métodos de ML para sobrevivência. Quando há mais de um desfecho possível, como conclusão e paralisação de uma obra, os desfechos são riscos competitivos, e tratar os demais como censura é uma simplificação que precisa ser avaliada \cite{fine1999}.
 
-A avaliação combina medidas próprias da sobrevivência com a métrica de decisão. O índice de concordância (\textit{C-index}) mede se os indivíduos com maior risco estimado sofrem o evento antes \cite{harrell1996}, e o escore de Brier integrado mede o erro das probabilidades estimadas ao longo do tempo, levando a censura em conta \cite{graf1999}. Para a decisão de fiscalização, o risco acumulado até o horizonte $h$, $1 - \prod_{j=1}^{h}(1 - \lambda_{t+j})$, ordena as unidades, e o \textit{recall@k} (Seção~\ref{sec:riscos}) mede quantos eventos ficam entre as $k$ primeiras.
+A avaliação combina medidas próprias da sobrevivência com a métrica de decisão. O índice de concordância (\textit{C-index}) mede se os indivíduos com maior risco estimado sofrem o evento antes \cite{harrell1996}, e o escore de Brier integrado mede o erro das probabilidades estimadas ao longo do tempo, levando a censura em conta \cite{graf1999}. Para a decisão de fiscalização, o risco acumulado até o horizonte $h$, $1 - \prod_{j=1}^{h}(1 - \lambda_{t+j})$, ordena as unidades, e o \textit{recall@k} (Seção~\ref{sec:avaliacao-capacidade}) mede quantos eventos ficam entre as $k$ primeiras.
 
 \begin{figure}[htbp]
 	\centering
@@ -318,7 +316,7 @@ A avaliação combina medidas próprias da sobrevivência com a métrica de deci
 		\draw[risk] (1,-2) -- (8,-2); \node[cen] at (8,-2) {};
 		\node[note] at (9.0,-2) {C: em obras até o fim do período (censurada)};
 
-		\node[anchor=north west, font=\scriptsize] at (19.6,0.6) {%
+		\node[anchor=north west, font=\scriptsize] at (10.0,-3.9) {%
 			\begin{tabular}{@{}ccc@{}}
 				\toprule
 				\textbf{Obra} & \textbf{Mês} & \textbf{Evento} \\
@@ -332,7 +330,7 @@ A avaliação combina medidas próprias da sobrevivência com a métrica de deci
 				\multicolumn{3}{c}{$\vdots$} \\
 				\bottomrule
 			\end{tabular}};
-		\node[font=\scriptsize\itshape, anchor=south] at (21.0,0.7) {formato pessoa-período};
+		\node[font=\scriptsize\itshape, anchor=south west] at (10.0,-3.9) {formato pessoa-período};
 	\end{tikzpicture}%
 	}
 	\caption{Evento, censura e truncamento à esquerda, e o formato pessoa-período correspondente.}
@@ -352,6 +350,8 @@ Um modelo com bom desempenho médio pode errar de forma sistemática em subgrupo
 
 \citeonline{wirtz2019} classificam as aplicações de inteligência artificial no setor público e os desafios associados em quatro dimensões: implementação tecnológica, lei e regulação, ética e sociedade. No Brasil, a Lei Geral de Proteção de Dados \cite{brasil2018lgpd} impõe restrições ao tratamento de dados pessoais, relevantes quando as bases de obras incluem informações de construtoras e responsáveis técnicos.
 
+\citeonline{veale2019}, ao examinar o uso de aprendizado de máquina na gestão pública, mapeiam os tipos de modelo e os processos que eles apoiam em três níveis, do planejamento macro à decisão na ponta, e perguntam se a tecnologia transforma a administração ou é absorvida pelo conservadorismo dinâmico das burocracias. \citeonline{engstrom2020}, em levantamento sobre as agências federais dos Estados Unidos, encontraram uso de IA ou ML em 64 das 142 agências analisadas, discutem as opções de desenvolver internamente, contratar ou colaborar com instituições externas e dedicam atenção aos desafios de prestação de contas. No Brasil, a Estratégia Brasileira de Inteligência Artificial \cite{brasil2021ebia} inclui a aplicação de IA no poder público entre seus eixos temáticos.
+
 \citeonline{ferreira2025}, ao analisar o pipeline de ML da plataforma Brasil Participativo, concluem que ML responsável no setor público é sobretudo um problema de engenharia institucional: acesso restrito a dados, conjuntos de dados sem versão e governança frágil de proveniência e monitoramento pesam tanto quanto as escolhas técnicas. Os autores defendem tratar pipelines de ML como infraestrutura cívica, com práticas de dados transparentes, reprodutíveis e auditáveis.
 
 % ---------------------------------------------------------------------
@@ -364,28 +364,28 @@ Um modelo com bom desempenho médio pode errar de forma sistemática em subgrupo
 
 Do lado da engenharia, \citeonline{kreuzberger2023} propõem uma arquitetura de referência genérica para MLOps, e \citeonline{amounajafabadi2024}, em mapeamento sistemático de 43 estudos primários, identificam 35 componentes de arquiteturas de MLOps e as variações em que eles se combinam. Esses trabalhos descrevem os componentes de forma independente da plataforma de dados: o repositório de features, por exemplo, aparece como fonte dos dados de treino, sem discutir sua relação com as camadas de um \textit{lakehouse} já existente. \citeonline{aguiar2020} e \citeonline{ferreira2025} relatam experiências de ML em projetos governamentais brasileiros, centradas no processo e nos obstáculos institucionais, e não na arquitetura.
 
-A proposta mais próxima vem da literatura de fornecedores. O guia de MLOps da Databricks \cite{databricks2023mlops} recomenda tratar dados e ativos de ML (features, modelos e funções) como ativos do mesmo \textit{lakehouse}, sob um único catálogo com linhagem. A ideia de não construir uma plataforma paralela é a mesma deste trabalho. A diferença está em três pontos: o guia supõe a pilha do próprio fornecedor (formato de tabela, catálogo, repositório de features e serviço de inferência integrados), enquanto este trabalho define papéis independentes de ferramenta; o guia mantém um repositório de features, enquanto este trabalho mostra que, num escore mensal em lote, as tabelas \textit{as of} $t$ da camada ouro cumprem essa função sem uma segunda implementação das features; e o guia não trata do retorno dos escores pela camada bronze, que submete as predições aos mesmos testes e ao mesmo catálogo das demais fontes.
+A proposta mais próxima vem da literatura de fornecedores. O guia de MLOps da Databricks \cite{databricks2023mlops} recomenda tratar dados e ativos de ML (features, modelos e funções) como ativos do mesmo \textit{lakehouse}, sob um único catálogo com linhagem. A ideia de não construir uma plataforma paralela é a mesma deste trabalho. A diferença está em três pontos: o guia supõe a pilha do próprio fornecedor (formato de tabela, catálogo, repositório de features e serviço de inferência integrados), enquanto este trabalho define papéis independentes de ferramenta; o guia mantém um repositório de features, enquanto este trabalho argumenta que, num escore mensal em lote, as tabelas \textit{as of} $t$ da camada ouro cumprem essa função sem uma segunda implementação das features; e o guia não trata do retorno dos escores pela camada bronze, que submete as predições aos mesmos testes e ao mesmo catálogo das demais fontes.
 
-Nenhum dos trabalhos parte de uma plataforma de dados governamentais já estruturada como \textit{lakehouse} em camadas medalhão, com uma camada de transformação declarativa e independente de fornecedor, para definir onde cada responsabilidade do ciclo de vida de ML deve morar. A Tabela~\ref{tab:relacionados} resume a comparação.
+Nenhum dos trabalhos parte de uma plataforma de dados governamentais já estruturada como \textit{lakehouse} em camadas medalhão, com uma camada de transformação declarativa e independente de fornecedor, para definir onde cada responsabilidade do ciclo de vida de ML deve morar. A Tabela~\ref{tab:relacionados} resume a comparação; a coluna ``Independente de fornecedor'' só se aplica aos trabalhos que propõem uma arquitetura.
 
 \begin{table}[htbp]
 	\centering
 	\caption{Comparação entre trabalhos relacionados e este trabalho.}
 	\label{tab:relacionados}
-	\small
-	\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.9cm}*{4}{>{\centering\arraybackslash}X}@{}}
+	\footnotesize
+	\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.0cm}*{5}{>{\centering\arraybackslash}X}@{}}
 		\toprule
-		\textbf{Trabalho} & \textbf{Setor público} & \textbf{Predição de risco} & \textbf{Arquitetura MLOps} & \textbf{Plataforma de dados existente} \\
+		\textbf{Trabalho} & \textbf{Setor público} & \textbf{Predição de risco} & \textbf{Arquitetura MLOps} & \textbf{Plataforma de dados existente} & \textbf{Indepen\-dente de fornecedor} \\
 		\midrule
-		\citeonline{madaio2016}            & Sim & Sim & Não     & Não \\
-		\citeonline{gondia2020}            & Não & Sim & Não     & Não \\
-		\citeonline{fernandes2024}         & Sim & Sim & Não     & Não \\
-		\citeonline{kreuzberger2023}       & Não & Não & Sim     & Não \\
-		\citeonline{amounajafabadi2024}    & Não & Não & Sim     & Não \\
-		\citeonline{databricks2023mlops}   & Não & Não & Sim     & Parcial \\
-		\citeonline{aguiar2020}            & Sim & Não & Parcial & Não \\
-		\citeonline{ferreira2025}          & Sim & Não & Parcial & Não \\
-		\textbf{Este trabalho}             & Sim & Sim & Sim     & Sim \\
+		\citeonline{madaio2016}            & Sim & Sim & Não     & Não     & --- \\
+		\citeonline{gondia2020}            & Não & Sim & Não     & Não     & --- \\
+		\citeonline{fernandes2024}         & Sim & Sim & Não     & Não     & --- \\
+		\citeonline{kreuzberger2023}       & Não & Não & Sim     & Não     & Sim \\
+		\citeonline{amounajafabadi2024}    & Não & Não & Sim     & Não     & Sim \\
+		\citeonline{databricks2023mlops}   & Não & Não & Sim     & Parcial & Não \\
+		\citeonline{aguiar2020}            & Sim & Não & Parcial & Não     & --- \\
+		\citeonline{ferreira2025}          & Sim & Não & Parcial & Não     & --- \\
+		\textbf{Este trabalho}             & Sim & Sim & Sim     & Sim     & Sim \\
 		\bottomrule
 	\end{tabularx}
 	\fonte{Elaborado pelos autores.}

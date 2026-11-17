@@ -19,7 +19,9 @@
 % Identificadores de código (tabelas, colunas, caminhos) em monoespaçado, com
 % quebra de linha permitida em _ e /. Uso: \cod{ouro_reloginho_indicadores}.
 % Não usar \path, que colide com o TikZ.
-\DeclareUrlCommand\cod{\urlstyle{tt}}
+% O abntex2cite define \UrlLeft{<} e \UrlRight{>} para URLs; aqui eles são
+% esvaziados para que identificadores não saiam entre colchetes angulares.
+\DeclareUrlCommand\cod{\urlstyle{tt}\def\UrlLeft{}\def\UrlRight{}}
 \makeatletter
 \g@addto@macro{\UrlBreaks}{\do\_\do\/\do\-}
 \Urlmuskip=0mu plus 2mu

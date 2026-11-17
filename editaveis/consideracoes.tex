@@ -3,7 +3,7 @@
 
 Este trabalho propõe uma arquitetura de MLOps para plataformas de dados governamentais, a ser instanciada na previsão de paralisação de obras do Programa Minha Casa, Minha Vida no Gov Hub Cidades. A proposta parte de uma constatação da literatura: a maior parte do esforço e da dívida técnica de um sistema de ML está fora do código de treino \cite{sculley2015}, e no setor público esse esforço é ainda maior por obstáculos institucionais \cite{ferreira2025}.
 
-A principal decisão da arquitetura é estender o \textit{Data Lakehouse} existente em vez de construir uma plataforma de ML paralela. Painel e rótulo ficam na camada prata; features, escores e monitoramento, na camada ouro; e os escores voltam pela camada bronze como qualquer outra fonte, sob os mesmos testes e o mesmo catálogo das demais tabelas. Todo cálculo sobre dados fica na camada de transformação, o ambiente de modelagem apenas treina, avalia e escora, e o orquestrador coordena as etapas. Com isso, o treino e o escore usam a mesma implementação de cada feature, e qualquer resultado pode ser refeito e rastreado a partir da versão do código e da versão do dataset. Como a arquitetura é definida por papéis, e não por ferramentas, ela pode ser reaproveitada em plataformas com outras pilhas tecnológicas e acomoda também aplicações com modelos de linguagem.
+A principal decisão da arquitetura é estender o \textit{Data Lakehouse} existente em vez de construir uma plataforma de ML paralela, com cada artefato do ciclo de vida em uma camada definida, todo cálculo na camada de transformação e os escores de volta pela zona de pouso, como qualquer outra fonte. O TCC1 pôs essa decisão à prova de duas formas. A primeira foi confrontá-la com as três regras de engenharia da plataforma (Seção~\ref{sec:requisitos}): nenhum artefato de ML exigiu uma camada nova, e os únicos elementos fora das camadas medalhão, os datasets congelados e os artefatos de modelo, são saídas do treino, e não etapas de transformação. A segunda foi a recuperação da série legada, em que todo o tratamento dos arquivos coube na zona de pouso, sem regra de negócio antes da camada bronze (Seção~\ref{sec:historico}). O que mudou ao longo do TCC1 foi o caso, não a arquitetura: a formulação passou de classificação binária a análise de sobrevivência em tempo discreto, o período rotulado foi ampliado pela série legada, e as aplicações com modelos de linguagem passaram de extensão avaliada a discussão. A divisão de papéis absorveu essas mudanças sem alteração, o que é um primeiro indício a favor da generalidade que o requisito R8 e a definição por papéis pretendem.
 
 Na instanciação, os papéis serão cumpridos por uma pilha aberta e proporcional a um escore mensal em lote: versionamento dos datasets congelados com o DVC, rastreamento de experimentos e promoção por apelidos (\textit{champion} e \textit{challenger}) no MLflow, validação de dados em três pontos, ciclo disparado pela chegada de dados novos no orquestrador e monitoramento em dois tempos. O caso é formulado como análise de sobrevivência em tempo discreto, e o modelo será comparado à regra vigente recalculada mês a mês sobre o histórico.
 
@@ -29,25 +29,25 @@ Fica como trabalho futuro, fora do escopo do TCC2, demonstrar a arquitetura em u
 
 \section{Cronograma}
 
-O TCC2 ocorre no semestre 2027.1, de 15 de março a 16 de julho de 2027, o que comporta nove \textit{sprints} de duas semanas (Seção~\ref{sec:gestao}). A Tabela~\ref{tab:cronograma} apresenta as \textit{sprints} previstas. Os critérios automatizados (AV3, AV4, AV7 e AV8) são verificados na \textit{sprint} em que a peça correspondente é construída, e a \textit{sprint} S7 consolida os demais.
+O TCC2 ocorre no semestre 2027.1, de 15 de março a 16 de julho de 2027, o que comporta nove \textit{sprints} de duas semanas (Seção~\ref{sec:gestao}). A Tabela~\ref{tab:cronograma} apresenta as \textit{sprints} previstas. Os critérios verificados junto com a construção de cada peça (AV3, AV4, AV7 e AV8) são aplicados na \textit{sprint} correspondente, e a \textit{sprint} S7 consolida os demais.
 
 \begin{table}[htbp]
 	\centering
 	\caption{\textit{Sprints} previstas para o TCC2 (semestre 2027.1).}
 	\label{tab:cronograma}
 	\small
-	\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}p{2.1cm}>{\raggedright\arraybackslash}X l@{}}
+	\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}X l@{}}
 		\toprule
 		\textbf{\textit{Sprint}} & \textbf{Período} & \textbf{Meta} & \textbf{Atividades} \\
 		\midrule
-		S1 & 15/03 a 28/03 & Responder às perguntas 4 e 5 da EDA e fechar $h$ e $k$ com o MCID, ou registrar os valores padrão & A1 \\
-		S2 & 29/03 a 11/04 & Responder às perguntas 6 e 7 da EDA, decidir quais famílias legadas entram no rótulo e calcular a regra vigente por subgrupo & A1, A2 \\
-		S3 & 12/04 a 25/04 & Painel e rótulo de sobrevivência na camada prata e features \textit{as of} $t$ na camada ouro, com testes de vazamento (AV4) & A3 \\
-		S4 & 26/04 a 09/05 & Export versionado, validação na leitura, linhas de base registradas e treino de fumaça na integração contínua (AV3) & A4 \\
-		S5 & 10/05 a 23/05 & Modelo de risco discreto, regra vigente como segundo escorador (AV8) e \textit{gate} de promoção & A4, A5 \\
-		S6 & 24/05 a 06/06 & Escore disparado por dados, monitoramento em dois tempos e reprodução da operação sobre o histórico (AV7) & A5 \\
-		S7 & 07/06 a 20/06 & Consolidação de AV1, AV2, AV5 e AV6, com o revisor externo & A6 \\
-		S8 & 21/06 a 04/07 & Redação dos resultados e da discussão e entrega à banca & A7 \\
+		S1 & 15/03 a 28/03 & Responder às perguntas 4 e 5 da EDA e fechar $h$ e $k$ com o MCID, ou registrar os valores padrão & A1 \\ \addlinespace
+		S2 & 29/03 a 11/04 & Responder às perguntas 6 e 7 da EDA, decidir quais famílias legadas entram no rótulo e calcular a regra vigente por subgrupo & A1, A2 \\ \addlinespace
+		S3 & 12/04 a 25/04 & Painel e rótulo de sobrevivência na camada prata e features \textit{as of} $t$ na camada ouro, com testes de vazamento (AV4) & A3 \\ \addlinespace
+		S4 & 26/04 a 09/05 & Export versionado, validação na leitura, linhas de base registradas e treino de fumaça na integração contínua (AV3) & A4 \\ \addlinespace
+		S5 & 10/05 a 23/05 & Modelo de risco discreto, regra vigente como segundo escorador (AV8) e \textit{gate} de promoção & A4, A5 \\ \addlinespace
+		S6 & 24/05 a 06/06 & Escore disparado por dados, monitoramento em dois tempos e reprodução da operação sobre o histórico (AV7) & A5 \\ \addlinespace
+		S7 & 07/06 a 20/06 & Consolidação de AV1, AV2, AV5 e AV6, com o revisor externo & A6 \\ \addlinespace
+		S8 & 21/06 a 04/07 & Redação dos resultados e da discussão e entrega à banca & A7 \\ \addlinespace
 		S9 & 05/07 a 16/07 & Revisão final e defesa & A7 \\
 		\bottomrule
 	\end{tabularx}
@@ -67,11 +67,13 @@ Parte do cronograma depende de fatores fora do controle dos autores. A Tabela~\r
 		\toprule
 		\textbf{Risco} & \textbf{Plano se o risco se confirmar} \\
 		\midrule
-		O MCID não define $h$ e $k$ até a \textit{sprint} S1 & Adotar os valores padrão (Seção~\ref{sec:decisoes-abertas}), registrá-los em ADR e relatar a sensibilidade a $h$ e a uma faixa de $k$ \\
-		Uma família da série legada não cumpre os critérios de aceite & A família fica fora do rótulo; a avaliação usa menos cortes temporais, e a exclusão é registrada \\
-		Poucos eventos no FAR e no FDS & Modelo único para todas as modalidades, com a modalidade como feature, e métricas por modalidade com intervalo de confiança \\
-		Revisor externo indisponível & Revisão cruzada pelos coorientadores, registrada como limitação \\
-		Indisponibilidade do servidor do MLflow ou do armazenamento de objetos no ambiente da plataforma & MLflow com armazenamento local em arquivo e remoto do DVC em disco, mantendo os mesmos identificadores de versão \\
+		O MCID não define $h$ e $k$ até a \textit{sprint} S1 & Adotar os valores padrão (Seção~\ref{sec:decisoes-abertas}), registrá-los em ADR e relatar a sensibilidade a $h$ e a uma faixa de $k$ \\ \addlinespace
+		Uma família da série legada não cumpre os critérios de aceite & A família fica fora do rótulo; a avaliação usa menos cortes temporais, e a exclusão é registrada \\ \addlinespace
+		Poucos eventos no FAR e no FDS & Modelo único para todas as modalidades, com a modalidade como feature, e métricas por modalidade com intervalo de confiança \\ \addlinespace
+		Revisor externo indisponível & Revisão cruzada pelos coorientadores, registrada como limitação \\ \addlinespace
+		Indisponibilidade do servidor do MLflow ou do armazenamento de objetos no ambiente da plataforma & MLflow com armazenamento local em arquivo e remoto do DVC em disco, mantendo os mesmos identificadores de versão \\ \addlinespace
+		O histórico não guarda o valor vigente em $t$ de datas usadas pela regra (como a previsão de conclusão) & Usar o primeiro valor registrado, relatar a sensibilidade do resultado da regra a essa escolha e registrar o ponto como ameaça à validade (Seção~\ref{sec:regra-vigente}) \\ \addlinespace
+		Indisponibilidade dos dados ou do ambiente de homologação do MCID durante o TCC2 & Desenvolver no ambiente local da plataforma sobre uma extração congelada das tabelas prata, com a data do corte registrada, e reexecutar no ambiente do MCID quando ele voltar \\
 		\bottomrule
 	\end{tabularx}
 	\fonte{Elaborado pelos autores.}
