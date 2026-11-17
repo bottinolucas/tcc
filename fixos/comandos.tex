@@ -13,3 +13,29 @@
 
 % Marca trechos que ainda precisam ser completados pelo autor
 \newcommand{\pendente}[1]{\textcolor{red}{[PENDENTE: #1]}}
+% Versão curta para células de tabela; a busca por \pendente também a encontra
+\newcommand{\pendentecelula}[1]{\textcolor{red}{[#1]}}
+
+% Identificadores de código (tabelas, colunas, caminhos) em monoespaçado, com
+% quebra de linha permitida em _ e /. Uso: \cod{ouro_reloginho_indicadores}.
+% Não usar \path, que colide com o TikZ.
+\DeclareUrlCommand\cod{\urlstyle{tt}}
+\makeatletter
+\g@addto@macro{\UrlBreaks}{\do\_\do\/\do\-}
+\Urlmuskip=0mu plus 2mu
+\makeatother
+% Folga extra para parágrafos que, sem ela, estourariam a margem
+\setlength{\emergencystretch}{2em}
+
+% Floats: páginas só de floats começam no topo, e tabelas médias ficam no
+% texto em vez de irem sozinhas para uma página.
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpsep}{12pt plus 1fil}
+\makeatother
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.6}
+\renewcommand{\textfraction}{0.12}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{topnumber}{3}
+\setcounter{totalnumber}{4}
