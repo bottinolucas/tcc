@@ -1,7 +1,7 @@
 # 0010 — Aplicações com LLM entram como extensão discutida
 
 - **Data:** 2026-11-15
-- **Status:** proposto
+- **Status:** substituído por 0013
 - **Proposto por:** Lucas Bottino
 - **Aprovado por:** —
 

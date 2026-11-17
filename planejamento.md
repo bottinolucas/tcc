@@ -1,6 +1,6 @@
 # Planejamento do TCC1
 
-Última atualização: 15/11/2026
+Última atualização: 16/11/2026 (revisão a partir do parecer e da devolutiva do TCC1)
 
 ## 1. Tema
 
@@ -9,19 +9,26 @@
 | **Título** | Arquitetura de MLOps para dados governamentais |
 | **Autores** | Lucas Gama De Araujo Bottino e Wallyson Paulo Costa Souza |
 | **Etapa** | TCC1 (proposta) |
-| **Orientação** | Profa. Dra. Carla Rocha Aguiar; coorientação: Prof. Dr. Isaque Alves |
+| **Orientação** | Prof. Dr. Isaque Alves; coorientação: Profa. Dra. Carla Rocha Aguiar e MSc. Guilherme Fernandes |
 | **Contribuição** | A arquitetura de MLOps. O caso da paralisação de obras serve para instanciá-la e avaliá-la |
-| **Caso** | Prever quais obras ativas do MCMV vão paralisar nos próximos meses (Gov Hub Cidades / MCID) |
+| **Caso** | Prever quais obras em execução do MCMV vão paralisar nos próximos meses (Gov Hub Cidades / MCID), como análise de sobrevivência em tempo discreto (decisão 0014) |
 | **Método** | Design Science Research (Hevner, 2004; Peffers et al., 2007) |
 | **Fonte de verdade do caso** | `data-application-cidades/docs/adr/0001-arquitetura-mlops-prevencao-paralisacao.md` e `ml/prevencao_paralisacao/README.md` |
 
-**Questão de pesquisa (QP):** como estruturar uma arquitetura de MLOps que se integre a uma
-plataforma de dados governamentais existente, garantindo reprodutibilidade, rastreabilidade e
-avaliação honesta de modelos?
+**Questão de pesquisa (QP):** como estruturar uma arquitetura de MLOps integrada a uma plataforma
+de dados governamentais organizada em camadas medalhão, de modo que os resultados de modelos
+preditivos sejam reprodutíveis, rastreáveis e comparáveis à regra vigente sem vazamento temporal?
 
-- **QE1:** o que fica no dbt, o que fica no Python e o que fica no Airflow?
-- **QE2:** como garantir que qualquer resultado possa ser refeito a partir do código e dos dados?
-- **QE3:** a arquitetura permite comparar o modelo com a regra vigente sem vazamento temporal?
+- **QE1:** o que fica na camada de transformação, no ambiente de modelagem e no orquestrador, e em
+  qual camada fica cada artefato de ML?
+- **QE2:** como permitir que qualquer resultado seja reproduzido e rastreado até o código, os dados
+  e o ambiente?
+- **QE3:** a arquitetura permite comparar o modelo com a regra vigente em condições iguais, sem
+  vazamento temporal?
+
+**Objetivos específicos:** OE1 requisitos; OE2 projeto por papéis; OE3 instanciação no caso; OE4
+avaliar a arquitetura (AV1, AV2, AV8); OE5 avaliar a instanciação (AV3–AV7). O quadro Objetivos ×
+Evidências está na metodologia (`tab:objetivos-evidencias`).
 
 **Tese em uma frase:** estender o Data Lakehouse existente em vez de criar uma plataforma de ML
 paralela. Painel e rótulo ficam na camada prata; features, escores e monitoramento, na ouro; e os
@@ -29,9 +36,10 @@ escores voltam pela bronze. A camada de transformação faz todo o cálculo, o a
 treina, avalia e escora, o orquestrador coordena, e cada treino congela um dataset versionado. A
 arquitetura é descrita por papéis, e as ferramentas aparecem só na instanciação (decisão 0008).
 Na instanciação, a stack é DVC, MLflow com apelidos champion/challenger, validação em três pontos,
-ciclo disparado por dados (nível 1 de maturidade) e monitoramento em dois tempos (decisão 0009). Os
-mesmos papéis são discutidos para aplicações com LLM a partir do graphrag-tais (decisão 0010), e o
-desempenho é reportado por subgrupo (R9, decisão 0012).
+ciclo disparado por dados (nível 1 de maturidade) e monitoramento em dois tempos (decisão 0009). O
+caso é sobrevivência em tempo discreto (decisão 0014), com o rótulo no legado da Caixa (2015–2018)
+e no SFTP (2019–2024) (decisão 0015). A avaliação tem oito critérios com condição de atendimento
+(decisão 0016). LLM/RAG entra só como discussão textual (decisão 0013).
 
 ## 2. Estrutura e divisão em escritas
 
@@ -39,50 +47,45 @@ Status: ✅ rascunho pronto · 🟡 rascunho com pendências · ⬜ depende de t
 
 | # | Escrita | Arquivo | Status | O que falta |
 |---|---|---|---|---|
-| E1 | Introdução: contexto, problema, questões, objetivos | `introducao.tex` | ✅ | Revisar depois de E11 |
-| E2 | Ref. 2.1: plataformas de dados (camadas, lakehouse, Airflow/dbt) | `referencial.tex` | ✅ | — |
-| E3 | Ref. 2.2: ML em produção (dívida técnica, desafios, CRISP-DM) | `referencial.tex` | ✅ | — |
-| E4 | Ref. 2.3: MLOps (P1–P9, maturidade, MLflow, ML Test Score) | `referencial.tex` | ✅ | — |
-| E5 | Ref. 2.5: riscos com dados longitudinais (vazamento, validação temporal, skew, recall@k, drift) | `referencial.tex` | ✅ | — |
-| E6 | Ref. 2.6: ML no setor público | `referencial.tex` | 🟡 | Seção curta; ampliar depois da busca de E7 |
-| E7 | Ref. 2.7: trabalhos relacionados e tabela comparativa | `referencial.tex` | 🟡 | Busca estruturada (ver seção 5) |
-| E8 | Metodologia: DSR, contexto, critérios AV1–AV5, ferramentas | `metodologia.tex` | 🟡 | Equipe e vínculo com o MCID; decidir se haverá avaliação qualitativa |
-| E9 | Proposta: requisitos R1–R8, arquitetura, responsabilidades, ciclo de vida | `proposta.tex` | 🟡 | Limiares de drift e política de retreino |
-| E10 | Proposta: instanciação no caso MCMV | `proposta.tex` | 🟡 | Decisões sobre h, k, retomada e usuário do alerta |
-| E11 | Resultados preliminares: diagnóstico, EDA, ameaças à validade | `resultados.tex` | ⬜ | Rodar a EDA e calcular o recall@k da regra vigente |
-| E12 | Considerações finais e cronograma do TCC2 | `consideracoes.tex` | 🟡 | Meses reais do semestre |
-| E13 | Resumo e abstract | `resumo.tex`, `abstract.tex` | ✅ | Ajustar depois de E11 |
-| E14 | Ref. 2.3: versionamento de dados, maturidade-alvo, MLflow com apelidos | `referencial.tex` | ✅ | — |
-| E15 | Ref. 2.4: aplicações com LLM (RAG, avaliação, segurança) | `referencial.tex` | ✅ | — |
-| E16 | Proposta: stack (feature store, validação, CI, promoção, monitoramento, R9) e figura com DVC | `proposta.tex` | 🟡 | Valores de PSI e periodicidade do retreino |
-| E17 | Proposta: extensão para aplicações com LLM (tabela de papéis × graphrag-tais) | `proposta.tex` | ✅ | — |
-| E18 | Metodologia: gestão em sprints, AV6 e AV7 | `metodologia.tex` | 🟡 | Confirmar o PO do MCID |
-| E19 | Resultados: recuperação da série histórica | `resultados.tex` | 🟡 | Revisão do de-para; decidir uso no rótulo |
-| E20 | Considerações: cronograma em sprints S1–S12 | `consideracoes.tex` | 🟡 | Datas reais do semestre |
+| E1 | Introdução no modelo contexto → objetivos → metodologia → resultados → conclusão | `introducao.tex` | ✅ | Atualizar o parágrafo de resultados com o número da regra (T1) |
+| E2–E5, E14 | Referencial: plataformas, ML em produção, MLOps (com figuras), riscos | `referencial.tex` | ✅ | — |
+| E15 | Ref. 2.4: LLM reduzida a dois parágrafos (decisão 0013) | `referencial.tex` | ✅ | — |
+| E21 | Ref. 2.5.6: sobrevivência em tempo discreto (figura pessoa-período) | `referencial.tex` | ✅ | — |
+| E6 | Ref. 2.6: ML no setor público | `referencial.tex` | 🟡 | Ampliar depois da busca de E7 |
+| E7 | Ref. 2.7: trabalhos relacionados (+ Amou Najafabadi 2024, Databricks 2023) e protocolo da busca | `referencial.tex` | 🟡 | Executar a busca estruturada e registrar contagens (T1) |
+| E8, E18 | Metodologia: DSR (figura), demonstração por reprodução sobre o histórico, AV1–AV8 com condição de atendimento, quadro Objetivos × Evidências, Scrum condensado | `metodologia.tex` | ✅ | Nome do revisor externo |
+| E9, E16, E17 | Proposta: requisitos, arquitetura, reprodutibilidade e rastreabilidade, operação (figura), LLM curta | `proposta.tex` | ✅ | — |
+| E10 | Proposta: instanciação (sobrevivência, período rotulado, regra vigente no mês t, Tabela 10 com estado) | `proposta.tex` | ✅ | Decisões do MCID (h, k, retomada, usuário) ou valores padrão |
+| E11 | Resultados: levantamento dos dados e regra vigente no histórico | `resultados.tex` | ⬜ | Preencher as células `\pendentecelula{T1}` e interpretar (T1) |
+| E19 | Resultados: série legada, critérios de aceite (decisão 0015) e figura do pipeline | `resultados.tex` | ✅ | Aplicar os critérios (S1–S2) |
+| E12, E20 | Considerações parciais: próximos passos, cronograma S1–S9, riscos | `consideracoes.tex` | ✅ | Refazer o cronograma depois da T2 |
+| E13 | Resumo e abstract | `resumo.tex`, `abstract.tex` | ✅ | Acrescentar o número da regra (T1) |
 
 ### Ordem sugerida para o que falta
 
-1. **E10**: fechar h, k, retomada e usuário do alerta. Isso trava a EDA e a métrica.
-2. **E11**: recall@k da regra vigente no período SFTP. Dá para calcular sem nenhum modelo e é o
-   resultado preliminar mais forte para a banca.
-3. **E11**: EDA, perguntas 1 a 3 (cobertura, troca de fonte, de-para de situação), com as figuras.
-4. **E7 e E6**: busca estruturada e ampliação dos trabalhos relacionados.
-5. **E8, E9, E12**: pendências curtas (equipe, drift, cronograma).
-6. **E1 e E13**: revisão final de introdução, resumo e abstract com os resultados em mãos.
-7. Revisão com os orientadores.
+1. **Regra vigente no mês t** no período SFTP, FAR e FDS, com h = 6 e k em 5%, 10% e 20% das obras
+   em execução (Tabela `tab:regra-historico`). Definição na Seção 4.3.3; o SQL de origem é
+   `ouro_reloginho_indicadores_gargalo_desempenho.sql` (pontuação `score_gargalo` sem o sinalizador
+   de paralisação).
+2. **Tabela de transições** por modalidade e fonte (`tab:levantamento`) e EDA perguntas 1 a 3.
+3. **Integrar ao repositório da plataforma** `ml/` e `docs/adr/0001-*` (hoje só na cópia local,
+   não versionados), com PR.
+4. **Busca estruturada** (seção 5 abaixo) e contagens no texto.
+5. **Decisões em aberto** com o MCID (h, k, retomada, usuário) e revisor externo (orientadores).
+6. Revisão com os orientadores e retirada dos `\pendente`.
 
 ## 3. Sprints
 
 Scrum adaptado, com sprints de 2 semanas (decisão 0011).
 - **PO:** ponto focal do MCID (a confirmar).
 - **Time:** a dupla.
-- **Stakeholders:** orientadores.
+- **Stakeholders:** orientador e coorientadores.
 - **Backlog:** Issues + GitHub Project neste repositório.
 
 | Sprint | Período | Meta | Status |
 |---|---|---|---|
 | 0 | 27/10 a 15/11/2026 | Diagnóstico, ADR da arquitetura, especificação do caso, levantamento dos dados, primeira versão do TCC1 e refinamento (stack, LLM, sprints, histórico) | ✅ |
-| T1 | 16/11 a 29/11/2026 | Recall@k da regra vigente no período SFTP; EDA perguntas 1 a 3; revisão do de-para do histórico | ⬜ |
+| T1 | 16/11 a 29/11/2026 | Regra vigente no mês t no período SFTP; tabela de transições; EDA perguntas 1 a 3; busca estruturada; integrar `ml/` e ADR 0001 na plataforma | ⬜ |
 | T2 | 30/11 a 13/12/2026 | Resultados da T1 no texto (E11); revisão com os orientadores; entrega do TCC1 | ⬜ |
 | S1–S12 | TCC2 | Ver a tabela `tab:cronograma` em `consideracoes.tex` | ⬜ |
 
@@ -183,6 +186,17 @@ afirmação).
 | Buneman, Khanna e Tan (2001), ICDT | Proveniência de dados | 5.4 | ○ |
 | Wang e Strong (1996), JMIS | Dimensões de qualidade de dados | 5.4 | ○ |
 | Rahm e Bernstein (2001), VLDB J.; Curino et al. (2008), PVLDB | Schema matching e evolução de esquema (de-para de colunas do histórico) | 5.4 | ○ |
+
+### Adicionadas em 16/11/2026 (revisão pós-devolutiva)
+
+| Ref. | Por que | Onde | Prior. |
+|---|---|---|---|
+| Kaplan e Meier (1958); Singer e Willett (2003); Tutz e Schmid (2016) | Sobrevivência; tempo discreto e formato pessoa-período | 2.5.6, 4.3 | ★ |
+| Harrell, Lee e Mark (1996); Graf et al. (1999) | C-index e Brier integrado | 2.5.6, 4.3 | ○ |
+| Fine e Gray (1999) | Riscos competitivos (conclusão × paralisação) | 2.5.6, 5.8 | ○ |
+| Davidson-Pilon (2019), lifelines | Biblioteca de sobrevivência na instanciação | Tabela 10 | ○ |
+| Amou Najafabadi et al. (2024), ECSA | Mapeamento de 43 estudos, 35 componentes de arquiteturas de MLOps | 2.7 | ★ |
+| Databricks (2023), Big Book of MLOps | Literatura cinzenta: dados e ativos de ML no mesmo lakehouse | 2.7 | ★ |
 
 ## 5. Busca estruturada pendente (E7)
 

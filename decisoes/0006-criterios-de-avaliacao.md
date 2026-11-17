@@ -1,7 +1,7 @@
 # 0006 — Critérios de avaliação AV1–AV5
 
 - **Data:** 2026-11-10
-- **Status:** proposto
+- **Status:** substituído por 0016
 - **Proposto por:** Lucas Bottino
 - **Aprovado por:** —
 
