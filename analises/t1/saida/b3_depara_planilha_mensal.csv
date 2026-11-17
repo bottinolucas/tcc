@@ -1,0 +1,8 @@
+cod,far,fds,rural,descricao_far_fds,descricao_rural,estagio,situacao_canonica
+1,358.0,618.0,900.0,NÃO INICIADA,Construção não começada,Não iniciada,nao_iniciada
+11,1195.0,283.0,2086.0,NORMAL,Obra em andamento dentro do prazo,Em obra - no prazo,em_obras
+16,37.0,17.0,10.0,OUTRAS,Código fora do layout (16),Não documentado,
+2,533.0,74.0,688.0,EM ANDAMENTO,Obra iniciada e em andamento,Em obra,em_obras
+3,366.0,85.0,2122.0,ATRASADA,Obra em andamento que ultrapassou o prazo,Em obra - atrasada,em_obras
+4,7.0,3.0,118.0,PARALISADA,Obra paralisada,Paralisada,paralisada
+5,64.0,7.0,144.0,CONCLUÍDA,Finalizada a fase de construção,Concluída,concluida

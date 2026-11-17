@@ -25,17 +25,19 @@ O levantamento inicial leu as tabelas prata de histórico do FAR, do FDS e do Ru
 		\toprule
 		\textbf{Modalidade} & \textbf{Obras} & \textbf{Transições no SFTP} & \textbf{Transições na troca de fonte} & \textbf{Transições na SNH} \\
 		\midrule
-		FAR & 5.555 & \pendentecelula{T1} & \pendentecelula{T1} & \pendentecelula{T1} \\
-		FDS & 1.021 & \pendentecelula{T1} & \pendentecelula{T1} & \pendentecelula{T1} \\
-		Rural & 11.122 & \pendentecelula{T1} & \pendentecelula{T1} & \pendentecelula{T1} \\
+		FAR & 5.555 & 140 & 33 & 43 \\
+		FDS & 917 & 147 & 3 & 63 \\
+		Rural & 11.122 & 980 & 1 & 111 \\
 		\midrule
-		Total & 17.698 & cerca de 1.500 & \pendentecelula{T1} & \pendentecelula{T1} \\
+		Total & 17.594 & 1.267 & 37 & 217 \\
 		\bottomrule
 	\end{tabularx}
-	\fonte{Elaborado pelos autores, a partir das tabelas prata da plataforma.}
+	\fonte{Elaborado pelos autores, a partir das tabelas prata da plataforma, extraídas em 17 de novembro de 2026.}
 \end{table}
 
-A fonte da situação muda duas vezes ao longo da série: SFTP da Caixa até novembro de 2024, sistema da SNH de junho de 2024 a março de 2026, e planilha de acompanhamento mensal a partir de abril de 2026. No período de sobreposição, as duas primeiras fontes concordam em 96 a 98\% dos casos. Ainda assim, um terço das paralisações do FAR ocorre exatamente no mês da troca de fonte, isto é, na primeira competência em que a coluna canônica de situação passa a vir da SNH, e dentro do período SNH quase não surgem paralisações novas. No período SFTP há cerca de 1.500 transições para \cod{paralisada}, a maioria no Rural. \pendente{Indicar a competência exata da troca de fonte, apurada na \textit{sprint} T1.}
+As obras são contadas pelo \cod{id_empreendimento}: no FAR e no Rural cada empreendimento tem um APF, e no FDS os 1.021 APFs formam 917 empreendimentos, porque o mesmo empreendimento pode ter mais de um APF. A troca de fonte é junho de 2024, a mesma nas três modalidades; as colunas da tabela separam as transições antes dessa competência, nela e depois dela.
+
+A fonte da situação muda duas vezes ao longo da série: SFTP da Caixa até novembro de 2024, sistema da SNH de junho de 2024 a março de 2026, e planilha de acompanhamento mensal a partir de abril de 2026. No período de sobreposição, as duas primeiras fontes concordam em 96 a 98\% dos casos. A primeira competência em que a coluna canônica de situação passa a vir da SNH é junho de 2024, no FAR, no FDS e no Rural. A troca não é definitiva: em agosto de 2024 o painel da SNH não tem foto, quase todas as obras voltam a ter a situação do SFTP, e a SNH volta a valer em setembro. No FDS, 26 obras seguem com a situação do SFTP até dezembro de 2025, e em junho de 2026 o FDS inteiro (916 obras) volta a ter a situação do SFTP. Essas mudanças produzem paralisações: no FAR, 33 das 216 transições para \cod{paralisada} (15,3\%) ocorrem em junho de 2024, e 73 (33,8\%) ocorrem num mês em que a fonte da obra muda (junho, agosto ou setembro de 2024). O mesmo vale para a coluna da SNH na Tabela~\ref{tab:levantamento}: das 63 transições do FDS depois da troca, 60 ocorrem em agosto e setembro de 2024 e em junho de 2026, e das 111 do Rural, 77 ocorrem em agosto e setembro de 2024. Com a fonte estável na SNH, restam 4 transições no FAR, 3 no FDS e 34 no Rural. Antes da troca, no período SFTP, há 1.267 transições para \cod{paralisada} (1.521 na série inteira), 980 delas (77\%) no Rural. Parte das do Rural vem de obras que alternam entre \cod{paralisada} e \cod{em_obras} de um mês para outro: no Rural, são 1.092 transições, mas só 643 primeiras paralisações. A planilha mensal, a partir de abril de 2026, ainda não tem o código de situação traduzido para a coluna canônica, de modo que a série com situação termina em março de 2026 no FAR e no Rural, e em junho de 2026 no FDS.
 
 Esses achados têm três implicações para o plano. Primeiro, o rótulo só é confiável no período SFTP, e a troca de fonte é uma mudança de distribuição conhecida (Seção~\ref{sec:riscos}) que a preparação dos dados precisa tratar explicitamente; as transições no mês da troca não contam como evento. Segundo, como a maioria dos eventos está no Rural, o FAR e o FDS sozinhos podem não ter eventos suficientes para treino e teste com vários cortes; por isso, o modelo é ajustado sobre todas as modalidades, com a modalidade como feature, e o desempenho é relatado por modalidade com intervalo de confiança. Terceiro, a regra vigente cobre apenas o FAR e o FDS, justamente as modalidades com menos eventos, o que reforça a necessidade de ampliar o período rotulado com a série legada (Seção~\ref{sec:historico}).
 
@@ -53,14 +55,18 @@ O primeiro número que o modelo terá de superar já pode ser obtido sem nenhum 
 		\toprule
 		\textbf{Modalidade} & \textbf{Eventos} & \textbf{\textit{Recall} ($k$ = 5\%)} & \textbf{\textit{Recall} ($k$ = 10\%)} & \textbf{\textit{Recall} ($k$ = 20\%)} & \textbf{\textit{Precision} ($k$ = 10\%)} \\
 		\midrule
-		FAR & \pendentecelula{T1} & \pendentecelula{T1} & \pendentecelula{T1} & \pendentecelula{T1} & \pendentecelula{T1} \\
-		FDS & \pendentecelula{T1} & \pendentecelula{T1} & \pendentecelula{T1} & \pendentecelula{T1} & \pendentecelula{T1} \\
+		FAR & 766 & 7,6\% & 12,9\% & 27,9\% & 6,3\% \\
+		FDS & 572 & 14,3\% & 28,2\% & 46,2\% & 47,5\% \\
 		\bottomrule
 	\end{tabularx}
-	\fonte{Elaborado pelos autores.}
+	\fonte{Elaborado pelos autores, a partir das tabelas prata da plataforma, extraídas em 17 de novembro de 2026.}
 \end{table}
 
-\pendente{Interpretar a Tabela~\ref{tab:regra-historico} depois do cálculo da \textit{sprint} T1: quanto das paralisações a regra antecipa com a capacidade de fiscalização atual, e em quais modalidades.}
+O cálculo percorre as competências de dezembro de 2019 a maio de 2024 (52 no FAR e 50 no FDS, por lacunas na série). Em cada uma, a pontuação usa só o que estava registrado até $t$, sem o sinalizador de paralisação, e vai de 0 a 7. A data da última liberação e a da última medição foram reconstruídas mês a mês a partir do próprio painel. Os eventos são as obras em execução em $t$ que paralisam pela primeira vez entre $t+1$ e $t+6$, somadas sobre as competências (766 no FAR e 572 no FDS, de 151 e 104 obras distintas). Obras concluídas ou canceladas antes de $t+6$ contam como não evento, e as transições de junho de 2024 não contam. O \textit{recall} e a \textit{precision} foram agregados pelo total de acertos sobre todas as competências.
+
+No FDS, a regra antecipa 14,3\%, 28,2\% e 46,2\% das paralisações com listas de 5\%, 10\% e 20\% das obras em execução, entre 2,3 e 2,9 vezes o que uma lista ao acaso teria (o \textit{recall} esperado ao acaso é o próprio $k$). Das obras na lista de 10\%, 47,5\% paralisam, contra 18,1\% de todas as obras em execução. No FAR, a regra fica perto do acaso: 7,6\%, 12,9\% e 27,9\%, com \textit{precision} de 6,3\% contra uma taxa de base de 5,0\%. É esse o número que o modelo terá de superar, e a margem é maior no FAR.
+
+Dois cuidados acompanham esses números. O primeiro é que o painel não guarda a previsão de conclusão, que alimenta o sinalizador de atraso, o de maior peso. Foi usado o último valor conhecido até $t$, do relatório executivo da Caixa recuperado da série legada (até agosto de 2018), e, na falta dele, o primeiro valor registrado depois de $t$, o que ocorreu em 13 obras do FAR e 14 do FDS, sem mudar nenhuma lista; 425 obras do FAR e 112 do FDS ficaram sem previsão e com o sinalizador de atraso falso. Sem nenhuma previsão, o \textit{recall} com $k$ igual a 10\% cai para 9,4\% no FAR e 12,1\% no FDS. O segundo é que, no FAR, 68 dos 766 eventos ocorrem em agosto ou setembro de 2024, os meses de ida e volta da fonte; sem eles, o \textit{recall} com $k$ igual a 10\% fica em 10,2\%.
 
 \section{Análise exploratória dos dados}
 
@@ -76,9 +82,48 @@ A análise exploratória (fase 2 do CRISP-DM) lê as tabelas prata como o pipeli
 	\item Quais famílias da série legada (Seção~\ref{sec:historico}) cumprem os critérios de aceite para entrar no rótulo?
 \end{enumerate}
 
-As perguntas 1 a 3 são respondidas na \textit{sprint} T1, junto com a Tabela~\ref{tab:levantamento}. As perguntas 4 a 7 ficam para as duas primeiras \textit{sprints} do TCC2. A pergunta 5 orienta a formulação de sobrevivência (Seção~\ref{sec:caso}). Ela vai mostrar se o risco de paralisar se concentra no início da obra ou cresce com o tempo, e se as diferenças entre modalidades justificam modelos separados.
+As perguntas 1 a 3 foram respondidas na \textit{sprint} T1, junto com a Tabela~\ref{tab:levantamento}. As perguntas 4 a 7 ficam para as duas primeiras \textit{sprints} do TCC2. A pergunta 5 orienta a formulação de sobrevivência (Seção~\ref{sec:caso}). Ela vai mostrar se o risco de paralisar se concentra no início da obra ou cresce com o tempo, e se as diferenças entre modalidades justificam modelos separados.
 
-\pendente{Inserir as figuras das perguntas 1 a 3 depois da \textit{sprint} T1: número de obras por mês e por fonte, com as trocas de fonte marcadas, e taxa mensal de transição para \texttt{paralisada} por fonte.}
+A Figura~\ref{fig:obras-fonte} responde à pergunta 1 e a Figura~\ref{fig:taxa-fonte}, à pergunta 2. O número de obras por fonte mostra a troca para a SNH em junho de 2024, a volta ao SFTP em agosto e a planilha mensal a partir de abril de 2026; a taxa mensal de transição para \cod{paralisada} tem picos nos meses em que a fonte muda e, no Rural, oscila no período SFTP porque poucas obras ficam em execução (cerca de 270 por mês, contra cerca de 700 paralisadas).
+
+\begin{figure}[htbp]
+	\centering
+	\input{figuras/t1_obras_por_fonte.tex}
+	\caption{Obras por mês de competência e por fonte da situação, de dezembro de 2019 a julho de 2026. As linhas tracejadas marcam as mudanças de fonte (junho, agosto e setembro de 2024 e abril de 2026; no FDS, também junho de 2026). Linha interrompida: competência sem dado.}
+	\label{fig:obras-fonte}
+	\fonte{Elaborado pelos autores, a partir das tabelas prata da plataforma.}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\input{figuras/t1_taxa_paralisacao.tex}
+	\caption{Taxa mensal de transição para \texttt{paralisada}: transições no mês sobre as obras em execução no mês anterior, por fonte da situação, só nos meses com 30 obras ou mais em execução no mês anterior. A planilha mensal não aparece porque ainda não tem a situação canônica.}
+	\label{fig:taxa-fonte}
+	\fonte{Elaborado pelos autores, a partir das tabelas prata da plataforma.}
+\end{figure}
+
+A pergunta 3 tem resposta parcial. Os códigos da planilha mensal se traduzem pelo dicionário da própria plataforma (seed \cod{far_situacao_obra}) e pelo domínio de situações usado na camada prata (Tabela~\ref{tab:depara-planilha}), mas o pipeline ainda não aplica esse de-para. O código 16, ``outras'' no dicionário do FAR e ``fora do layout'' no do Rural, não tem correspondência. No FGTS, o domínio cobre os códigos de 1 a 6, 8, B, C e E; ficam sem correspondência o 0 (obra não executada, contrato cancelado), o 7 (iniciada sem medição), o A (crítica), o D (frustrada), o F (medida para atender suspensiva), o G (não iniciada, liberação de terreno) e o H (paralisada ou frustrada, em devolução de recursos), além de 48.826 registros sem código.
+
+\begin{table}[htbp]
+	\centering
+	\caption{De-para dos códigos de situação da planilha mensal para a situação canônica (abr./2026 a jul./2026).}
+	\label{tab:depara-planilha}
+	\small
+	\begin{tabularx}{\textwidth}{@{}>{\raggedleft\arraybackslash}p{1.2cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{3.2cm}>{\raggedleft\arraybackslash}p{2.6cm}@{}}
+		\toprule
+		\textbf{Código} & \textbf{Descrição} & \textbf{Situação canônica} & \textbf{Linhas} \\
+		\midrule
+		1 & Não iniciada & \cod{nao_iniciada} & 1.876 \\
+		2 & Em andamento & \cod{em_obras} & 1.295 \\
+		3 & Atrasada & \cod{em_obras} & 2.573 \\
+		4 & Paralisada & \cod{paralisada} & 128 \\
+		5 & Concluída & \cod{concluida} & 215 \\
+		11 & Normal & \cod{em_obras} & 3.564 \\
+		16 & Outras (fora do layout) & sem correspondência & 64 \\
+		\bottomrule
+	\end{tabularx}
+	\fonte{Elaborado pelos autores, a partir das tabelas prata e dos dicionários da plataforma.}
+\end{table}
 
 \section{Recuperação da série legada}
 \label{sec:historico}
