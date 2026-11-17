@@ -7,8 +7,8 @@
 
 ## Contexto
 
-O rótulo de paralisação só é confiável no período SFTP (dez/2019 a nov/2024). Há cerca de 1.500
-transições, a maioria no Rural, o que é pouco para treinar e testar com vários cortes temporais. A
+O rótulo de paralisação só é confiável no período SFTP (dez/2019 a nov/2024). Há 1.267
+transições antes da troca de fonte (junho de 2024), 980 delas no Rural (levantamento da T1), o que é pouco para treinar e testar com vários cortes temporais. A
 recuperação do *dump* legado mostrou que o relatório executivo da Caixa traz a situação da obra de
 jul/2015 a ago/2018 (6.942 linhas marcadas como paralisada), com o código APF ligável à fonte atual
 em 98% dos casos. O parecer pediu que o texto dissesse o que precisa ser verdade para essa série

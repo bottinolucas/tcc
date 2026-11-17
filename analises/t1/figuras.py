@@ -35,10 +35,10 @@ def figura(df, valor, ylabel, fontes, legenda):
         "% Gerado por analises/t1/figuras.py a partir de analises/t1/saida/. Não editar à mão.",
         "\\begin{tikzpicture}",
         "\\begin{groupplot}[group style={group size=1 by 3, vertical sep=0.55cm, xticklabels at=edge bottom},",
-        "  width=\\textwidth, height=3.9cm, xmin=0, xmax=79, ymin=0, grid=major, grid style={gray!20}, unbounded coords=jump,",
+        "  scale only axis, width=\\textwidth-2.1cm, height=2.9cm, xmin=0, xmax=79, ymin=0, grid=major, grid style={gray!20}, unbounded coords=jump,",
         f"  xtick={{{','.join(str(idx(t)) for t in TICKS)}}}, xticklabels={{{','.join(TICKS)}}},",
         "  x tick label style={rotate=45, anchor=north east, font=\\scriptsize}, y tick label style={font=\\scriptsize},",
-        "  /pgf/number format/use comma, /pgf/number format/1000 sep={.}]",
+        "  scaled y ticks=false, /pgf/number format/use comma, /pgf/number format/1000 sep={.}]",
     ]
     for i, (mod, nome) in enumerate(MODALIDADES):
         extra = f", legend to name=leg{valor}, legend columns={len(fontes)}, legend style={{font=\\footnotesize, draw=none}}" if i == 0 else ""
