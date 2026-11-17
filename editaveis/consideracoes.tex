@@ -1,52 +1,77 @@
-\chapter[Considerações Finais]{Considerações Finais}
+\chapter[Considerações Parciais]{Considerações Parciais}
 \label{cap:consideracoes}
 
-Este trabalho propõe uma arquitetura de MLOps para plataformas de dados governamentais, instanciada na previsão de paralisação de obras do Programa Minha Casa, Minha Vida no Gov Hub Cidades. A proposta parte de uma constatação da literatura: a maior parte do esforço e da dívida técnica de um sistema de ML está fora do código de treino \cite{sculley2015}, e no setor público esse esforço é ainda maior por obstáculos institucionais \cite{ferreira2025}.
+Este trabalho propõe uma arquitetura de MLOps para plataformas de dados governamentais, a ser instanciada na previsão de paralisação de obras do Programa Minha Casa, Minha Vida no Gov Hub Cidades. A proposta parte de uma constatação da literatura: a maior parte do esforço e da dívida técnica de um sistema de ML está fora do código de treino \cite{sculley2015}, e no setor público esse esforço é ainda maior por obstáculos institucionais \cite{ferreira2025}.
 
-A principal decisão da arquitetura é estender o \textit{Data Lakehouse} existente em vez de construir uma plataforma de ML paralela. Painel e rótulo ficam na camada prata; features, escores e monitoramento, na camada ouro; e os escores voltam pela camada bronze como qualquer outra fonte, sob os mesmos testes e o mesmo catálogo das demais tabelas. Todo cálculo sobre dados fica na camada de transformação, o ambiente de modelagem apenas treina, avalia e escora, e o orquestrador coordena as etapas. Com isso, o treino e o escore usam a mesma implementação de cada feature, e qualquer resultado pode ser refeito a partir da versão do código e da versão do dataset. Como a arquitetura é definida por papéis, e não por ferramentas, ela pode ser reaproveitada em plataformas com outras pilhas tecnológicas, e os mesmos papéis descrevem também aplicações com modelos de linguagem, como o assistente de dados graphrag-tais do próprio Gov Hub (Seção~\ref{sec:extensao-llm}).
+A principal decisão da arquitetura é estender o \textit{Data Lakehouse} existente em vez de construir uma plataforma de ML paralela. Painel e rótulo ficam na camada prata; features, escores e monitoramento, na camada ouro; e os escores voltam pela camada bronze como qualquer outra fonte, sob os mesmos testes e o mesmo catálogo das demais tabelas. Todo cálculo sobre dados fica na camada de transformação, o ambiente de modelagem apenas treina, avalia e escora, e o orquestrador coordena as etapas. Com isso, o treino e o escore usam a mesma implementação de cada feature, e qualquer resultado pode ser refeito e rastreado a partir da versão do código e da versão do dataset. Como a arquitetura é definida por papéis, e não por ferramentas, ela pode ser reaproveitada em plataformas com outras pilhas tecnológicas e acomoda também aplicações com modelos de linguagem.
 
-Na instanciação, os papéis são cumpridos por uma pilha aberta e proporcional a um escore mensal em lote: versionamento dos datasets congelados com o DVC, rastreamento de experimentos e promoção por apelidos (\textit{champion} e \textit{challenger}) no MLflow, validação de dados em três pontos, ciclo disparado pela chegada de dados novos no orquestrador e monitoramento em dois tempos, que compensa o atraso do rótulo com o acompanhamento da distribuição das features.
+Na instanciação, os papéis serão cumpridos por uma pilha aberta e proporcional a um escore mensal em lote: versionamento dos datasets congelados com o DVC, rastreamento de experimentos e promoção por apelidos (\textit{champion} e \textit{challenger}) no MLflow, validação de dados em três pontos, ciclo disparado pela chegada de dados novos no orquestrador e monitoramento em dois tempos. O caso é formulado como análise de sobrevivência em tempo discreto, e o modelo será comparado à regra vigente recalculada mês a mês sobre o histórico.
 
-No TCC1 foram concluídas a identificação do problema, a definição dos requisitos, o projeto da arquitetura e o levantamento inicial dos dados. O levantamento já revelou um achado relevante para o caso: as trocas de fonte de dados ao longo da série produzem transições de situação que não correspondem necessariamente a paralisações reais, o que restringe o período em que o rótulo é confiável. A recuperação da série histórica anterior a 2019, ainda em validação, indica que esse período pode ser ampliado.
+No TCC1 foram concluídas a identificação do problema, a definição dos requisitos, o projeto da arquitetura e o levantamento inicial dos dados. O levantamento mostrou que as trocas de fonte ao longo da série produzem transições que não correspondem necessariamente a paralisações reais, o que restringe o período em que o rótulo é confiável. A recuperação da série legada encontrou rótulo de 2015 a 2018 e, sujeita a critérios de aceite, amplia esse período e a base de treino.
 
 \section{Próximos passos}
+
+Até a entrega do TCC1, em dezembro de 2026, restam duas \textit{sprints}. A primeira (T1, de 16 a 29 de novembro) calcula o desempenho da regra vigente no período SFTP (Tabela~\ref{tab:regra-historico}), responde às perguntas 1 a 3 da análise exploratória, completa a Tabela~\ref{tab:levantamento}, executa a busca estruturada de trabalhos relacionados e integra ao repositório da plataforma o ADR 0001 e a documentação do ciclo de vida. A segunda (T2, de 30 de novembro a 13 de dezembro) incorpora esses resultados ao texto e passa pela revisão dos orientadores.
 
 Para o TCC2, estão previstas as seguintes atividades:
 
 \begin{enumerate}
-	\item[A1] Concluir a análise exploratória, incluindo a série histórica, e fechar as decisões sobre horizonte, capacidade, retomada e usuário do alerta;
-	\item[A2] Calcular o desempenho da regra vigente no período SFTP, no agregado e por subgrupo;
-	\item[A3] Implementar na camada de transformação o painel e o rótulo (camada prata) e as features \textit{as of} $t$ (camada ouro), com testes de vazamento;
-	\item[A4] Implementar o export de datasets versionados com o DVC, a validação na leitura, o treino e a avaliação, com registro dos experimentos no MLflow e treino de fumaça na integração contínua;
-	\item[A5] Implementar a promoção com \textit{gate}, o escore mensal e o monitoramento em dois tempos, inclusive por subgrupo;
-	\item[A6] Executar a avaliação (AV1--AV7);
+	\item[A1] Concluir a análise exploratória (perguntas 4 a 7) e fechar as decisões sobre horizonte, capacidade, retomada e usuário do alerta, ou registrar os valores padrão;
+	\item[A2] Aplicar os critérios de aceite às famílias da série legada e calcular a regra vigente no período rotulado completo, no agregado e por subgrupo;
+	\item[A3] Implementar na camada de transformação o painel e o rótulo de sobrevivência (camada prata) e as features \textit{as of} $t$ (camada ouro), com testes de vazamento e injeção proposital (AV4);
+	\item[A4] Implementar o export de datasets versionados com o DVC, a validação na leitura, o treino das linhas de base e do modelo de risco discreto e o registro dos experimentos no MLflow, com treino de fumaça na integração contínua (AV3);
+	\item[A5] Implementar a regra vigente como segundo escorador (AV8), a promoção com \textit{gate}, o escore mensal e o monitoramento em dois tempos, e executar a reprodução da operação sobre o histórico (AV7);
+	\item[A6] Consolidar a avaliação (AV1, AV2, AV5 e AV6), com o revisor externo;
 	\item[A7] Redigir a monografia final e preparar a defesa.
 \end{enumerate}
 
-Fica como trabalho futuro, fora do escopo do TCC2, levar ao graphrag-tais a mesma pilha usada no caso preditivo: o conjunto \textit{gold} e as cópias do índice versionados com o DVC, e as avaliações, os \textit{prompts} e os \textit{traces} registrados no MLflow. Isso transformaria a análise de aderência do AV7 em uma segunda instanciação da arquitetura.
+Fica como trabalho futuro, fora do escopo do TCC2, demonstrar a arquitetura em uma aplicação com modelo de linguagem, como o graphrag-tais \cite{graphragtais}: o conjunto de avaliação e as cópias do índice versionados com o DVC, e as avaliações, os \textit{prompts} e os \textit{traces} registrados no MLflow.
 
 \section{Cronograma}
 
-O trabalho segue \textit{sprints} de duas semanas (Seção~\ref{sec:gestao}). Até a entrega do TCC1, em dezembro de 2026, restam duas: a primeira calcula o desempenho da regra vigente e responde às três primeiras perguntas da EDA, e a segunda incorpora esses resultados ao texto e passa pela revisão dos orientadores. O TCC2 ocorre no semestre 2027.1, de 15 de março a 16 de julho de 2027, o que comporta nove \textit{sprints}. A Tabela~\ref{tab:cronograma} apresenta as \textit{sprints} previstas, com as respectivas datas.
+O TCC2 ocorre no semestre 2027.1, de 15 de março a 16 de julho de 2027, o que comporta nove \textit{sprints} de duas semanas (Seção~\ref{sec:gestao}). A Tabela~\ref{tab:cronograma} apresenta as \textit{sprints} previstas. Os critérios automatizados (AV3, AV4, AV7 e AV8) são verificados na \textit{sprint} em que a peça correspondente é construída, e a \textit{sprint} S7 consolida os demais.
 
-\begin{table}[!htb]
+\begin{table}[htbp]
 	\centering
 	\caption{\textit{Sprints} previstas para o TCC2 (semestre 2027.1).}
 	\label{tab:cronograma}
 	\small
-	\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{1.1cm}>{\raggedright\arraybackslash}p{2.4cm}X>{\raggedright\arraybackslash}p{1.8cm}}
+	\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}p{2.1cm}>{\raggedright\arraybackslash}X l@{}}
 		\toprule
 		\textbf{\textit{Sprint}} & \textbf{Período} & \textbf{Meta} & \textbf{Atividades} \\
 		\midrule
-		S1 & 15/03 a 28/03 & Responder às perguntas 1 a 3 da EDA e fechar $h$ e $k$ com o MCID & A1, A2 \\
-		S2 & 29/03 a 11/04 & Responder às perguntas 4 a 7 da EDA, incluindo a série histórica, e calcular a regra vigente por subgrupo & A1, A2 \\
-		S3 & 12/04 a 25/04 & Painel e rótulo na camada prata e \textit{features} \textit{as of} $t$ na camada ouro, com testes de vazamento & A3 \\
-		S4 & 26/04 a 09/05 & Export versionado, validação na leitura, primeiro treino registrado e treino de fumaça na integração contínua & A4 \\
-		S5 & 10/05 a 23/05 & Experimentos de modelagem e \textit{gate} de promoção & A4, A5 \\
-		S6 & 24/05 a 06/06 & Escore mensal disparado por dados e monitoramento: PSI e desempenho realizado, inclusive por subgrupo & A5 \\
-		S7 & 07/06 a 20/06 & Avaliação AV1 a AV7 & A6 \\
+		S1 & 15/03 a 28/03 & Responder às perguntas 4 e 5 da EDA e fechar $h$ e $k$ com o MCID, ou registrar os valores padrão & A1 \\
+		S2 & 29/03 a 11/04 & Responder às perguntas 6 e 7 da EDA, decidir quais famílias legadas entram no rótulo e calcular a regra vigente por subgrupo & A1, A2 \\
+		S3 & 12/04 a 25/04 & Painel e rótulo de sobrevivência na camada prata e features \textit{as of} $t$ na camada ouro, com testes de vazamento (AV4) & A3 \\
+		S4 & 26/04 a 09/05 & Export versionado, validação na leitura, linhas de base registradas e treino de fumaça na integração contínua (AV3) & A4 \\
+		S5 & 10/05 a 23/05 & Modelo de risco discreto, regra vigente como segundo escorador (AV8) e \textit{gate} de promoção & A4, A5 \\
+		S6 & 24/05 a 06/06 & Escore disparado por dados, monitoramento em dois tempos e reprodução da operação sobre o histórico (AV7) & A5 \\
+		S7 & 07/06 a 20/06 & Consolidação de AV1, AV2, AV5 e AV6, com o revisor externo & A6 \\
 		S8 & 21/06 a 04/07 & Redação dos resultados e da discussão e entrega à banca & A7 \\
 		S9 & 05/07 a 16/07 & Revisão final e defesa & A7 \\
+		\bottomrule
+	\end{tabularx}
+	\fonte{Elaborado pelos autores.}
+\end{table}
+
+\section{Riscos}
+
+Parte do cronograma depende de fatores fora do controle dos autores. A Tabela~\ref{tab:riscos} lista os principais riscos e o que será feito se cada um se confirmar.
+
+\begin{table}[htbp]
+	\centering
+	\caption{Riscos e planos de contingência.}
+	\label{tab:riscos}
+	\small
+	\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}X@{}}
+		\toprule
+		\textbf{Risco} & \textbf{Plano se o risco se confirmar} \\
+		\midrule
+		O MCID não define $h$ e $k$ até a \textit{sprint} S1 & Adotar os valores padrão (Seção~\ref{sec:decisoes-abertas}), registrá-los em ADR e relatar a sensibilidade a $h$ e a uma faixa de $k$ \\
+		Uma família da série legada não cumpre os critérios de aceite & A família fica fora do rótulo; a avaliação usa menos cortes temporais, e a exclusão é registrada \\
+		Poucos eventos no FAR e no FDS & Modelo único para todas as modalidades, com a modalidade como feature, e métricas por modalidade com intervalo de confiança \\
+		Revisor externo indisponível & Revisão cruzada pelos coorientadores, registrada como limitação \\
+		Indisponibilidade do servidor do MLflow ou do armazenamento de objetos no ambiente da plataforma & MLflow com armazenamento local em arquivo e remoto do DVC em disco, mantendo os mesmos identificadores de versão \\
 		\bottomrule
 	\end{tabularx}
 	\fonte{Elaborado pelos autores.}

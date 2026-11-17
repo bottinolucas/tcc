@@ -1,11 +1,13 @@
 \chapter[Referencial Teórico]{Referencial Teórico}
 \label{cap:referencial}
 
-Este capítulo apresenta os conceitos que fundamentam a proposta. A Seção~\ref{sec:plataformas} trata das plataformas de dados sobre as quais a arquitetura se apoia. A Seção~\ref{sec:ml-producao} discute os desafios de sistemas de ML em produção e os modelos de processo que organizam seu ciclo de vida. A Seção~\ref{sec:mlops} define MLOps, seus princípios e componentes, e a Seção~\ref{sec:llm} discute o que muda quando o artefato é uma aplicação com modelos de linguagem. A Seção~\ref{sec:riscos} aborda os riscos específicos da modelagem com dados longitudinais. A Seção~\ref{sec:setor-publico} discute o uso de ML no setor público e a Seção~\ref{sec:relacionados} apresenta os trabalhos relacionados.
+Este capítulo apresenta os conceitos que fundamentam a proposta. A Seção~\ref{sec:plataformas} trata das plataformas de dados sobre as quais a arquitetura se apoia. A Seção~\ref{sec:ml-producao} discute os desafios de sistemas de ML em produção e os modelos de processo que organizam seu ciclo de vida. A Seção~\ref{sec:mlops} define MLOps, seus princípios e componentes, e a Seção~\ref{sec:llm} trata brevemente das aplicações com modelos de linguagem. A Seção~\ref{sec:riscos} aborda os riscos específicos da modelagem com dados longitudinais, incluindo a análise de sobrevivência em tempo discreto usada no caso estudado. A Seção~\ref{sec:setor-publico} discute o uso de ML no setor público e a Seção~\ref{sec:relacionados} apresenta os trabalhos relacionados.
 
 % ---------------------------------------------------------------------
 \section{Plataformas de dados governamentais}
 \label{sec:plataformas}
+
+A arquitetura proposta se apoia em uma plataforma de dados já existente. Esta seção apresenta os conceitos dessa plataforma em três partes: o ciclo de vida do dado na engenharia de dados, a organização do armazenamento em camadas sobre um \textit{lakehouse} e a separação entre orquestração e transformação.
 
 \subsection{Engenharia de dados e o ciclo de vida do dado}
 
@@ -37,9 +39,11 @@ Os dois papéis separam duas responsabilidades: o orquestrador decide \emph{quan
 \section{Aprendizado de máquina em produção}
 \label{sec:ml-producao}
 
+Colocar um modelo em produção é um problema diferente de treiná-lo. Esta seção reúne a literatura que sustenta essa distinção: a dívida técnica própria de sistemas de ML, os desafios relatados em implantações reais e os modelos de processo que organizam o ciclo de vida de um modelo.
+
 \subsection{Dívida técnica em sistemas de ML}
 
-\citeonline{sculley2015} mostram que, em sistemas reais, o código de ML é uma pequena fração do sistema, cercada por coleta de dados, extração de features, verificação de dados, gestão de configuração, infraestrutura de serviço e monitoramento. Os autores identificam formas de dívida técnica específicas desses sistemas, entre elas:
+\citeonline{sculley2015} mostram que, em sistemas reais, o código de ML é uma pequena fração do sistema, cercada por coleta de dados, extração de features, verificação de dados, gestão de configuração, infraestrutura de serviço e monitoramento (Figura~\ref{fig:sculley}). Os autores identificam formas de dívida técnica específicas desses sistemas, entre elas:
 
 \begin{itemize}
 	\item \textbf{Emaranhamento}: pelo princípio CACE (\textit{Changing Anything Changes Everything}), alterar uma feature, um hiperparâmetro ou a distribuição de entrada pode mudar o comportamento de todo o modelo;
@@ -47,6 +51,30 @@ Os dois papéis separam duas responsabilidades: o orquestrador decide \emph{quan
 	\item \textbf{Código de cola e selvas de pipeline}: grande parte do sistema consiste em código que conecta componentes e prepara dados, frequentemente duplicado entre treino e uso em produção;
 	\item \textbf{Ciclos de realimentação}: o próprio uso do modelo pode alterar os dados que ele observará no futuro.
 \end{itemize}
+
+\begin{figure}[htbp]
+	\centering
+	\resizebox{0.92\textwidth}{!}{%
+	\begin{tikzpicture}[
+		blk/.style={draw, fill=gray!10, align=center, font=\footnotesize, inner sep=3pt},
+		ml/.style={draw, fill=black, text=white, align=center, font=\scriptsize\bfseries, minimum width=1.3cm, minimum height=0.8cm}
+	]
+		\node[blk, minimum width=3.0cm, minimum height=2.6cm] at (0,0) {Configuração};
+		\node[blk, minimum width=3.6cm, minimum height=1.2cm] at (3.4,0.7) {Coleta de dados};
+		\node[blk, minimum width=3.6cm, minimum height=1.2cm] at (3.4,-0.7) {Extração de features};
+		\node[ml] at (6.15,0) {Código\\de ML};
+		\node[blk, minimum width=3.4cm, minimum height=1.2cm] at (8.65,0.7) {Verificação de dados};
+		\node[blk, minimum width=3.4cm, minimum height=1.2cm] at (8.65,-0.7) {Gestão de recursos\\de máquina};
+		\node[blk, minimum width=3.0cm, minimum height=2.6cm] at (12.0,0) {Infraestrutura\\de serviço};
+		\node[blk, minimum width=4.6cm, minimum height=1.0cm] at (1.0,-1.95) {Ferramentas de análise};
+		\node[blk, minimum width=4.6cm, minimum height=1.0cm] at (6.1,-1.95) {Gestão de processos};
+		\node[blk, minimum width=4.6cm, minimum height=1.0cm] at (11.2,-1.95) {Monitoramento};
+	\end{tikzpicture}%
+	}
+	\caption{Em um sistema de ML real, o código de ML é uma pequena parte, cercada pela infraestrutura necessária para operá-lo.}
+	\label{fig:sculley}
+	\fonte{Adaptada de \citeonline{sculley2015}.}
+\end{figure}
 
 \subsection{Desafios de implantação}
 
@@ -56,13 +84,44 @@ Em estudo de entrevistas com engenheiros de ML, \citeonline{shankar2024} observa
 
 \subsection{Modelos de processo}
 
-O CRISP-DM (\textit{Cross-Industry Standard Process for Data Mining}) organiza projetos de mineração de dados em seis fases iterativas: entendimento do negócio, entendimento dos dados, preparação dos dados, modelagem, avaliação e implantação \cite{wirth2000}. O CRISP-ML(Q) estende esse processo para ML, acrescentando uma fase de monitoramento e manutenção e associando a cada fase uma metodologia de garantia de qualidade baseada em riscos \cite{studer2021}.
+O CRISP-DM (\textit{Cross-Industry Standard Process for Data Mining}) organiza projetos de mineração de dados em seis fases iterativas: entendimento do negócio, entendimento dos dados, preparação dos dados, modelagem, avaliação e implantação \cite{wirth2000}. As fases não formam uma cascata: a avaliação pode devolver o projeto ao entendimento do negócio, e a modelagem frequentemente exige voltar à preparação dos dados (Figura~\ref{fig:crispdm}). O CRISP-ML(Q) estende esse processo para ML, acrescentando uma fase de monitoramento e manutenção e associando a cada fase uma metodologia de garantia de qualidade baseada em riscos \cite{studer2021}.
 
 Neste trabalho, o CRISP-DM organiza o ciclo de vida de cada modelo, e as fases de monitoramento e de garantia de qualidade do CRISP-ML(Q) orientam a etapa de operação.
+
+\begin{figure}[htbp]
+	\centering
+	\resizebox{0.8\textwidth}{!}{%
+	\begin{tikzpicture}[
+		ph/.style={draw, rounded corners, fill=blue!8, align=center, font=\footnotesize, text width=2.6cm, minimum height=1.0cm},
+		arr/.style={-{Stealth[length=2mm]}, thick},
+		dbl/.style={{Stealth[length=2mm]}-{Stealth[length=2mm]}, thick}
+	]
+		\node[draw, circle, fill=yellow!25, minimum size=1.8cm, font=\footnotesize\bfseries] (d) at (0,0) {Dados};
+		\node[ph] (neg) at (-2.6,2.4)  {Entendimento do negócio};
+		\node[ph] (dad) at (2.6,2.4)   {Entendimento dos dados};
+		\node[ph] (pre) at (4.0,0)     {Preparação dos dados};
+		\node[ph] (mod) at (2.6,-2.4)  {Modelagem};
+		\node[ph] (ava) at (-2.6,-2.4) {Avaliação};
+		\node[ph] (imp) at (-4.0,0)    {Implantação};
+		\draw[dbl] (neg) -- (dad);
+		\draw[arr] (dad) -- (pre);
+		\draw[dbl] (pre) -- (mod);
+		\draw[arr] (mod) -- (ava);
+		\draw[arr] (ava) -- (neg);
+		\draw[arr] (ava) -- (imp);
+		\draw[arr, gray, line width=1.2pt] (0,1.25) arc (90:-250:1.25);
+	\end{tikzpicture}%
+	}
+	\caption{Fases do CRISP-DM e as transições entre elas.}
+	\label{fig:crispdm}
+	\fonte{Adaptada de \citeonline{wirth2000}.}
+\end{figure}
 
 % ---------------------------------------------------------------------
 \section{MLOps}
 \label{sec:mlops}
+
+MLOps reúne as práticas que tornam a operação de modelos de ML contínua, reprodutível e auditável. Esta seção apresenta a definição e os princípios de MLOps, os níveis de maturidade que orientam a escolha do alvo deste trabalho e dois mecanismos centrais para a reprodutibilidade: o versionamento de dados e o registro de experimentos e modelos.
 
 \subsection{Definição e princípios}
 
@@ -80,21 +139,96 @@ Neste trabalho, o CRISP-DM organiza o ciclo de vida de cada modelo, e as fases d
 	\item[P9] ciclos de realimentação.
 \end{enumerate}
 
-Esses princípios se materializam em componentes técnicos: repositório de código, componente de CI/CD, orquestrador de fluxos, repositório de features (\textit{feature store}), infraestrutura de treino, registro de modelos, repositório de metadados de ML, serviço de inferência e monitoramento \cite{kreuzberger2023}. Os princípios P1--P9 servirão de critério de avaliação da arquitetura proposta (Capítulo~\ref{cap:metodologia}).
+Esses princípios se materializam em nove componentes técnicos, e cada componente implementa um ou mais princípios (Figura~\ref{fig:kreuzberger}): componente de CI/CD, repositório de código, orquestrador de fluxos, repositório de features (\textit{feature store}), infraestrutura de treino, registro de modelos, repositório de metadados de ML, serviço de inferência e monitoramento \cite{kreuzberger2023}. Os princípios P1--P9 servirão de critério de avaliação da arquitetura proposta (Capítulo~\ref{cap:metodologia}).
+
+\begin{figure}[htbp]
+	\centering
+	\resizebox{\textwidth}{!}{%
+	\begin{tikzpicture}[
+		comp/.style={draw, rounded corners, fill=blue!8, align=center, font=\footnotesize, text width=3.0cm, minimum height=1.25cm},
+		tag/.style={draw, fill=yellow!30, font=\scriptsize\bfseries, inner sep=1.5pt},
+		leg/.style={font=\scriptsize, anchor=west}
+	]
+		\foreach \x/\y/\n/\t/\p in {
+			0/0/C1/{Componente de CI/CD}/{P1, P6, P9},
+			3.6/0/C2/{Repositório de código}/{P4, P5},
+			7.2/0/C3/{Orquestração de fluxos}/{P2, P3, P6},
+			0/-2.0/C4/{Repositório de \textit{features}}/{P3, P4},
+			3.6/-2.0/C5/{Infraestrutura de treino}/{P6},
+			7.2/-2.0/C6/{Registro de modelos}/{P3, P4},
+			0/-4.0/C7/{Repositório de metadados de ML}/{P4, P7},
+			3.6/-4.0/C8/{Serviço de inferência}/{P1},
+			7.2/-4.0/C9/{Monitoramento}/{P8, P9}} {
+			\node[comp] (\n) at (\x,\y) {\textbf{\n}\\\t};
+			\node[tag, anchor=south east] at (\n.north east) {\p};
+		}
+		\node[leg, align=left] at (9.4,-2.0) {%
+			\textbf{Princípios}\\[2pt]
+			P1 automação de CI/CD\\
+			P2 orquestração de fluxos\\
+			P3 reprodutibilidade\\
+			P4 versionamento de dados, código e modelos\\
+			P5 colaboração\\
+			P6 treino e avaliação contínuos\\
+			P7 rastreamento de metadados de ML\\
+			P8 monitoramento contínuo\\
+			P9 ciclos de realimentação};
+	\end{tikzpicture}%
+	}
+	\caption{Componentes técnicos de MLOps e os princípios que cada um implementa.}
+	\label{fig:kreuzberger}
+	\fonte{Adaptada de \citeonline{kreuzberger2023}.}
+\end{figure}
 
 \citeonline{testi2022} propõem uma taxonomia de trabalhos sobre MLOps e uma metodologia para conduzir projetos de ML com práticas de MLOps. Em um dos primeiros relatos brasileiros, \citeonline{aguiar2020} descreve a adoção de MLOps por uma equipe com experiência prévia em DevOps durante 24 meses de co-desenvolvimento entre governo e academia, e aponta que, embora implantar modelos tenha ficado mais simples, manter e evoluir sistemas de ML segue pouco discutido.
 
 \subsection{Níveis de maturidade}
 
-A documentação de arquitetura do Google Cloud descreve três níveis de maturidade em MLOps \cite{google2020mlops}: no nível 0, o processo é manual e o modelo é entregue como artefato; no nível 1, o pipeline de treino é automatizado e permite treino contínuo; no nível 2, o próprio pipeline é testado e implantado por CI/CD. \citeonline{john2021} propõem um modelo de maturidade derivado de revisão de literatura e estudos de caso, com estágios que vão de processos manuais orientados a dados até operação totalmente automatizada com monitoramento e retreino.
+A documentação de arquitetura do Google Cloud descreve três níveis de maturidade em MLOps \cite{google2020mlops} (Figura~\ref{fig:maturidade}): no nível 0, o processo é manual e o modelo é entregue como artefato; no nível 1, o pipeline de treino é automatizado e permite treino contínuo; no nível 2, o próprio pipeline é testado e implantado por CI/CD. \citeonline{john2021} propõem um modelo de maturidade derivado de revisão de literatura e estudos de caso, com estágios que vão de processos manuais orientados a dados até operação totalmente automatizada com monitoramento e retreino.
 
 O nível de maturidade adequado depende do contexto. Um modelo que gera um escore mensal sobre dados atualizados mensalmente não exige inferência em tempo real, mas exige que o retreino e o escore sejam reprodutíveis e auditáveis. Por isso, este trabalho adota o nível 1 como alvo: o pipeline de treino, avaliação e promoção é automatizado e disparado pela chegada de dados novos, enquanto a implantação do próprio pipeline continua sob revisão humana. O nível 2 traria um custo de engenharia desproporcional para um escore em lote mensal.
+
+\begin{figure}[htbp]
+	\centering
+	\resizebox{\textwidth}{!}{%
+	\begin{tikzpicture}[
+		lvl/.style={draw, rounded corners, align=left, font=\footnotesize, text width=4.3cm, minimum height=3.3cm, anchor=north},
+		hd/.style={font=\footnotesize\bfseries, anchor=south},
+		arr/.style={-{Stealth[length=2mm]}, thick}
+	]
+		\node[lvl, fill=gray!10] (n0) at (0,0) {%
+			$\bullet$ treino manual, em \textit{notebooks}\\
+			$\bullet$ modelo entregue como arquivo\\
+			$\bullet$ retreino raro e manual\\
+			$\bullet$ sem monitoramento sistemático};
+		\node[lvl, fill=green!15, very thick, draw=green!50!black] (n1) at (5.2,0) {%
+			$\bullet$ \textit{pipeline} de treino automatizado\\
+			$\bullet$ treino contínuo disparado por dados ou calendário\\
+			$\bullet$ validação de dados e de modelo\\
+			$\bullet$ registro de modelos e de metadados\\
+			$\bullet$ monitoramento em produção};
+		\node[lvl, fill=gray!10] (n2) at (10.4,0) {%
+			$\bullet$ tudo do nível 1\\
+			$\bullet$ o próprio \textit{pipeline} é testado e implantado por CI/CD\\
+			$\bullet$ muitas variações do \textit{pipeline} em paralelo};
+		\node[hd] at (n0.north) {Nível 0: processo manual};
+		\node[hd] at (n1.north) {Nível 1: treino contínuo};
+		\node[hd] at (n2.north) {Nível 2: CI/CD do \textit{pipeline}};
+		\draw[arr] (n0.east) -- (n1.west);
+		\draw[arr] (n1.east) -- (n2.west);
+		\node[font=\scriptsize\itshape, text=green!40!black, anchor=north] at (n1.south) {alvo deste trabalho};
+	\end{tikzpicture}%
+	}
+	\caption{Níveis de maturidade em MLOps e o nível adotado como alvo.}
+	\label{fig:maturidade}
+	\fonte{Adaptada de \citeonline{google2020mlops}.}
+\end{figure}
 
 \subsection{Versionamento de dados}
 
 O Git versiona bem código e arquivos de texto, mas não foi feito para conjuntos de dados de centenas de megabytes que mudam a cada competência. Sem um mecanismo próprio, o vínculo entre um modelo e o dado que o treinou fica num caminho de arquivo ou na memória de quem o treinou, o que contraria os princípios P3 e P4 \cite{kreuzberger2023}. \citeonline{shankar2024} apontam o versionamento de dados, código e modelos como um dos três fatores de sucesso de uma implantação.
 
-O DVC (\textit{Data Version Control}) \cite{dvc} resolve esse vínculo mantendo o conteúdo dos dados fora do Git. Cada conjunto versionado é representado por um pequeno arquivo de metadados com o \textit{hash} do conteúdo, e esse arquivo é versionado no Git junto com o código. O conteúdo fica em um armazenamento remoto, como um armazenamento de objetos compatível com S3. O DVC também descreve etapas de processamento em um arquivo de pipeline (\texttt{dvc.yaml}) e registra, em um arquivo de trava (\texttt{dvc.lock}), os \textit{hashes} das entradas e saídas de cada execução. Assim, cada \textit{commit} aponta para uma versão exata dos dados e da cadeia que os produziu. \citeonline{barrak2021}, em estudo empírico de projetos de código aberto que usam o DVC, mostram que os arquivos de pipeline de dados evoluem junto com o código-fonte e exigem manutenção frequente. Isso reforça que o versionamento de dados é parte da engenharia do sistema, e não um passo auxiliar.
+O DVC (\textit{Data Version Control}) \cite{dvc} resolve esse vínculo mantendo o conteúdo dos dados fora do Git. Cada conjunto versionado é representado por um pequeno arquivo de metadados com o \textit{hash} do conteúdo, e esse arquivo é versionado no Git junto com o código. O conteúdo fica em um armazenamento remoto, como um armazenamento de objetos compatível com S3. O DVC também descreve etapas de processamento em um arquivo de pipeline (\cod{dvc.yaml}) e registra, em um arquivo de trava (\cod{dvc.lock}), os \textit{hashes} das entradas e saídas de cada execução. Assim, cada \textit{commit} aponta para uma versão exata dos dados e da cadeia que os produziu. \citeonline{barrak2021}, em estudo empírico de projetos de código aberto que usam o DVC, mostram que os arquivos de pipeline de dados evoluem junto com o código-fonte e exigem manutenção frequente. Isso reforça que o versionamento de dados é parte da engenharia do sistema, e não um passo auxiliar.
 
 Em \textit{lakehouses} com formatos de tabela abertos, como Delta Lake e Apache Iceberg, o próprio formato oferece versões consultáveis de cada tabela (\textit{time travel}) \cite{armbrust2021}. Ferramentas como o DVC continuam úteis quando o motor analítico não oferece esse recurso, ou quando o que precisa ser versionado é um recorte congelado para treino, e não a tabela inteira.
 
@@ -102,7 +236,7 @@ Em \textit{lakehouses} com formatos de tabela abertos, como Delta Lake e Apache 
 
 O MLflow \cite{zaharia2018} é uma plataforma aberta para o ciclo de vida de ML com três componentes originais: \textit{Tracking}, que registra parâmetros, métricas e artefatos de cada execução; \textit{Projects}, que empacota código de forma reprodutível; e \textit{Models}, que define um formato padrão para implantação. \citeonline{chen2020mlflow} descrevem a evolução da plataforma, que acrescentou um registro de modelos com versionamento, linhagem até a execução de origem e anotações.
 
-No registro, cada versão de um modelo aponta para a execução que a gerou. A prática atual é marcar as versões com apelidos (\textit{aliases}) atribuídos pelo processo de promoção, como \texttt{champion} para a versão em uso e \texttt{challenger} para a candidata, em vez dos estágios fixos das primeiras versões da ferramenta \cite{mlflowdocs}. O consumidor do modelo carrega sempre o apelido, e a promoção se resume a mover o apelido para outra versão, o que torna a troca e o retorno à versão anterior operações auditáveis. A mesma plataforma passou a rastrear e avaliar aplicações com modelos de linguagem, registrando execuções de avaliação e \textit{traces} de cada chamada \cite{mlflowgenai}.
+No registro, cada versão de um modelo aponta para a execução que a gerou. A prática atual é marcar as versões com apelidos (\textit{aliases}) atribuídos pelo processo de promoção, como \cod{champion} para a versão em uso e \cod{challenger} para a candidata, em vez dos estágios fixos das primeiras versões da ferramenta \cite{mlflowdocs}. O consumidor do modelo carrega sempre o apelido, e a promoção se resume a mover o apelido para outra versão, o que torna a troca e o retorno à versão anterior operações auditáveis.
 
 \citeonline{pineau2021}, ao relatar o programa de reprodutibilidade da NeurIPS, mostram que a reprodução de um resultado de ML depende de mais do que o código: exige também a versão dos dados, o ambiente de execução, as sementes aleatórias e os hiperparâmetros. Rastreamento de experimentos e versionamento de dados são, portanto, complementares. O primeiro registra o que foi feito, e o segundo garante que os dados usados ainda possam ser recuperados.
 
@@ -112,25 +246,15 @@ No registro, cada versão de um modelo aponta para a execução que a gerou. A p
 \section{Aplicações com modelos de linguagem}
 \label{sec:llm}
 
-MLOps não se limita a modelos preditivos treinados pela própria equipe. Aplicações construídas sobre grandes modelos de linguagem (\textit{Large Language Models}, LLMs) também precisam de versionamento, avaliação, promoção controlada e monitoramento. O que muda são os artefatos que passam por esse ciclo.
+MLOps não se limita a modelos preditivos treinados pela própria equipe. Na geração aumentada por recuperação (\textit{Retrieval-Augmented Generation}, RAG), um grande modelo de linguagem (\textit{Large Language Model}, LLM) responde com base em trechos recuperados de uma base externa no momento da pergunta, em vez de depender apenas do que memorizou no treino \cite{lewis2020rag}; o GraphRAG estende a ideia com um grafo de conhecimento, em que a recuperação percorre relações explícitas entre entidades \cite{edge2024graphrag}. Nessas aplicações, o lugar das features e do rótulo é ocupado por outros artefatos (o catálogo de onde vêm os documentos, o índice, os \textit{prompts} e um conjunto de avaliação com respostas esperadas), que também mudam com o tempo e precisam ser versionados, avaliados antes de cada promoção e monitorados.
 
-\subsection{Geração aumentada por recuperação}
-
-Na geração aumentada por recuperação (\textit{Retrieval-Augmented Generation}, RAG), o modelo de linguagem responde com base em trechos recuperados de uma base externa no momento da pergunta, em vez de depender apenas do que memorizou no treino \cite{lewis2020rag}. A abordagem reduz respostas inventadas e permite atualizar o conhecimento sem retreinar o modelo, trocando apenas o índice \cite{gao2023rag}. O GraphRAG estende a ideia com um grafo de conhecimento: a recuperação percorre relações explícitas entre entidades, e não apenas a semelhança entre textos \cite{edge2024graphrag}.
-
-Uma aplicação próxima do contexto deste trabalho é a tradução de perguntas em linguagem natural para consultas SQL (\textit{text-to-SQL}). Os \textit{benchmarks} Spider \cite{yu2018spider} e BIRD \cite{li2023bird} mostram que a dificuldade cresce com o tamanho e a sujeira das bases reais: nomes de coluna pouco descritivos, valores fora do padrão e a necessidade de conhecimento do domínio para escolher as tabelas certas. É exatamente o cenário de uma plataforma de dados governamentais, em que o catálogo de dados é a principal fonte desse conhecimento.
-
-\subsection{O que muda na operação}
-
-Em uma aplicação RAG, o lugar das features e do rótulo é ocupado por outros artefatos: o corpus ou catálogo de onde vêm os documentos, o índice construído a partir dele, os \textit{prompts} enviados ao modelo e um conjunto de avaliação com perguntas e respostas esperadas (\textit{gold}). Todos mudam com o tempo e precisam ser versionados, como o código e os datasets de um modelo preditivo.
-
-A avaliação também muda. \citeonline{es2024ragas} e \citeonline{saadfalcon2024ares} propõem avaliar separadamente a qualidade da recuperação (se os trechos certos foram encontrados) e a da geração (se a resposta é fiel a esses trechos), porque uma resposta errada pode vir de qualquer uma das duas etapas. Parte dessa avaliação costuma usar o próprio LLM como juiz. \citeonline{zheng2023judge} mostram que juízes baseados em LLM concordam com avaliadores humanos em boa parte dos casos, mas têm vieses conhecidos, como a preferência por respostas mais longas. \citeonline{shankar2024validators} alertam que os critérios do juiz também precisam ser validados contra o julgamento humano.
-
-Por fim, uma aplicação interativa precisa de um serviço de inferência sempre disponível e traz riscos de segurança próprios. A injeção indireta de instruções, em que um conteúdo recuperado manipula o comportamento do modelo, foi demonstrada em aplicações reais \cite{greshake2023}, e a divulgação de informação sensível está entre os principais riscos listados pela OWASP para aplicações com LLM \cite{owasp2025llm}. No setor público, isso se soma à LGPD \cite{brasil2018lgpd}: um dado pessoal que entra no \textit{prompt} de um modelo hospedado por terceiros sai do controle do órgão. Por isso, convém preferir modelos executados na própria infraestrutura e mascarar os dados antes de qualquer chamada externa.
+Duas diferenças em relação a um modelo preditivo em lote importam para a arquitetura. A avaliação separa a qualidade da recuperação da qualidade da geração, porque uma resposta errada pode vir de qualquer das duas etapas \cite{es2024ragas}. E uma aplicação interativa precisa de um serviço de inferência sempre disponível, com riscos de segurança próprios, como a injeção indireta de instruções por conteúdo recuperado \cite{greshake2023} e a divulgação de informação sensível \cite{owasp2025llm}, que no setor público se somam às exigências da LGPD \cite{brasil2018lgpd}.
 
 % ---------------------------------------------------------------------
 \section{Riscos na modelagem com dados longitudinais}
 \label{sec:riscos}
+
+O caso estudado usa dados longitudinais: cada obra é observada mês a mês, e o objetivo é prever um evento futuro. Esse tipo de dado traz riscos próprios, discutidos nesta seção: vazamento de informação, validação que ignora a ordem temporal, desalinhamento entre treino e produção, métricas inadequadas a uma capacidade de ação limitada e mudança de distribuição ao longo do tempo. Em seguida, apresenta-se a análise de sobrevivência em tempo discreto, que é a formulação adotada para o caso, e as práticas de explicabilidade e equidade que acompanham um escore de risco.
 
 \subsection{Vazamento de informação}
 
@@ -138,7 +262,7 @@ Por fim, uma aplicação interativa precisa de um serviço de inferência sempre
 
 \subsection{Validação temporal}
 
-A validação cruzada com partições aleatórias supõe observações independentes, hipótese que dados temporais violam. \citeonline{bergmeir2012} comparam esquemas de avaliação para preditores de séries temporais, como a validação cruzada em blocos e a avaliação fora da amostra sobre o trecho final da série, e discutem em que condições cada um produz estimativas confiáveis. Para o caso estudado, em que as features dependem do histórico de cada obra e o objetivo é prever eventos futuros, adota-se a forma mais conservadora: cortes temporais fixos e documentados, com treino sempre anterior à validação e ao teste.
+A validação cruzada com partições aleatórias supõe observações independentes, hipótese que dados temporais violam. \citeonline{bergmeir2012} comparam esquemas de avaliação para preditores de séries temporais, como a validação cruzada em blocos e a avaliação fora da amostra sobre o trecho final da série, e discutem em que condições cada um produz estimativas confiáveis. Para o caso estudado, em que as features dependem do histórico de cada obra e o objetivo é prever eventos futuros, adota-se a avaliação por origem móvel (\textit{rolling origin}): vários cortes temporais documentados, com o treino sempre anterior à validação e ao teste em cada corte, o que dá mais de uma estimativa do desempenho fora da amostra.
 
 \subsection{Desalinhamento entre treino e produção}
 
@@ -154,13 +278,71 @@ Modelos em produção enfrentam mudanças na distribuição dos dados de entrada
 
 Um agravante é o atraso do rótulo. Quando o modelo prevê um evento até $h$ meses à frente, só se sabe se um escore acertou $h$ meses depois de emiti-lo. Durante esse intervalo, o desempenho realizado não pode ser medido, e o monitoramento depende de sinais indiretos, como a mudança da distribuição das features de entrada em relação ao conjunto de treino. Esses sinais não provam que o modelo piorou, mas indicam quando vale a pena antecipar uma reavaliação.
 
-\subsection{Modelos para dados tabulares e explicabilidade}
+\subsection{Análise de sobrevivência em tempo discreto}
+\label{sec:sobrevivencia}
 
-Para dados tabulares, métodos de \textit{gradient boosting} sobre árvores de decisão, como o LightGBM \cite{ke2017}, são uma escolha frequente pela boa relação entre desempenho e custo computacional. Quando o interesse é o tempo até um evento, a análise de sobrevivência oferece alternativas, do modelo de riscos proporcionais de \citeonline{cox1972} a métodos de ML revisados por \citeonline{wang2019survival}.
+A análise de sobrevivência estuda o tempo até a ocorrência de um evento. Sua particularidade é lidar com observações incompletas. Uma observação é \textbf{censurada} quando o acompanhamento termina antes do evento, porque a série acabou ou porque outro desfecho ocorreu primeiro; ela informa que o evento não aconteceu até ali, e descartá-la enviesaria a estimativa. Uma observação é \textbf{truncada à esquerda} quando o indivíduo só passa a ser observado depois de já estar em risco; ela só entra no cálculo a partir do primeiro momento observado. O estimador de \citeonline{kaplan1958} estima a curva de sobrevivência sem supor uma forma para ela, e o modelo de riscos proporcionais de \citeonline{cox1972} relaciona o risco a covariáveis.
+
+Quando o tempo é medido em intervalos, como meses, a análise pode ser feita em \textbf{tempo discreto} \cite{singer2003,tutz2016}. Cada indivíduo contribui com uma linha por período em que esteve em risco, no formato pessoa-período, e o rótulo de cada linha indica se o evento ocorreu naquele período (Figura~\ref{fig:pessoaperiodo}). A probabilidade condicional de o evento ocorrer no período $t$, dado que não ocorreu antes, é o \textbf{risco discreto} $\lambda_t$, e pode ser estimada por qualquer classificador aplicado às linhas pessoa-período, inclusive métodos de \textit{gradient boosting} como o LightGBM \cite{ke2017}, frequentes em dados tabulares pela boa relação entre desempenho e custo. Esse formato tem duas vantagens para o caso estudado: as covariáveis podem mudar a cada período, como as features calculadas \textit{as of} $t$, e a censura e o truncamento são tratados simplesmente pela presença ou ausência das linhas. \citeonline{wang2019survival} revisam outros métodos de ML para sobrevivência. Quando há mais de um desfecho possível, como conclusão e paralisação de uma obra, os desfechos são riscos competitivos, e tratar os demais como censura é uma simplificação que precisa ser avaliada \cite{fine1999}.
+
+A avaliação combina medidas próprias da sobrevivência com a métrica de decisão. O índice de concordância (\textit{C-index}) mede se os indivíduos com maior risco estimado sofrem o evento antes \cite{harrell1996}, e o escore de Brier integrado mede o erro das probabilidades estimadas ao longo do tempo, levando a censura em conta \cite{graf1999}. Para a decisão de fiscalização, o risco acumulado até o horizonte $h$, $1 - \prod_{j=1}^{h}(1 - \lambda_{t+j})$, ordena as unidades, e o \textit{recall@k} (Seção~\ref{sec:riscos}) mede quantos eventos ficam entre as $k$ primeiras.
+
+\begin{figure}[htbp]
+	\centering
+	\resizebox{\textwidth}{!}{%
+	\begin{tikzpicture}[x=0.9cm, y=0.8cm,
+		risk/.style={line width=3pt, blue!50},
+		ev/.style={draw, fill=red!70, circle, inner sep=2.2pt},
+		cen/.style={draw, fill=white, circle, inner sep=2.2pt, thick},
+		lbl/.style={font=\footnotesize, anchor=east},
+		note/.style={font=\scriptsize\itshape, anchor=west}
+	]
+		\foreach \m in {1,...,8} {
+			\draw[gray!40] (\m,0.4) -- (\m,-2.6);
+			\node[font=\scriptsize] at (\m,-2.95) {\m};
+		}
+		\node[font=\scriptsize] at (4.5,-3.45) {mês de competência};
+		\draw[gray!60, dashed] (8.5,0.5) -- (8.5,-2.6);
+		\node[font=\scriptsize\itshape, anchor=south] at (8.5,0.5) {fim do período rotulado};
+
+		\node[lbl] at (0.6,0) {Obra A};
+		\draw[risk] (1,0) -- (5,0); \node[ev] at (5,0) {};
+		\node[note] at (9.0,0) {A: paralisa no mês 5 (evento)};
+
+		\node[lbl] at (0.6,-1) {Obra B};
+		\draw[gray!50, dotted, thick] (1,-1) -- (3,-1);
+		\draw[risk] (3,-1) -- (7,-1); \node[cen] at (7,-1) {};
+		\node[note] at (9.0,-1) {B: entra no mês 3 (truncada) e conclui no 7 (censurada)};
+
+		\node[lbl] at (0.6,-2) {Obra C};
+		\draw[risk] (1,-2) -- (8,-2); \node[cen] at (8,-2) {};
+		\node[note] at (9.0,-2) {C: em obras até o fim do período (censurada)};
+
+		\node[anchor=north west, font=\scriptsize] at (19.6,0.6) {%
+			\begin{tabular}{@{}ccc@{}}
+				\toprule
+				\textbf{Obra} & \textbf{Mês} & \textbf{Evento} \\
+				\midrule
+				A & 1 & 0 \\
+				A & 2 & 0 \\
+				A & 3 & 0 \\
+				A & 4 & 0 \\
+				A & 5 & 1 \\
+				B & 3 & 0 \\
+				\multicolumn{3}{c}{$\vdots$} \\
+				\bottomrule
+			\end{tabular}};
+		\node[font=\scriptsize\itshape, anchor=south] at (21.0,0.7) {formato pessoa-período};
+	\end{tikzpicture}%
+	}
+	\caption{Evento, censura e truncamento à esquerda, e o formato pessoa-período correspondente.}
+	\label{fig:pessoaperiodo}
+	\fonte{Elaborado pelos autores, com base em \citeonline{singer2003}.}
+\end{figure}
+
+\subsection{Explicabilidade e equidade}
 
 Para que um escore de risco seja usado por equipes de fiscalização, ele precisa ser explicável. Os valores SHAP \cite{lundberg2017} atribuem a cada feature uma contribuição para uma predição individual, com fundamentação na teoria dos jogos cooperativos. \citeonline{mitchell2019} propõem os \textit{model cards}, documentos curtos que acompanham um modelo e descrevem seu uso pretendido, desempenho por subgrupos e limitações. De forma análoga, \citeonline{gebru2021} propõem as \textit{datasheets} de conjuntos de dados, que registram motivação, composição, processo de coleta e usos recomendados de cada conjunto.
-
-\subsection{Equidade}
 
 Um modelo com bom desempenho médio pode errar de forma sistemática em subgrupos da população. \citeonline{mehrabi2022} catalogam as fontes desse viés, que vão da coleta e da representação dos dados ao próprio processo de avaliação, e as definições de equidade usadas para medi-lo. Quando um escore orienta onde a fiscalização vai, um viés regional ou por tipo de obra desloca a atenção do Estado de forma desigual. Por isso, o desempenho precisa ser reportado por subgrupo, e não apenas no agregado. \citeonline{sambasivan2021} mostram, em entrevistas com profissionais de IA em domínios de alto impacto, que problemas de dados não tratados cedo se propagam em cascata até o uso do modelo, e raramente são percebidos antes disso.
 
@@ -180,27 +362,35 @@ Um modelo com bom desempenho médio pode errar de forma sistemática em subgrupo
 
 \citeonline{gondia2020} comparam árvores de decisão e classificadores bayesianos ingênuos para prever o risco de atraso em projetos de construção a partir de dados históricos de projetos. No contexto brasileiro, \citeonline{fernandes2024} treinou modelos XGBoost sobre dados abertos do SAGRES, do Tribunal de Contas do Estado da Paraíba, para classificar obras públicas entre sucesso e fracasso. Ambos tratam a predição como experimento isolado, sem pipeline de retreino, monitoramento ou integração com a plataforma de dados de origem.
 
-Do lado da engenharia, \citeonline{kreuzberger2023} propõem uma arquitetura de referência genérica para MLOps, e \citeonline{aguiar2020} e \citeonline{ferreira2025} relatam experiências de ML em projetos governamentais brasileiros. Nenhum deles parte de uma plataforma de dados governamentais já estruturada como \textit{lakehouse} em camadas medalhão para definir onde cada responsabilidade do ciclo de vida de ML deve morar. A Tabela~\ref{tab:relacionados} resume a comparação.
+Do lado da engenharia, \citeonline{kreuzberger2023} propõem uma arquitetura de referência genérica para MLOps, e \citeonline{amounajafabadi2024}, em mapeamento sistemático de 43 estudos primários, identificam 35 componentes de arquiteturas de MLOps e as variações em que eles se combinam. Esses trabalhos descrevem os componentes de forma independente da plataforma de dados: o repositório de features, por exemplo, aparece como fonte dos dados de treino, sem discutir sua relação com as camadas de um \textit{lakehouse} já existente. \citeonline{aguiar2020} e \citeonline{ferreira2025} relatam experiências de ML em projetos governamentais brasileiros, centradas no processo e nos obstáculos institucionais, e não na arquitetura.
 
-\begin{table}[htb]
+A proposta mais próxima vem da literatura de fornecedores. O guia de MLOps da Databricks \cite{databricks2023mlops} recomenda tratar dados e ativos de ML (features, modelos e funções) como ativos do mesmo \textit{lakehouse}, sob um único catálogo com linhagem. A ideia de não construir uma plataforma paralela é a mesma deste trabalho. A diferença está em três pontos: o guia supõe a pilha do próprio fornecedor (formato de tabela, catálogo, repositório de features e serviço de inferência integrados), enquanto este trabalho define papéis independentes de ferramenta; o guia mantém um repositório de features, enquanto este trabalho mostra que, num escore mensal em lote, as tabelas \textit{as of} $t$ da camada ouro cumprem essa função sem uma segunda implementação das features; e o guia não trata do retorno dos escores pela camada bronze, que submete as predições aos mesmos testes e ao mesmo catálogo das demais fontes.
+
+Nenhum dos trabalhos parte de uma plataforma de dados governamentais já estruturada como \textit{lakehouse} em camadas medalhão, com uma camada de transformação declarativa e independente de fornecedor, para definir onde cada responsabilidade do ciclo de vida de ML deve morar. A Tabela~\ref{tab:relacionados} resume a comparação.
+
+\begin{table}[htbp]
 	\centering
 	\caption{Comparação entre trabalhos relacionados e este trabalho.}
 	\label{tab:relacionados}
 	\small
-	\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.8cm}*{4}{>{\centering\arraybackslash}X}}
+	\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.9cm}*{4}{>{\centering\arraybackslash}X}@{}}
 		\toprule
 		\textbf{Trabalho} & \textbf{Setor público} & \textbf{Predição de risco} & \textbf{Arquitetura MLOps} & \textbf{Plataforma de dados existente} \\
 		\midrule
-		\citeonline{madaio2016}      & Sim & Sim & Não     & Não \\
-		\citeonline{gondia2020}      & Não & Sim & Não     & Não \\
-		\citeonline{fernandes2024}   & Sim & Sim & Não     & Não \\
-		\citeonline{kreuzberger2023} & Não & Não & Sim     & Não \\
-		\citeonline{aguiar2020}      & Sim & Não & Parcial & Não \\
-		\citeonline{ferreira2025}    & Sim & Não & Parcial & Não \\
-		\textbf{Este trabalho}       & Sim & Sim & Sim     & Sim \\
+		\citeonline{madaio2016}            & Sim & Sim & Não     & Não \\
+		\citeonline{gondia2020}            & Não & Sim & Não     & Não \\
+		\citeonline{fernandes2024}         & Sim & Sim & Não     & Não \\
+		\citeonline{kreuzberger2023}       & Não & Não & Sim     & Não \\
+		\citeonline{amounajafabadi2024}    & Não & Não & Sim     & Não \\
+		\citeonline{databricks2023mlops}   & Não & Não & Sim     & Parcial \\
+		\citeonline{aguiar2020}            & Sim & Não & Parcial & Não \\
+		\citeonline{ferreira2025}          & Sim & Não & Parcial & Não \\
+		\textbf{Este trabalho}             & Sim & Sim & Sim     & Sim \\
 		\bottomrule
 	\end{tabularx}
 	\fonte{Elaborado pelos autores.}
 \end{table}
 
-\pendente{Ampliar os trabalhos relacionados com uma busca estruturada (Scopus, IEEE Xplore, ACM DL e SBC OpenLib) por ``MLOps'' AND (``public sector'' OR ``government'') e por trabalhos de predição de paralisação ou atraso de obras públicas no Brasil.}
+Os trabalhos acima vieram de uma busca exploratória, feita em 16 de novembro de 2026 no arXiv e no Google Scholar. Para sustentar a afirmação de que nenhum trabalho cobre a combinação deste, a busca será repetida de forma estruturada nas bases Scopus, IEEE Xplore, ACM Digital Library, SBC OpenLib e BDTD, com três expressões: \textit{``MLOps'' AND (``public sector'' OR ``government'' OR ``public administration'')}; \textit{(``machine learning'' OR ``predictive'') AND (``construction'' OR ``public works'') AND (``delay'' OR ``stoppage'' OR ``abandon*'')}; e \textit{``aprendizado de máquina'' AND (``obras públicas'' OR ``obras paralisadas'')}. Os critérios de inclusão são publicação a partir de 2015, estudo empírico ou proposta de arquitetura e texto completo disponível. Serão registrados, para cada base e expressão, a data, o número de resultados e o número de trabalhos selecionados.
+
+\pendente{Registrar as contagens da busca estruturada (sprint T1) e incorporar à Tabela~\ref{tab:relacionados} os trabalhos selecionados.}

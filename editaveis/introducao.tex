@@ -1,67 +1,63 @@
 \chapter[Introdução]{Introdução}
 \label{cap:introducao}
-Neste capítulo, apresentamos os principais temas deste trabalho. Partimos do uso de dados na administração pública federal e do papel de plataformas de dados governamentais, como o Gov Hub, na consolidação desses dados, até a passagem de análises descritivas para análises preditivas apoiadas por aprendizado de máquina e pela disciplina de MLOps. Em seguida, vêm o problema da paralisação de obras do Programa Minha Casa, Minha Vida e a justificativa para integrar o ciclo de vida de modelos a uma plataforma de dados existente. Na sequência, constam a questão de pesquisa que guia esta investigação e os objetivos geral e específicos; por fim, a metodologia em síntese e a organização dos demais capítulos.
-\section{Contextualização}
+
+Neste capítulo, apresentamos os principais temas deste trabalho em cinco partes. Partimos do contexto: o uso de dados na administração pública federal e o papel de plataformas de dados governamentais, como o Gov Hub, na consolidação desses dados, o problema da paralisação de obras do Programa Minha Casa, Minha Vida e a lacuna de engenharia que motiva a pesquisa. Em seguida, vêm a questão de pesquisa que guia esta investigação e os objetivos geral e específicos. Na sequência, constam a metodologia em síntese e os resultados iniciais e esperados; por fim, a conclusão, com a contribuição do trabalho e a organização dos demais capítulos.
+
+\section{Contexto}
 
 A administração pública federal brasileira produz, em seus sistemas estruturantes, um volume crescente de dados sobre a execução de políticas públicas. A Política de Dados Abertos do Poder Executivo federal \cite{brasil2016dadosabertos} e a Lei do Governo Digital \cite{brasil2021governodigital} estabeleceram a disponibilização e o uso desses dados como diretriz de gestão. Disponibilizar o dado, porém, não garante que ele apoie decisões: \citeonline{janssen2012} mostram que os benefícios dos dados abertos dependem de capacidades institucionais para integrá-los, interpretá-los e mantê-los ao longo do tempo.
 
 Plataformas de dados governamentais como o Gov Hub, desenvolvido pelo Laboratório de Competência em Software Livre (LabLivre) da Universidade de Brasília em parceria com órgãos federais, respondem a parte desse desafio. Elas ingerem dados de sistemas heterogêneos, os organizam em camadas de qualidade crescente e os publicam em painéis analíticos. No caso do Ministério das Cidades (MCID), a plataforma consolida o histórico mensal de execução das obras do Programa Minha Casa, Minha Vida (MCMV) \cite{brasil2023mcmv}, com situação, percentuais de execução física e financeira, valores e datas de cada empreendimento.
 
-Com esse histórico disponível, a pergunta deixa de ser descritiva (``quais obras estão paralisadas?'') e passa a ser preditiva (``quais obras ativas vão paralisar nos próximos meses?''). Responder a ela exige modelos de aprendizado de máquina (\textit{Machine Learning}, ML). Colocar esses modelos em produção de forma confiável é um problema de engenharia distinto, conhecido como MLOps (\textit{Machine Learning Operations}) \cite{kreuzberger2023}. O mesmo problema aparece em aplicações construídas sobre grandes modelos de linguagem, como assistentes que respondem a perguntas sobre os dados da própria plataforma: elas também precisam de versionamento, avaliação e monitoramento antes de serem confiáveis.
+A paralisação de obras públicas é um problema de grande escala no Brasil. Auditoria operacional do Tribunal de Contas da União identificou 14.403 obras paralisadas em um universo de 38.412 obras financiadas com recursos federais \cite{tcu2019}. Quando a fiscalização só identifica a paralisação depois que ela ocorre, o custo de retomada já incorreu. No Gov Hub Cidades, a priorização de obras em risco é feita hoje por uma regra de sinalizadores, a \textbf{regra vigente}, que pontua cada obra por atraso, tempo sem atualização e baixa execução física ou financeira. Essa regra nunca foi comparada com as paralisações que de fato ocorreram. Com o histórico disponível, a pergunta deixa de ser descritiva (``quais obras estão paralisadas?'') e passa a ser preditiva (``quais obras em execução vão paralisar nos próximos meses?''), e um modelo de aprendizado de máquina (\textit{Machine Learning}, ML) treinado no histórico poderia, em princípio, antecipar mais paralisações com o mesmo número de vistorias.
 
-\section{Problema e justificativa}
+O obstáculo não é apenas estatístico. Colocar modelos em produção de forma confiável é um problema de engenharia distinto, conhecido como MLOps (\textit{Machine Learning Operations}) \cite{kreuzberger2023}. A literatura mostra que o código de treinamento é uma fração pequena de um sistema de ML em produção, e que a maior parte do esforço e da dívida técnica está na infraestrutura em torno dele: dependências de dados, pipelines, configuração e monitoramento \cite{sculley2015}. Estudos de casos reais apontam desafios em todas as etapas da implantação \cite{paleyes2022}, e no setor público eles se somam a obstáculos institucionais, como acesso restrito a dados, conjuntos de dados sem versionamento e governança frágil de proveniência \cite{ferreira2025}. Em plataformas governamentais que já adotam práticas maduras de engenharia de dados, como um \textit{Data Lakehouse} organizado nas camadas bronze, prata e ouro da arquitetura medalhão, orquestração de fluxos, transformação declarativa e catálogo de dados, falta definir como o ciclo de vida de modelos se encaixa nessas práticas sem duplicar lógica nem criar camadas paralelas. A mesma questão aparece em produtos mais recentes, como assistentes baseados em grandes modelos de linguagem, que também precisam de versionamento, avaliação e monitoramento.
 
-A paralisação de obras públicas é um problema de grande escala no Brasil. Auditoria operacional do Tribunal de Contas da União identificou 14.403 obras paralisadas em um universo de 38.412 obras financiadas com recursos federais \cite{tcu2019}. Quando a fiscalização só identifica a paralisação depois que ela ocorre, o custo de retomada já incorreu.
+\section{Objetivos}
+\label{sec:objetivos}
 
-No Gov Hub Cidades, a identificação de obras em risco é feita hoje por uma regra fixa: uma obra é sinalizada quando passa 90 dias sem atualização, apresenta diferença superior a 10 pontos percentuais entre execução física e financeira ou tem menos de 30\% de execução. Essa regra nunca foi comparada com as paralisações que de fato ocorreram. Um modelo preditivo treinado no histórico poderia, em princípio, antecipar mais paralisações com o mesmo número de vistorias.
-
-O obstáculo não é apenas estatístico. A literatura mostra que o código de treinamento de um modelo é uma fração pequena de um sistema de ML em produção, e que a maior parte do esforço e da dívida técnica está na infraestrutura em torno dele: dependências de dados, pipelines, configuração e monitoramento \cite{sculley2015}. Estudos de casos reais apontam desafios em todas as etapas da implantação \cite{paleyes2022}, e no setor público eles se somam a obstáculos institucionais, como acesso restrito a dados, conjuntos de dados sem versionamento e governança frágil de proveniência \cite{ferreira2025}. Em plataformas governamentais que já adotam práticas maduras de engenharia de dados, como um \textit{Data Lakehouse} organizado nas camadas bronze, prata e ouro da arquitetura medalhão, orquestração de fluxos, transformação declarativa e catálogo de dados, falta definir como o ciclo de vida de modelos se encaixa nessas práticas sem duplicar lógica nem criar camadas paralelas.
-
-\section{Questão de pesquisa}
-
-Diante desse cenário, este trabalho é orientado pela seguinte questão de pesquisa:
+Diante desse contexto, este trabalho é orientado pela seguinte questão de pesquisa:
 
 \begin{quote}
-\textbf{QP:} Como estruturar uma arquitetura de MLOps que se integre a uma plataforma de dados governamentais existente, garantindo reprodutibilidade, rastreabilidade e avaliação honesta de modelos preditivos?
+\textbf{QP:} Como estruturar uma arquitetura de MLOps integrada a uma plataforma de dados governamentais organizada em camadas medalhão, de modo que os resultados de modelos preditivos sejam reprodutíveis, rastreáveis e comparáveis à regra vigente sem vazamento de informação temporal?
 \end{quote}
 
 Dela derivam três questões específicas:
 
 \begin{itemize}
 	\item \textbf{QE1:} Quais responsabilidades do ciclo de vida de ML devem ficar na camada de transformação de dados, quais no ambiente de modelagem e quais no orquestrador, e em qual camada do \textit{lakehouse} fica cada artefato de ML?
-	\item \textbf{QE2:} Como garantir que qualquer resultado de um modelo possa ser reproduzido a partir do código e dos dados que o geraram?
-	\item \textbf{QE3:} A arquitetura proposta permite avaliar um modelo contra a regra vigente de forma comparável, sem vazamento de informação temporal?
+	\item \textbf{QE2:} Como permitir que qualquer resultado de um modelo seja reproduzido e rastreado até o código, os dados e o ambiente que o geraram?
+	\item \textbf{QE3:} A arquitetura permite comparar um modelo com a regra vigente em condições iguais (mesma população, mesmo período e mesmo número de vistorias), sem vazamento de informação temporal?
 \end{itemize}
 
-\section{Objetivos}
+O \textbf{objetivo geral} é propor, instanciar e avaliar uma arquitetura de MLOps para plataformas de dados governamentais, instanciada no caso de previsão de paralisação de obras do Programa Minha Casa, Minha Vida na plataforma Gov Hub Cidades. Os \textbf{objetivos específicos} são:
 
-\subsection{Objetivo geral}
+\begin{description}
+	\item[OE1.] Definir os requisitos da arquitetura a partir dos riscos descritos na literatura e das regras de engenharia da plataforma existente;
+	\item[OE2.] Projetar a arquitetura sobre as camadas do \textit{lakehouse}, especificando os papéis que a compõem e as responsabilidades de cada um, independentemente de ferramenta;
+	\item[OE3.] Instanciar a arquitetura no caso de previsão de paralisação de obras, cobrindo rótulo, features, treino, avaliação, escore mensal e monitoramento;
+	\item[OE4.] Avaliar a arquitetura quanto à aderência aos princípios de MLOps, à prontidão para produção e à extensibilidade;
+	\item[OE5.] Avaliar a instanciação quanto à reprodutibilidade, à rastreabilidade, à ausência de vazamento temporal, ao desempenho frente à regra vigente e à equidade entre subgrupos.
+\end{description}
 
-Propor, implementar e avaliar uma arquitetura de MLOps para plataformas de dados governamentais, instanciada no caso de previsão de paralisação de obras do Programa Minha Casa, Minha Vida na plataforma Gov Hub Cidades.
+\section{Metodologia}
 
-\subsection{Objetivos específicos}
+O trabalho segue a \textit{Design Science Research} (DSR) \cite{hevner2004,peffers2007}, abordagem voltada à construção e avaliação de artefatos que resolvem problemas reais. O artefato principal é a arquitetura de MLOps, descrita por papéis independentes de ferramenta. O caso de previsão de paralisação de obras serve para demonstrá-la e avaliá-la em contexto real: as paralisações são modeladas por análise de sobrevivência em tempo discreto, sobre o painel mensal de obras, e o modelo é comparado à regra vigente recalculada mês a mês sobre o histórico. A avaliação usa oito critérios, cada um com uma condição de atendimento definida de antemão, que cobrem a aderência a princípios de MLOps, a prontidão para produção, a reprodutibilidade, a rastreabilidade, a ausência de vazamento temporal, a comparação com a regra vigente, a equidade e a extensibilidade. No TCC1 foram realizadas a identificação do problema, a definição dos requisitos e o projeto da arquitetura; a implementação, a demonstração e a avaliação ficam para o TCC2. O Capítulo~\ref{cap:metodologia} detalha as etapas.
 
-\begin{enumerate}
-	\item Levantar, na literatura, os princípios, componentes e riscos de sistemas de ML em produção, com atenção ao contexto do setor público;
-	\item Definir os requisitos da arquitetura a partir das restrições da plataforma de dados existente e do caso de uso;
-	\item Projetar a arquitetura sobre as camadas do \textit{lakehouse}, especificando os papéis que a compõem e as responsabilidades de cada um, independentemente de ferramenta;
-	\item Instanciar a arquitetura no caso de prevenção de paralisação de obras, cobrindo preparação de dados, treino, avaliação, escore mensal e monitoramento;
-	\item Avaliar a arquitetura quanto à reprodutibilidade, à rastreabilidade e à capacidade de comparar o modelo com a regra vigente.
-\end{enumerate}
+\section{Resultados iniciais e esperados}
 
-\section{Metodologia em síntese}
+Até esta etapa, o trabalho produziu os nove requisitos da arquitetura, cada um ligado à sua origem na literatura ou nas regras da plataforma, e o projeto da arquitetura, com a divisão de responsabilidades entre os papéis e o lugar de cada artefato de ML nas camadas do \textit{lakehouse}. Sobre o caso, o levantamento dos dados mostrou que as trocas de fonte ao longo da série produzem transições de situação que não correspondem necessariamente a paralisações reais, o que restringe o período em que o rótulo é confiável. A recuperação de uma série legada de 754 arquivos mostrou que há rótulo de paralisação também de 2015 a 2018, o que, sob critérios de aceite explícitos, amplia a base de treino. O desempenho da regra vigente sobre as paralisações observadas, primeiro número que o modelo terá de superar, é calculado na última \textit{sprint} do TCC1.
 
-O trabalho segue a \textit{Design Science Research} (DSR) \cite{hevner2004,peffers2007}, abordagem voltada à construção e avaliação de artefatos que resolvem problemas reais. O artefato principal é a arquitetura de MLOps. O caso de previsão de paralisação de obras serve como demonstração e avaliação em contexto real. O Capítulo~\ref{cap:metodologia} detalha as etapas.
+Ao fim do TCC2, espera-se ter a arquitetura implementada na plataforma, demonstrada pela reprodução da operação mensal sobre o histórico e avaliada pelos oito critérios, além da comparação entre o modelo de sobrevivência e a regra vigente, no agregado e por subgrupo. Um modelo que não supere a regra não invalida a arquitetura, desde que a comparação tenha sido feita de forma correta e reprodutível.
 
-\section{Organização do trabalho}
+\section{Conclusão}
 
-Esta seção apresenta a estrutura do documento e o conteúdo de cada capítulo desta monografia:
+A contribuição deste trabalho é uma arquitetura que estende a plataforma de dados existente, em vez de construir uma plataforma de ML paralela: cada artefato do ciclo de vida de um modelo ocupa uma camada definida do \textit{lakehouse}, todo cálculo sobre dados fica na camada de transformação e os escores voltam à plataforma como qualquer outra fonte, sob os mesmos testes e o mesmo catálogo. O restante do documento está organizado da seguinte forma:
 
 \begin{itemize}
-	\item \textbf{Introdução}: contextualização do uso de dados na administração pública federal e da disciplina de MLOps; apresentação do problema da paralisação de obras do MCMV e da sua justificativa, da questão de pesquisa, dos objetivos e da metodologia em síntese;
-	\item \textbf{Referencial Teórico} (Capítulo~\ref{cap:referencial}): fundamentação sobre plataformas de dados governamentais e arquitetura \textit{lakehouse}; aprendizado de máquina em produção e MLOps; riscos na modelagem com dados longitudinais, como vazamento de informação, validação temporal, mudança de distribuição e equidade; aplicações com modelos de linguagem; uso de ML no setor público e trabalhos relacionados;
-	\item \textbf{Metodologia} (Capítulo~\ref{cap:metodologia}): classificação da pesquisa; descrição da \textit{Design Science Research} e de como suas atividades se distribuem entre o TCC1 e o TCC2; contexto da pesquisa; planejamento do trabalho em \textit{sprints}; critérios e procedimentos de avaliação e ferramentas utilizadas;
-	\item \textbf{Proposta} (Capítulo~\ref{cap:proposta}): requisitos e arquitetura de MLOps proposta, com suas camadas, papéis, ciclo de vida e mecanismos de reprodutibilidade; extensão dos papéis a aplicações com modelos de linguagem; instanciação da arquitetura no caso de prevenção de paralisação de obras do MCMV;
-	\item \textbf{Resultados Preliminares} (Capítulo~\ref{cap:resultados}): relato das atividades realizadas até esta etapa, do plano de análise exploratória dos dados, da recuperação da série histórica e das ameaças à validade; e
-	\item \textbf{Considerações Finais} (Capítulo~\ref{cap:consideracoes}): síntese do trabalho até o momento, próximos passos e cronograma para a continuidade no TCC2.
+	\item \textbf{Referencial Teórico} (Capítulo~\ref{cap:referencial}): plataformas de dados governamentais e arquitetura \textit{lakehouse}; aprendizado de máquina em produção e MLOps; aplicações com modelos de linguagem; riscos na modelagem com dados longitudinais, incluindo a análise de sobrevivência em tempo discreto; uso de ML no setor público e trabalhos relacionados;
+	\item \textbf{Metodologia} (Capítulo~\ref{cap:metodologia}): classificação da pesquisa; a DSR e a distribuição de suas atividades entre o TCC1 e o TCC2; contexto da pesquisa; planejamento em \textit{sprints}; critérios de avaliação e sua ligação com os objetivos e os requisitos;
+	\item \textbf{Proposta} (Capítulo~\ref{cap:proposta}): requisitos e projeto da arquitetura, com suas camadas, papéis, ciclo de vida, reprodutibilidade e operação; instanciação no caso de previsão de paralisação de obras do MCMV, com a formulação de sobrevivência e a definição da regra vigente;
+	\item \textbf{Resultados Preliminares} (Capítulo~\ref{cap:resultados}): o que foi produzido até esta etapa, o levantamento dos dados, o desempenho da regra vigente no histórico, o plano da análise exploratória, a recuperação da série legada e as ameaças à validade; e
+	\item \textbf{Considerações Parciais} (Capítulo~\ref{cap:consideracoes}): síntese do trabalho até o momento, próximos passos, cronograma do TCC2 e riscos.
 \end{itemize}
